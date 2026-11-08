@@ -1,0 +1,151 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-image: url("../img/fondo.webp"); /*Insertamos la imagen*/
+    background-repeat: no-repeat; /*Evita que se repita la imagen*/
+    background-position: center; /*Centramos la imagen en la pantalla*/
+    background-size: cover; /*Cubrimos todo el fondo sin deformar la imagen*/
+    background-attachment: fixed; /*Mantenemos la imagen fija al hacer scroll*/
+    margin: 0;
+    height: 100vh;
+    color: white;
+}
+
+/* ==========================================================================
+   HEADER / CONTENEDOR DE NAVEGACIÓN PRINCIPAL
+   ========================================================================== */
+
+.contenedor-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important; /* Distribuye Logo (izq), Menú (centro) y Botón (der) */
+    
+    /* Ajustes de margen y tamaño para que la barra flote elegantemente */
+    margin: 20px auto; 
+    padding: 12px 15px;
+    width: 95%; 
+    max-width: 1400px;
+    box-sizing: border-box;
+
+    /* EFECTO DE CRISTAL/NEBLINA: Filtro esmerilado que no tapa el fondo espacial */
+    background: rgba(255, 255, 255, 0.05); /* Blanco ultra transparente para hacer la "nube" */
+    backdrop-filter: blur(20px) saturate(130%); /* Licúa el fondo de atrás y aviva los colores morados */
+    -webkit-backdrop-filter: blur(20px) saturate(130%);
+    border-radius: 18px; 
+
+    /* POTENCIA DE RESPLANDOR NEÓN: Capas de sombras intensas a los extremos */
+    box-shadow: -5px 0 15px rgba(0, 217, 255, 0.6),   /* Resplandor Azul cercano */
+                -20px 0 40px rgba(0, 217, 255, 0.25),  /* Brillo Azul expansivo (izq) */
+                5px 0 15px rgba(0, 255, 102, 0.6),    /* Resplandor Verde cercano corregido */
+                20px 0 40px rgba(0, 255, 102, 0.25);   /* Brillo Verde expansivo (der) */
+
+    /* Posicionamiento relativo obligatorio para que funcione el borde ::before */
+    position: relative; 
+}
+
+/* 
+   PSEUDOELEMENTO ADICIONAL: Genera el borde neón degradado por separado 
+   para evitar que manche el fondo transparente de la barra de verde.
+-------------------------------------------------------------------------- */
+.contenedor-nav::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 18px; /* Debe heredar la misma curvatura del padre */
+    padding: 2px; /* Controla el grosor exacto del anillo neón */
+    
+    /* DEGRADADO DINÁMICO: Transición limpia del Azul Cian al Verde Eléctrico de la imagen */
+    background: linear-gradient(to right, #00d9ff, #00ff66); 
+    
+    /* MÁSCARA DE RECORTE: Truco avanzado para que solo pinte el contorno de la línea */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    
+    pointer-events: none; /* Evita bloquear los clics del usuario sobre los enlaces */
+
+    /* EFECTO TUBO DE GAS: Añade una iluminación extra nativa a la propia línea del borde */
+    filter: drop-shadow(0 0 5px rgba(0, 217, 255, 0.6)) 
+            drop-shadow(0 0 8px rgba(0, 255, 102, 0.4));
+}
+
+/* ==========================================================================
+   COMPONENTES INTERNOS (Estructura y flex)
+   ========================================================================== */
+
+.logo-inicio {
+    display: flex;
+    align-items: center;
+    z-index: 2; /* Mantiene el logotipo al frente de las capas */
+}
+
+/* Forzamos el comportamiento horizontal y eliminamos los puntos explícitamente */
+.menu-ul {
+    display: flex !important;
+    flex-direction: row !important; /* Obliga a acostar el menú */
+    list-style: none !important; /* Quita los puntos blancos por completo */
+    list-style-type: none !important; /* Refuerzo extra para navegadores viejos */
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+    align-items: center; 
+    gap: 24px; /* Separación uniforme entre cada texto */
+}
+
+/* Modificamos los elementos de la lista internos para asegurar que fluyan horizontalmente */
+.menu-ul li {
+    display: inline-block !important; /* Respaldo si el flexbox llega a fallar en tu navegador */
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos de los enlaces de texto dentro de mi lista */
+.menu-ul li a {
+    color: white;
+    text-decoration: none; /* Quitamos la línea de abajo */
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase; /* Forzamos mayúsculas como en el diseño de ziGO */
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+}
+
+/* Cambia a color neón cuando paso el cursor en los enlaces */
+.menu-ul li a:hover {
+    color: #00ff66;
+}
+
+/* Contenedor derecho para el buscador y el botón */
+.button-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Separa el input del botón de agendar cita */
+    z-index: 2;
+}
+
+.buscador-nav {
+    width: 160px;
+    padding: 8px 12px 8px 28px; /* Reducido a 28px para quitar el espacio muerto antes del texto */
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: #ffffff;
+    
+    /* Fondo oscuro transparente tipo neblina como en el modelo */
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px; /* Bordes completamente redondeados */
+    outline: none;
+    
+    /* INYECCIÓN DE LA LUPA CORREGIDA */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='16' height='16' fill='%23a0a0a0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 8px center; /* Movida la lupa a 8px a la izquierda para pegarla al borde */
+    
+    transition: all 0.3s ease;
+}
+
+/* Efecto cuando el usuario hace clic para escribir */
+.buscador-nav:focus {
+    border-color: #00d9ff; /* El borde brilla en azul cian */
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+}

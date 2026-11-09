@@ -3,35 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ziGO</title>
+    
+    <!-- SEO y visualización -->
+    <title>ziGO - Ciencia y Arte en tu Mirada</title>
+    <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX. Lleva tu mirada al siguiente nivel con nuestro probador virtual.">
+    
+    <!-- Preconexión a recursos externos para mejorar tiempos de carga (Performance) -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    <!-- Hojas de estilo locales -->
     <link rel="stylesheet" href="./css/styles.css">
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="./css/fonts.css">
+    <link rel="stylesheet" href="style.css?v=2.1">
+    
+    <!-- CDN de FontAwesome para asegurar que los íconos de estrellas y redes carguen correctamente -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <nav class="contenedor-nav">
-    <div class="logo-inicio">
-        <img src="img/logo.png" alt="ziGO">
-    </div>
-
-    <!-- ASEGÚRATE DE QUE LA CLASE SE LLAME EXACTAMENTE ASÍ -->
-    <ul class="menu-ul">
-        <li><a href="#">Inicio</a></li>
-        <li><a href="#">Lentes de contacto</a></li>
-        <li><a href="#">Pupilentes</a></li>
-        <li><a href="#">Examen de la vista</a></li>
-        <li><a href="#">Promociones</a></li>
-        <li><a href="#">Nosotros</a></li>
-    </ul>
-
-    <div class="button-nav">
-        <input type="text" class="buscador-nav" placeholder="🔍Buscar">
-        <button class="btn-neon">Agendar cita</button>
-    </div>
-</nav>
-
+    <header class="contenedor-menu">
+        <div class="logo">
+            <a href="./index.html"> 
+                <img src="./img/logo.png" alt="ziGO - Optometría y Estilo" width="297" height="159">
+            </a>
+        </div>
+        <nav aria-label="Menú principal">
+            <ul>
+                <li><a href="./index.html">Inicio</a></li>
+                <li><a href="#">Lentes de contacto</a></li>
+                <li><a href="#">Pupilentes</a></li>
+                <li><a href="#">Promociones</a></li>
+            </ul>
+        </nav>
+        <div class="botones-menu">
+            <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
+            <button type="button" class="boton-agenda">Agendar cita</button>
+        </div>
     </header>
+
+    <main>
+        <section class="contenedor-main" aria-label="Introducción"> 
+            <div>
+                <h1><span class="titulo-main">¡En <span>ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
+                <p>CIENCIA Y ARTE EN TU MIRADA.</p>
+                <p>Explora lentes de contacto, pupilentes de color y exámenes de vista con la tecnología y el estilo más fresco del universo.</p>
+                <button type="button" class="ver-catalogo">Ver catálogo</button> 
+                <button type="button" class="agendar-examen">Agendar examen</button>
+            </div>
+            <div>
+                <img src="./img/hero.webp" alt="Modelos luciendo lentes de diseño ziGO" width="1024" height="572">
+            </div>
+        </section>
+
+        <!-- Sección de Social Proof para aumentar conversión -->
+        <section class="testimonios-google-section">
+            <h2 class="seccion-titulo">Lo que dicen nuestros clientes</h2>
+            <div class="testimonios-google-grid">
+                
+                <article class="testimonio-google-card"> 
+                    <div class="card-header">
+                        <div class="avatar-placeholder" aria-hidden="true">M</div> 
+                        <div class="reviewer-info">
+                            <p class="reviewer-name">Miguel Rocha</p>
+                            <p class="review-date">Mayo 2024</p>
+                        </div>
+                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                    </div>
+                    <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
+                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <blockquote class="review-text">"Excelente servicio a domicilio. Me encantó la variedad de armazones que tienen. Mis lentes quedaron perfectos."</blockquote> 
+                </article>
+
+                <article class="testimonio-google-card">
+                    <div class="card-header">
+                        <div class="avatar-placeholder" aria-hidden="true">J</div>
+                        <div class="reviewer-info">
+                            <p class="reviewer-name">Julio César B.</p>
+                            <p class="review-date">Junio 2024</p>
+                        </div>
+                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                    </div>
+                    <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
+                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <blockquote class="review-text">"¡La atención al cliente es increíble! Todo el proceso fue muy cómodo y a un precio bastante accesible. ¡Súper recomendado!"</blockquote>
+                </article>
+
+                <article class="testimonio-google-card">
+                    <div class="card-header">
+                        <div class="avatar-placeholder" aria-hidden="true">A</div>
+                        <div class="reviewer-info">
+                            <p class="reviewer-name">Arantza L.</p>
+                            <!-- Corregido el typo de 'Parzo' a 'Marzo' -->
+                            <p class="review-date">Marzo 2024</p>
+                        </div>
+                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                    </div>
+                    <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
+                        <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
+                    </div>
+                    <blockquote class="review-text">"La doctora Escarlet es una excelente especialista. Me explicó todo a detalle y el proceso de selección fue muy profesional."</blockquote>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-zigo">
+        <div class="footer-container">
+            <div class="redes-sociales">
+                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+            </div>
+            <div class="direccion">
+                <address>
+                    <p>Av. Principal 123, Local 4</p>
+                    <p>Ciudad de México, CP 01234</p>
+                </address>
+            </div>
+            <nav aria-label="Enlaces legales">
+                <ul class="enlaces-legales">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="#">Productos</a></li>
+                    <li><a href="#">Legal</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </footer>
 </body>
 </html>

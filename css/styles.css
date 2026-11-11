@@ -256,7 +256,131 @@ li a:hover {
     background-color: rgba(0, 180, 216, 0.1);
     filter: drop-shadow(0 0 8px var(--neon-cyan));
 }
+/*============================================================
+                TARJETAS NEÓN CON LUZ VIAJERA
+============================================================*/
 
+/* Contenedor principal de las 3 etiquetas */
+.contenedor-tarjetas-neon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    padding: 60px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    flex-wrap: wrap; /* Permite que bajen de línea en celulares */
+}
+
+/* Base de la tarjeta */
+.tarjeta-neon {
+    position: relative;
+    width: 320px;
+    height: 280px;
+    border-radius: 16px;
+    overflow: hidden; /* FUNDAMENTAL: Oculta lo que sobra del haz de luz que gira */
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    /* Un pequeño resplandor estático general */
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.tarjeta-neon:hover {
+    transform: translateY(-5px); /* Se eleva al pasar el mouse */
+}
+
+/* --- EL TRUCO DEL GUSANITO (HAZ DE LUZ GIRATORIO) --- */
+.tarjeta-neon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%; 
+    height: 150%;
+    /* conic-gradient crea el rayo: empieza transparente y termina en el color neón */
+    background: conic-gradient(transparent 70%, var(--color-luz) 100%);
+    transform: translate(-50%, -50%);
+    animation: girar-luz 3s linear infinite;
+    z-index: 1; /* Se pone en el fondo */
+}
+
+/* --- EL FONDO DE NEBLINA (CRISTAL OSCURO) --- */
+.tarjeta-neon::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Deja EXACTAMENTE 3px libres en el borde para que se vea el gusanito */
+    border-radius: 14px; /* Un poco menos que el borde exterior */
+    background: rgba(2, 16, 43, 0.7); /* Tu azul cósmico pero con 70% de opacidad */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2; /* Tapa el centro del haz de luz, creando la ilusión del borde */
+}
+
+/* --- CONTENIDO DE LA TARJETA --- */
+.contenido-tarjeta {
+    position: relative;
+    z-index: 3; /* Se coloca por encima de la neblina para que sea visible y clickeable */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.contenido-tarjeta img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.contenido-tarjeta h3 {
+    color: var(--text-white);
+    font-size: 16px;
+    font-weight: 900;
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contenido-tarjeta p {
+    color: var(--text-gray);
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* --- VARIABLES DE COLOR POR TARJETA --- */
+.tarjeta-verde {
+    --color-luz: var(--neon-green);
+}
+.tarjeta-verde:hover { box-shadow: 0 0 25px rgba(57, 255, 20, 0.3); }
+
+.tarjeta-cian {
+    --color-luz: var(--neon-cyan);
+}
+.tarjeta-cian:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); }
+
+.tarjeta-purpura {
+    --color-luz: var(--neon-purple);
+}
+.tarjeta-purpura:hover { box-shadow: 0 0 25px rgba(255, 0, 255, 0.3); }
+
+/* --- ANIMACIÓN (LOS KEYFRAMES QUE HACEN GIRAR LA LUZ) --- */
+@keyframes girar-luz {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* INTERACCIÓN EXTRA: Cuando el usuario pasa el mouse, el gusanito acelera */
+.tarjeta-neon:hover::before {
+    animation: girar-luz 1.5s linear infinite; 
+    /* Hacemos la cola del gusanito más larga al pasar el mouse */
+    background: conic-gradient(transparent 50%, var(--color-luz) 100%); 
+}
 
 /*******************************************
         Módulo: Social Proof (Testimonios)

@@ -229,6 +229,8 @@ li a:hover {
     object-fit: contain; /* Asegura que la imagen mantenga sus proporciones sin deformarse */
 }
 
+
+
 /*******************************
         EFECTOS H1 Y GRADIENTES
 *******************************/
@@ -333,6 +335,7 @@ li a:hover {
     /* Un pequeño resplandor estático general */
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
     transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.15));
 }
 
 .tarjeta-neon:hover {
@@ -434,7 +437,7 @@ li a:hover {
         Módulo: Social Proof (Testimonios)
 ********************************************/
 .testimonios-google-section {
-    padding: 100px 60px 80px 60px;
+    padding: 50px 60px 80px 60px;
     max-width: 1800px;
     margin: 0 auto;
 }

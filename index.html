@@ -2,24 +2,22 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- Configuramos el viewport para garantizar un renderizado uno a uno en dispositivos móviles y habilitar media queries -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- SEO y visualización -->
     <title>ziGO - Ciencia y Arte en tu Mirada</title>
     <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX. Lleva tu mirada al siguiente nivel con nuestro probador virtual.">
     
-    <!-- Preconexión a recursos externos para mejorar tiempos de carga (Performance) -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     
-    <!-- Hojas de estilo locales -->
-    <link rel="stylesheet" href="./css/styles.css">
+    <!-- Vinculamos las hojas de estilo asegurando un control de caché mediante el versionado del archivo -->
+    <link rel="stylesheet" href="./css/styles.css?v=2.2">
     <link rel="stylesheet" href="./css/fonts.css">
-    <link rel="stylesheet" href="style.css?v=2.1">
     
-    <!-- CDN de FontAwesome para asegurar que los íconos de estrellas y redes carguen correctamente -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+    <!-- Estructuramos el header como un componente aislado para manejar su propio contexto de apilamiento (z-index) y albergar el efecto glassmorphism -->
     <header class="contenedor-menu">
         <div class="logo">
             <a href="./index.html"> 
@@ -27,6 +25,7 @@
             </a>
         </div>
         <nav aria-label="Menú principal">
+            <!-- La lista de navegación se controla mediante Flexbox para distribuir espacios de manera equitativa -->
             <ul>
                 <li><a href="./index.html">Inicio</a></li>
                 <li><a href="#">Lentes de contacto</a></li>
@@ -41,52 +40,50 @@
     </header>
 
     <main>
+        <!-- El Hero Section se divide en dos bloques fluidos para facilitar el apilamiento vertical en móviles -->
         <section class="contenedor-main" aria-label="Introducción"> 
-            <div>
+            <div class="hero-texto">
                 <h1><span class="titulo-main">¡En <span>ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
                 <p>CIENCIA Y ARTE EN TU MIRADA.</p>
                 <p>Explora lentes de contacto, pupilentes de color y exámenes de vista con la tecnología y el estilo más fresco del universo.</p>
-                <button type="button" class="ver-catalogo">Ver catálogo</button> 
-                <button type="button" class="agendar-examen">Agendar examen</button>
+                <div class="grupo-botones-hero">
+                    <button type="button" class="ver-catalogo">Ver catálogo</button> 
+                    <button type="button" class="agendar-examen">Agendar examen</button>
+                </div>
             </div>
-            <div>
+            <div class="hero-imagen">
                 <img src="./img/hero.webp" alt="Modelos luciendo lentes de diseño ziGO" width="1024" height="572">
             </div>
         </section>
 
-        <!-- Módulo de Servicios / Etiquetas Neón -->
+        <!-- Módulo de tarjetas renderizado con Flexbox wrap para que el layout fluya automáticamente según la resolución de la pantalla -->
         <section class="contenedor-tarjetas-neon">
-            
-            <!-- Etiqueta 1: Verde -->
             <article class="tarjeta-neon tarjeta-verde">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton1.webp" alt="Examen de la vista">
+                    <img src="./img/boton1.webp" alt="Examen de la vista" loading="lazy">
                     <h3>Examen de la vista</h3>
                     <p>Tecnología espacial para tus ojos</p>
                 </div>
             </article>
 
-            <!-- Etiqueta 2: Cian -->
             <article class="tarjeta-neon tarjeta-cian">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton2.webp" alt="Pupilentes y color">
+                    <img src="./img/boton2.webp" alt="Pupilentes y color" loading="lazy">
                     <h3>Pupilentes y color</h3>
                     <p>Atrévete a cambiar tu universo visual</p>
                 </div>
             </article>
 
-            <!-- Etiqueta 3: Púrpura -->
             <article class="tarjeta-neon tarjeta-purpura">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton3.webp" alt="Envíos cósmicos">
+                    <img src="./img/boton3.webp" alt="Envíos cósmicos" loading="lazy">
                     <h3>Envíos cósmicos</h3>
                     <p>Rápidos y seguros hasta tu órbita</p>
                 </div>
             </article>
-
         </section>
 
-        <!-- Sección de Social Proof para aumentar conversión -->
+        <!-- Utilizamos CSS Grid para la sección de testimonios, lo que permite un control bidimensional preciso de las tarjetas -->
         <section class="testimonios-google-section">
             <h2 class="seccion-titulo">Lo que dicen nuestros clientes</h2>
             <div class="testimonios-google-grid">
@@ -126,7 +123,6 @@
                         <div class="avatar-placeholder" aria-hidden="true">A</div>
                         <div class="reviewer-info">
                             <p class="reviewer-name">Arantza L.</p>
-                            <!-- Corregido el typo de 'Parzo' a 'Marzo' -->
                             <p class="review-date">Marzo 2024</p>
                         </div>
                         <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
@@ -140,6 +136,7 @@
         </section>
     </main>
 
+    <!-- El footer mantiene una estructura de flex-column para centralizar la información legal y redes -->
     <footer class="footer-zigo">
         <div class="footer-container">
             <div class="redes-sociales">

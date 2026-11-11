@@ -1,6 +1,7 @@
 /*============================================================
-                            CSS ziGOmx 2026
+                    CONFIGURACIÓN BASE Y RESET
 ============================================================*/
+/* Centralizamos los tokens de diseño (variables) en el root para mantener una paleta coherente y facilitar futuros temas */
 :root {
     --bg-color-dark: #02102b;
     --text-white: #ffffff;
@@ -10,54 +11,55 @@
     --neon-purple: #ff00ff;
 }
 
-html {
+/* Establecemos el comportamiento base del renderizado. 
+   El overflow-x: hidden es crítico en el html y body para evitar scrolls horizontales accidentales en dispositivos móviles. */
+html, body {
     background-color: var(--bg-color-dark);
     background-image: url('../img/fondo-cosmico.jpg'); 
     background-size: cover;
     background-position: center;
     background-attachment: fixed; 
     font-family: "Roboto", sans-serif;
-    /* Evita el scroll horizontal indeseado */
+    margin: 0;
+    padding: 0;
     overflow-x: hidden; 
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
-/* Animación global para los radares y tarjetas */
+/* Declaramos la animación de radar globalmente para reutilizarla en headers y botones.
+   El motor gráfico optimiza transformaciones como 'rotate', mejorando el performance sin forzar repaints. */
 @keyframes radar-infinito {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+
 /*============================================================
-                            HEADER
+                        HEADER (NAVBAR)
 ============================================================*/
+/* Para simular la perspectiva de zoom al 90% en la interfaz global, reducimos ligeramente el max-width a 1250px (anteriormente 1400/1800).
+   Esto compacta elegantemente la interfaz en monitores anchos. */
 .contenedor-menu {
     position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
-    padding: 15px 40px;
-    margin: 25px auto; 
-    max-width: 1400px;
+    padding: 12px 35px;
+    margin: 20px auto; 
+    max-width: 1250px; 
     width: 95%; 
     box-sizing: border-box;
     border-radius: 50px;
     overflow: hidden; 
     box-shadow: 0 0 25px rgba(0, 240, 255, 0.15); 
     
-    /* FUNDAMENTAL: Crea un contexto de apilamiento para que 
-       el z-index negativo del fondo no se escape del header */
+    /* El isolation: isolate genera un nuevo stacking context local, 
+       garantizando que los pseudo-elementos del cristal no interfieran con el z-index de otras secciones */
     isolation: isolate; 
     z-index: 100;
 }
 
-/* 1. EL HAZ DE LUZ GIRATORIO DEL HEADER (EL RADAR) */
+/* Renderiza el rayo giratorio extendiendo sus dimensiones para abarcar los extremos de la píldora. */
 .contenedor-menu::before {
     content: '';
     position: absolute;
@@ -71,122 +73,72 @@ body {
     z-index: -2; 
 }
 
-/* 2. EL FONDO DE NEBLINA (CRISTAL ESMERILADO) DEL HEADER */
+/* Aplica el filtro glassmorphism (cristal esmerilado). 
+   Dejamos 2px libres mediante 'inset' para permitir que el radar se asome exclusivamente por el borde. */
 .contenedor-menu::after {
     content: '';
     position: absolute;
-    inset: 3px; /* Grosor del borde */
-    border-radius: 47px;
-    background: rgba(2, 16, 43, 0.4); 
+    inset: 2px; 
+    border-radius: 48px;
+    background: rgba(2, 16, 43, 0.45); 
     backdrop-filter: blur(20px); 
     -webkit-backdrop-filter: blur(20px);
     z-index: -1; 
 }
 
-/*******************************
-        LOGO MENU
-*******************************/
-.logo {
-    /* Le damos un ancho base al logo para que ocupe su tercio izquierdo */
-    flex: 0 0 auto; 
-}
-
-.logo img {
-    width: 180px;
-    height: 80px;
-    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(0, 240, 255, 0.8));
-    transition: filter 0.3s ease;
-}
-
-.logo img:hover { filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(0, 240, 255, 1)); }
-
-nav { flex: 1 1 auto; display: flex; justify-content: center; }
-nav ul { display: flex; list-style: none; gap: 30px; padding: 0; margin: 0; white-space: nowrap; }
-li a { font-weight: 900; color: var(--text-white); text-decoration: none; font-size: 15px; transition: color 0.3s ease; }
-li a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 10px; }
-
-.botones-menu { display: flex; align-items: center; justify-content: flex-end; gap: 20px; flex: 0 0 auto; }
-
-/*******************************
-        MENU - NAV (CENTRADO)
-*******************************/
-nav {
-    /* Hacemos que el nav ocupe el espacio sobrante en el centro */
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center;
-}
-
-nav ul {
-    display: flex;
-    list-style: none;
-    gap: 30px; /* Aumentamos el gap para que respire mejor en centro */
-    padding: 0;
-    margin: 0;
-    /* Previene que los enlaces bajen de línea antes de tiempo */
-    white-space: nowrap; 
-}
-
-li a {
-    font-weight: 900;
-    color: var(--text-white);
-    text-decoration: none;
-    font-size: 15px;
-    transition: color 0.3s ease, text-decoration 0.3s ease;
-}
-
-li a:hover {
-    color: var(--neon-green);
-    text-decoration: underline;
-    text-underline-offset: 10px; 
-}
-
-/*******************************
-        CONTENEDOR BOTONES (DERECHA)
-*******************************/
-.botones-menu {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 20px;
-    /* Ocupa el tercio derecho */
-    flex: 0 0 auto; 
+/* Forzamos a todos los hijos directos del header a colocarse sobre el filtro del cristal */
+.contenedor-menu > * {
     position: relative;
     z-index: 1;
 }
 
-/* Buscador y Botón Agenda conservan tus estilos previos */
+/* Escalamos el logo proporcionalmente para el nuevo zoom general */
+.logo { flex: 0 0 auto; }
+.logo img {
+    width: 150px;
+    height: 68px;
+    object-fit: contain;
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(0, 240, 255, 0.8));
+    transition: filter 0.3s ease;
+}
+.logo img:hover { filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(0, 240, 255, 1)); }
+
+nav { flex: 1 1 auto; display: flex; justify-content: center; }
+nav ul { display: flex; list-style: none; gap: 30px; padding: 0; margin: 0; white-space: nowrap; }
+li a { font-weight: 900; color: var(--text-white); text-decoration: none; font-size: 14px; transition: color 0.3s ease; }
+li a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 10px; }
+
+.botones-menu { display: flex; align-items: center; justify-content: flex-end; gap: 15px; flex: 0 0 auto; }
+
 .buscador {
     background-color: #070A15;
     color: var(--text-white);
     font-family: 'Roboto', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     border-radius: 50px;
     border: 3px solid #00b4d8;
     padding: 10px 45px 10px 20px;           
-    width: 180px; /* Ligeramente más compacto para evitar colisiones tempranas */
+    width: 170px; 
     outline: none;
     box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);
     transition: all 0.3s ease;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2339FF14' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: calc(100% - 15px) center;
-    background-size: 20px;
+    background-size: 18px;
 }
-
 .buscador::placeholder { color: #718096; font-weight: 300; }
 .buscador:hover { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.7); cursor: pointer; }
-.buscador:focus { border-color: var(--neon-cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); width: 220px; }
+.buscador:focus { border-color: var(--neon-cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); width: 200px; }
 
 .boton-agenda {
     background-color: var(--neon-green);
     color: #050814; 
     font-weight: 900;
     border-radius: 50px;
-    padding: 12px 20px;  
-    width: 180px;
+    padding: 10px 18px;  
     font-family: 'Roboto', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     border: none;
     box-shadow: 0 0 15px var(--neon-green);
     cursor: pointer;
@@ -194,155 +146,140 @@ li a:hover {
 }
 .boton-agenda:hover { filter: drop-shadow(0 0 8px var(--neon-green)); transform: translateY(-2px); }
 
+
 /*============================================================
                             MAIN (HERO)
 ============================================================*/
+/* Unificamos el contenedor principal al max-width de 1400px para evitar espacios laterales excesivos (estrategia zoom 90%) */
 .contenedor-main {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Centra verticalmente el texto y la imagen */
+    align-items: center; 
     color: var(--text-white);
-    max-width: 1800px; 
-    margin: 40px auto 0 auto;    
-    padding: 0 60px;   
-    gap: 40px;         
+    max-width: 1400px; 
+    margin: 30px auto 0 auto;    
+    padding: 0 40px;   
+    gap: 30px;         
 }
 
-/* Columna Izquierda: Textos y Botones */
-.contenedor-main > div:nth-child(1) {
-    flex: 1 1 45%; /* Ocupa el 45% del espacio disponible, permitiendo encogerse o crecer */
-    max-width: 750px; /* Limita el crecimiento del texto para que no abrume */
-}
+.hero-texto { flex: 1 1 50%; max-width: 650px; }
+.hero-imagen { flex: 1 1 50%; display: flex; justify-content: flex-end; }
 
-/* Columna Derecha: Imagen que se ADAPTA */
-.contenedor-main > div:nth-child(2) {
-    flex: 1 1 55%; /* Le da preferencia de espacio a la imagen (55%) */
-    display: flex;
-    justify-content: flex-end; /* Alinea la imagen a la derecha del contenedor */
-}
-
-/* La magia para que la imagen no rompa el diseño y siempre encaje */
 .contenedor-main img {
     width: 100%;
-    max-width: 900px; /* Límite de tamaño en pantallas gigantes */
+    max-width: 750px; 
     height: auto;
-    object-fit: contain; /* Asegura que la imagen mantenga sus proporciones sin deformarse */
+    object-fit: contain; 
 }
 
-
-
-/*******************************
-        EFECTOS H1 Y GRADIENTES
-*******************************/
+/* Utilizamos clamp() para escalar la tipografía de forma fluida basándonos en el viewport width (vw). */
 .contenedor-main .titulo-main {
-    font-size: clamp(36px, 4vw, 55px); /* Tipografía fluida: se adapta al tamaño de la pantalla suavemente */
+    font-size: clamp(32px, 3.5vw, 50px); 
     font-weight: 900;
     text-transform: uppercase;
     line-height: 1.15;
-    margin-bottom: 25px;
-    
-    /* GRADIENTE MULTICOLOR IGUAL A TU DISEÑO BASE */
-    /* Empieza en verde, pasa a cian y termina en violeta */
+    margin-bottom: 20px;
     background: linear-gradient(to right, var(--neon-green) 0%, var(--neon-cyan) 50%, var(--neon-purple) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.contenedor-main p:nth-of-type(1) {
-    font-weight: 700;
-    font-size: 18px;
-    letter-spacing: 2px;
-    margin-bottom: 15px;
-}
+.contenedor-main p:nth-of-type(1) { font-weight: 700; font-size: 16px; letter-spacing: 2px; margin-bottom: 12px; }
+.contenedor-main p:nth-of-type(2) { color: var(--text-gray); font-size: 15px; line-height: 1.6; margin-bottom: 30px; max-width: 90%; }
 
-.contenedor-main p:nth-of-type(2) {
-    color: var(--text-gray); 
-    font-size: 17px;
-    line-height: 1.6;
-    margin-bottom: 35px;
-    max-width: 90%; /* Evita que el párrafo se estire de más y quede difícil de leer */
-}
+/* Contenedor Flex dedicado para alinear correctamente la botonería primaria */
+.grupo-botones-hero { display: flex; gap: 15px; flex-wrap: wrap; }
 
-/*******************************
-        BOTONES MAIN (LADO A LADO)
-*******************************/
-/* Contenedor extra para agrupar los botones y usar flexbox en ellos */
-.grupo-botones-hero {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap; /* Si la pantalla es muy pequeña, los apilará */
-}
-
+/* Botones principales con efecto cristal heredando la misma estructura de radar que el nav */
 .ver-catalogo, .agendar-examen {
+    position: relative;
+    overflow: hidden;
+    background-color: transparent; 
+    border: none; 
     font-family: 'Roboto', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     border-radius: 50px;
-    padding: 14px 24px;  
-    width: 220px; /* Ligeramente más anchos para mejor presencia */
-    background-color: transparent; 
+    padding: 12px 22px;  
+    width: 200px;
     cursor: pointer;
-    transition: all 0.3s ease;
     text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    isolation: isolate; 
 }
 
-.ver-catalogo {
-    color: var(--neon-green);
-    border: 3px solid var(--neon-green);
-    box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
-}
-.ver-catalogo:hover {
-    background-color: rgba(57, 255, 20, 0.1); 
-    filter: drop-shadow(0 0 8px var(--neon-green));
+.ver-catalogo { color: var(--neon-green); }
+.agendar-examen { color: var(--neon-cyan); }
+
+.ver-catalogo::before, 
+.agendar-examen::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    transform: translate(-50%, -50%);
+    z-index: -2;
+    animation: radar-infinito 3s linear infinite;
 }
 
-.agendar-examen {
-    color: var(--neon-cyan);
-    border: 3px solid var(--neon-cyan);
-    box-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
+.ver-catalogo::before { background: conic-gradient(transparent 50%, var(--neon-green) 100%); }
+.agendar-examen::before { background: conic-gradient(transparent 50%, var(--neon-cyan) 100%); }
+
+.ver-catalogo::after, 
+.agendar-examen::after {
+    content: '';
+    position: absolute;
+    inset: 2px; 
+    border-radius: 48px;
+    background: rgba(2, 16, 43, 0.7); 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
 }
-.agendar-examen:hover {
-    background-color: rgba(0, 180, 216, 0.1);
-    filter: drop-shadow(0 0 8px var(--neon-cyan));
-}
+
+/* Modificamos el timing-function on hover para un feedback de interacción más agresivo */
+.ver-catalogo:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(57, 255, 20, 0.4); }
+.agendar-examen:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); }
+.ver-catalogo:hover::before, .agendar-examen:hover::before { animation: radar-infinito 1s linear infinite; }
+
+
 /*============================================================
-                TARJETAS NEÓN CON LUZ VIAJERA
+                SECCIÓN DE SERVICIOS (TARJETAS NEÓN)
 ============================================================*/
-
-/* Contenedor principal de las 3 etiquetas */
 .contenedor-tarjetas-neon {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 30px;
     padding: 60px 40px;
-    max-width: 1400px;
+    max-width: 1250px;
     margin: 0 auto;
-    flex-wrap: wrap; /* Permite que bajen de línea en celulares */
+    flex-wrap: wrap; 
 }
 
-/* Base de la tarjeta */
+/* Redimensionamos ligeramente el layout base de las tarjetas para escalar mejor en grid en pantallas medianas */
 .tarjeta-neon {
     position: relative;
-    width: 320px;
-    height: 280px;
+    width: 300px;
+    height: 270px;
+    min-width: 300px;
     border-radius: 16px;
-    overflow: hidden; /* FUNDAMENTAL: Oculta lo que sobra del haz de luz que gira */
+    overflow: hidden; 
     display: flex;
     flex-direction: column;
     padding: 15px;
-    /* Un pequeño resplandor estático general */
+    box-sizing: border-box;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
     transition: transform 0.3s ease;
-    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.15));
+    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.1));
+    isolation: isolate;
 }
 
-.tarjeta-neon:hover {
-    transform: translateY(-5px); /* Se eleva al pasar el mouse */
-}
+.tarjeta-neon:hover { transform: translateY(-5px); }
 
-/* --- EL TRUCO DEL GUSANITO (HAZ DE LUZ GIRATORIO) --- */
 .tarjeta-neon::before {
     content: '';
     position: absolute;
@@ -350,29 +287,26 @@ li a:hover {
     left: 50%;
     width: 150%; 
     height: 150%;
-    /* conic-gradient crea el rayo: empieza transparente y termina en el color neón */
     background: conic-gradient(transparent 70%, var(--color-luz) 100%);
     transform: translate(-50%, -50%);
-    animation: girar-luz 3s linear infinite;
-    z-index: 1; /* Se pone en el fondo */
+    animation: radar-infinito 3s linear infinite;
+    z-index: -2; 
 }
 
-/* --- EL FONDO DE NEBLINA (CRISTAL OSCURO) --- */
 .tarjeta-neon::after {
     content: '';
     position: absolute;
-    inset: 3px; /* Deja EXACTAMENTE 3px libres en el borde para que se vea el gusanito */
-    border-radius: 14px; /* Un poco menos que el borde exterior */
-    background: rgba(2, 16, 43, 0.7); /* Tu azul cósmico pero con 70% de opacidad */
+    inset: 3px; 
+    border-radius: 14px; 
+    background: rgba(2, 16, 43, 0.7); 
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    z-index: 2; /* Tapa el centro del haz de luz, creando la ilusión del borde */
+    z-index: -1; 
 }
 
-/* --- CONTENIDO DE LA TARJETA --- */
 .contenido-tarjeta {
     position: relative;
-    z-index: 3; /* Se coloca por encima de la neblina para que sea visible y clickeable */
+    z-index: 1; 
     width: 100%;
     height: 100%;
     display: flex;
@@ -381,189 +315,123 @@ li a:hover {
 
 .contenido-tarjeta img {
     width: 100%;
-    height: 160px;
+    height: 150px;
     object-fit: cover;
     border-radius: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-.contenido-tarjeta h3 {
-    color: var(--text-white);
-    font-size: 16px;
-    font-weight: 900;
-    margin: 0 0 5px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
+.contenido-tarjeta h3 { color: var(--text-white); font-size: 15px; font-weight: 900; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+.contenido-tarjeta p { color: var(--text-gray); font-size: 13px; margin: 0; line-height: 1.4; }
 
-.contenido-tarjeta p {
-    color: var(--text-gray);
-    font-size: 13px;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* --- VARIABLES DE COLOR POR TARJETA --- */
-.tarjeta-verde {
-    --color-luz: var(--neon-green);
-}
+.tarjeta-verde { --color-luz: var(--neon-green); }
 .tarjeta-verde:hover { box-shadow: 0 0 25px rgba(57, 255, 20, 0.3); }
 
-.tarjeta-cian {
-    --color-luz: var(--neon-cyan);
-}
+.tarjeta-cian { --color-luz: var(--neon-cyan); }
 .tarjeta-cian:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); }
 
-.tarjeta-purpura {
-    --color-luz: var(--neon-purple);
-}
+.tarjeta-purpura { --color-luz: var(--neon-purple); }
 .tarjeta-purpura:hover { box-shadow: 0 0 25px rgba(255, 0, 255, 0.3); }
 
-/* --- ANIMACIÓN (LOS KEYFRAMES QUE HACEN GIRAR LA LUZ) --- */
-@keyframes girar-luz {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
+.tarjeta-neon:hover::before { animation: radar-infinito 1.5s linear infinite; background: conic-gradient(transparent 50%, var(--color-luz) 100%); }
 
-/* INTERACCIÓN EXTRA: Cuando el usuario pasa el mouse, el gusanito acelera */
-.tarjeta-neon:hover::before {
-    animation: girar-luz 1.5s linear infinite; 
-    /* Hacemos la cola del gusanito más larga al pasar el mouse */
-    background: conic-gradient(transparent 50%, var(--color-luz) 100%); 
-}
 
-/*******************************************
-        Módulo: Social Proof (Testimonios)
-********************************************/
-.testimonios-google-section {
-    padding: 50px 60px 80px 60px;
-    max-width: 1800px;
-    margin: 0 auto;
-}
-
-/* Título con gradiente Cian puro como en tu diseño */
-.seccion-titulo {
-    background: linear-gradient(to right, #00f0ff 0%, #00f0ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
-    font-size: 40px; /* H2 un poco más grande */
-    margin-bottom: 50px;
-}
-
-/* ... (El CSS del grid de testimonios y el footer se mantienen idénticos al anterior) ... */
-.testimonios-google-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+/*============================================================
+                        TESTIMONIOS & FOOTER
+============================================================*/
+.testimonios-google-section { padding: 50px 40px 80px 40px; max-width: 1250px; margin: 0 auto; }
+.seccion-titulo { background: linear-gradient(to right, #00f0ff 0%, #00f0ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; font-size: 36px; margin-bottom: 40px; }
+.testimonios-google-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
 .testimonio-google-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 0, 255, 0.3); box-shadow: 0 4px 20px rgba(255, 0, 255, 0.15); display: flex; flex-direction: column; gap: 15px; transition: transform 0.3s ease, border-color 0.3s ease; }
 .testimonio-google-card:hover { transform: translateY(-5px); border-color: var(--neon-purple); }
 .card-header { display: flex; align-items: center; gap: 15px; }
-.avatar-placeholder { width: 45px; height: 45px; background-color: #e0e0e0; color: #091d33; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-.reviewer-name { font-weight: bold; color: var(--text-white); font-size: 16px; margin: 0; }
+.avatar-placeholder { width: 40px; height: 40px; background-color: #e0e0e0; color: #091d33; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.reviewer-name { font-weight: bold; color: var(--text-white); font-size: 15px; margin: 0; }
 .review-date { color: var(--text-gray); font-size: 12px; margin: 2px 0 0 0; }
-.google-icon-small { width: 30px; margin-left: auto; }
-.google-stars-yellow { color: #fbc02d; font-size: 16px; }
-.review-text { color: var(--text-white); font-size: 14px; line-height: 1.6; font-style: italic; margin: 0; }
+.google-icon-small { width: 25px; margin-left: auto; }
+.google-stars-yellow { color: #fbc02d; font-size: 14px; }
+.review-text { color: var(--text-white); font-size: 13px; line-height: 1.6; font-style: italic; margin: 0; }
 
-/*============================================================
-                            FOOTER
-============================================================*/
 .footer-zigo { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(5px); padding: 40px 20px; border-top: 1px solid rgba(0, 240, 255, 0.2); }
 .footer-container { display: flex; flex-direction: column; align-items: center; max-width: 1000px; margin: 0 auto; gap: 25px; }
 .redes-sociales { display: flex; justify-content: center; align-items: center; gap: 20px; }
-.redes-sociales a { display: inline-flex; justify-content: center; align-items: center; color: var(--text-white); font-size: 22px; text-decoration: none; width: 44px; height: 44px; border: 2px solid transparent; border-radius: 50%; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-.redes-sociales a:hover { color: var(--neon-cyan); border-color: var(--neon-cyan); background-color: rgba(0, 229, 255, 0.05); box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2); text-shadow: 0 0 8px rgba(0, 229, 255, 0.8); transform: scale(1.1); }
-.direccion p { font-size: 14px; color: var(--text-gray); margin: 4px 0; text-align: center; }
+.redes-sociales a { display: inline-flex; justify-content: center; align-items: center; color: var(--text-white); font-size: 20px; text-decoration: none; width: 40px; height: 40px; border: 2px solid transparent; border-radius: 50%; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.redes-sociales a:hover { color: var(--neon-cyan); border-color: var(--neon-cyan); background-color: rgba(0, 229, 255, 0.05); box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2); transform: scale(1.1); }
+.direccion p { font-size: 13px; color: var(--text-gray); margin: 4px 0; text-align: center; }
 .enlaces-legales { list-style: none; display: flex; gap: 25px; padding: 0; margin: 0; }
-.enlaces-legales a { color: var(--text-white); font-size: 14px; text-decoration: none; transition: color 0.3s ease; }
+.enlaces-legales a { color: var(--text-white); font-size: 13px; text-decoration: none; transition: color 0.3s ease; }
 .enlaces-legales a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 5px; }
 
 
 /* ============================================================
-        MEDIA QUERIES (DISEÑO RESPONSIVO)
+        MEDIA QUERIES (ARQUITECTURA DESKTOP FIRST)
 ============================================================ */
 
-/* 1. Laptops y Escritorios Pequeños (Ajuste del Menú para que no se rompa) */
-@media (max-width: 1300px) {
-    .contenedor-menu {
-        flex-direction: column; /* Apila Logo, Nav y Botones */
-        gap: 25px;
-    }
-    nav ul {
-        gap: 25px;
-    }
+/* 1. Monitores medianos y Laptops (hasta 1200px) 
+   Comenzamos a reducir los márgenes internos para evitar colisiones en la barra superior. */
+@media (max-width: 1200px) {
+    .contenedor-menu { padding: 15px 20px; }
+    nav ul { gap: 15px; }
 }
 
-/* 2. Tablets Horizontales y Verticales (Ajuste del Hero e Imagen) */
-@media (max-width: 1024px) {
-    .contenedor-main {
-        flex-direction: column; /* Apila el texto arriba y la imagen abajo */
-        text-align: center;
-        padding: 0 30px;
-    }
-    
-    .contenedor-main > div:nth-child(1) {
-        max-width: 100%; /* El texto ahora ocupa todo el ancho */
-    }
-
-    .contenedor-main > div:nth-child(2) {
-        justify-content: center; /* Centra la imagen cuando está abajo */
-    }
-
-    /* Centramos los párrafos y el grupo de botones */
-    .contenedor-main p:nth-of-type(1),
-    .contenedor-main p:nth-of-type(2) {
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .grupo-botones-hero {
-        justify-content: center;
-    }
-
-    .testimonios-google-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* 3. Ajuste fino para celulares (Botones apilados 100%) */
-@media (max-width: 576px) {
-    .contenedor-main .titulo-main {
-        font-size: 38px; 
-    }
-    
-    .botones-menu {
+/* 2. Tablets (hasta 992px)
+    Modificamos la flex-direction del contenedor principal a columna. 
+   Es crítico remover la limitación white-space: nowrap del menú de navegación para prevenir desbordes horizontales. */
+@media (max-width: 992px) {
+    .contenedor-menu { 
         flex-direction: column; 
-        width: 100%;
-        gap: 15px;
+        gap: 20px; 
+        padding: 25px 20px; 
+        border-radius: 20px; 
+    }
+    .contenedor-menu::after { border-radius: 17px; } /* Ajustamos el inset radius proporcionalmente al contendor */
+    
+    nav ul { 
+        justify-content: center; 
+        flex-wrap: wrap; 
+        white-space: normal; /* FUNDAMENTAL: Habilita el text-wrapping dinámico para evitar cortes. */
+        gap: 20px;
     }
     
-    .buscador, 
-    .boton-agenda {
-        width: 100%; 
-        max-width: 320px;
-    }
+    .botones-menu { justify-content: center; width: 100%; flex-wrap: wrap;}
+
+    /* Invertimos el hero-section para priorizar el contenido textual sobre la gráfica */
+    .contenedor-main { flex-direction: column-reverse; text-align: center; gap: 30px; margin-top: 20px; padding: 0 20px; }
+    .hero-texto { max-width: 100%; }
+    .contenedor-main p:nth-of-type(1), .contenedor-main p:nth-of-type(2) { text-align: center; margin-left: auto; margin-right: auto; }
     
-    /* REGLA CRÍTICA: Apila los botones de Ver Catálogo y Agendar en celular */
-    .grupo-botones-hero {
+    .grupo-botones-hero { justify-content: center; }
+    .contenedor-main img { max-width: 450px; }
+
+    /* Forzamos el wrapping de testimonios a dos columnas (grid) */
+    .testimonios-google-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 3. Dispositivos Móviles (hasta 576px)
+   Maximizamos la legibilidad colapsando todos los flex items a 100% de width (width: 100%). */
+@media (max-width: 576px) {
+    .contenedor-menu { width: 100%; border-radius: 0; margin: 0; padding: 20px 10px; }
+    .contenedor-menu::after { border-radius: 0; }
+    
+    /* Apilamos los enlaces verticalmente para evitar miss-clicks en móviles (mejora de UI/UX) */
+    nav ul {
         flex-direction: column;
         align-items: center;
+        gap: 15px;
         width: 100%;
     }
 
-    .ver-catalogo, .agendar-examen {
-        width: 100%; /* Ocupan todo el ancho de la pantalla */
-        max-width: 320px;
-    }
+    .contenedor-main .titulo-main { font-size: 28px; }
+    .botones-menu { flex-direction: column; width: 100%; gap: 15px; }
+    
+    .grupo-botones-hero { flex-direction: column; align-items: center; width: 100%; }
+    
+    /* Los CTA primarios heredan ancho total para rellenar la pantalla (thumb zone compliance) */
+    .ver-catalogo, .agendar-examen { width: 100%; max-width: 100%; }
 
-    .testimonios-google-grid {
-        grid-template-columns: 1fr; /* Testimonios a una columna */
-    }
-
-    .enlaces-legales {
-        flex-direction: column; 
-        text-align: center;
-        gap: 15px;
-    }
+    /* Degradación de columnas a listas de un solo bloque (1fr) */
+    .testimonios-google-grid { grid-template-columns: 1fr; }
+    
+    .enlaces-legales { flex-direction: column; text-align: center; gap: 15px; }
 }

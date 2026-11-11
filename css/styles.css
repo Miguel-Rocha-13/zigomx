@@ -25,6 +25,10 @@ html, body {
     overflow-x: hidden; 
 }
 
+a{
+    text-decoration: none;
+}
+
 /* Declaramos la animación de radar globalmente para reutilizarla en headers y botones.
    El motor gráfico optimiza transformaciones como 'rotate', mejorando el performance sin forzar repaints. */
 @keyframes radar-infinito {
@@ -362,6 +366,122 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 .enlaces-legales { list-style: none; display: flex; gap: 25px; padding: 0; margin: 0; }
 .enlaces-legales a { color: var(--text-white); font-size: 13px; text-decoration: none; transition: color 0.3s ease; }
 .enlaces-legales a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 5px; }
+
+
+
+
+/*||||||||||||||||||||||||||||||||||||||||AGENDA|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
+
+
+
+
+
+/*============================================================
+                SECCIÓN AGENDA / CALENDARIO
+============================================================*/
+.seccion-titulo{
+    background: linear-gradient(to right, var(--neon-green) 10%, var(--neon-cyan) 45%, var(--neon-purple) 65%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.contenedor-agenda-section {
+    padding: 20px 40px 80px 40px;
+    max-width: 1300px;
+    margin: 0 auto;
+
+}
+
+.agenda-glass-card {
+    position: relative;
+    background: rgba(2, 16, 43, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 20px;
+    padding: 35px;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.1);
+    color: var(--text-white);
+    
+}
+
+.agenda-info-servicio {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding-right: 25px;
+}
+
+.servicio-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-optica {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--bg-color-dark);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.agenda-info-servicio h2 {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 0 0 5px 0;
+}
+
+.especialista {
+    color: var(--text-gray);
+    font-size: 13px;
+    margin: 0;
+}
+
+.duracion-cita {
+    color: var(--neon-green);
+    font-weight: 700;
+    font-size: 14px;
+    margin: 0;
+}
+
+.descripcion-servicio {
+    color: var(--text-gray);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.agenda-iframe-container iframe {
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    /* Filtro opcional para adaptar calendarios blancos nativos al modo oscuro cósmico */
+    background: rgba(2, 16, 43, 0.9);
+}
+
+/* Responsivo para celulares */
+@media (max-width: 992px) {
+    .agenda-glass-card {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+    .agenda-info-servicio {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-right: 0;
+        padding-bottom: 20px;
+    }
+}
 
 
 /* ============================================================

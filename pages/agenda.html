@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ziGO - Agendar Cita</title>
+    <meta name="description" content="Agenda tu examen de la vista a domicilio con ziGO de forma rápida y sencilla.">
+    
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="stylesheet" href="./css/styles.css?v=2.2">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Header unificado con efecto píldora y cristal -->
+    <header class="contenedor-menu">
+        <div class="logo">
+            <a href="../index.html"> 
+                <img src="../img/logo.png" alt="ziGO - Optometría y Estilo" width="297" height="159">
+            </a>
+        </div>
+        <nav aria-label="Menú principal">
+            <ul>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="#">Lentes de contacto</a></li>
+                <li><a href="#">Pupilentes</a></li>
+                <li><a href="#">Promociones</a></li>
+            </ul>
+        </nav>
+        <div class="botones-menu">
+            <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
+            <a href="./pages/agenda.html" class="boton-agenda">Agendar cita</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Sección del Calendario Integrado con Estética Cósmica y Cristal -->
+        <section class="contenedor-agenda-section">
+            <h1 class="seccion-titulo">Agenda tu Examen de la Vista</h1>
+            
+            <div class="agenda-glass-card">
+                <!-- Columna de Detalle del Servicio -->
+                <div class="agenda-info-servicio">
+                    <div class="servicio-header">
+                        <div class="avatar-optica"><i class="fas fa-eye"></i></div>
+                        <div>
+                            <h2>Examen de la Vista / Cita Óptica ziGO</h2>
+                            <p class="especialista">Especialista: Dra. Escarlet Alcocer</p>
+                        </div>
+                    </div>
+                    <p class="duracion-cita"><i class="far fa-clock"></i> Duración estimada: 2 horas 30 mins</p>
+                    <p class="descripcion-servicio">Tecnología espacial y diagnósticos precisos directamente hasta la comodidad de tu órbita o domicilio.</p>
+                </div>
+
+                <!-- Columna del Calendario (Iframe sincronizado con Google Calendar gratuito) -->
+                <div class="agenda-iframe-container">
+                <iframe 
+                    src="https://zohobookings.com" 
+                    style="border: 0; border-radius: 12px;" 
+                    width="100%" 
+                    height="750" 
+                    frameborder="0" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer unificado -->
+    <footer class="footer-zigo">
+        <div class="footer-container">
+            <div class="redes-sociales">
+                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener" aria-label="X"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+            </div>
+            <div class="direccion">
+                <address>
+                    <p>Av. Principal 123, Local 4</p>
+                    <p>Ciudad de México, CP 01234</p>
+                </address>
+            </div>
+            <nav aria-label="Enlaces legales">
+                <ul class="enlaces-legales">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="#">Productos</a></li>
+                    <li><a href="#">Legal</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </footer>
+</body>
+</html>

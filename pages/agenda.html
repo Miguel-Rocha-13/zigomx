@@ -54,15 +54,19 @@
 
                 <!-- Columna del Calendario (Iframe sincronizado con Google Calendar gratuito) -->
                 <div class="agenda-iframe-container">
-                <iframe 
-                    src="https://zohobookings.com" 
-                    style="border: 0; border-radius: 12px;" 
-                    width="100%" 
-                    height="750" 
-                    frameborder="0" 
-                    allowfullscreen>
-                </iframe>
-            </div>
+                    <div id="inline-container" style="border-radius: 12px; overflow: hidden;"></div>
+                </div>
+
+                <script src="https://bookings.nimbuspop.com/assets/embed.js"></script>
+                <script>
+                    window.addEventListener("load", function() {
+                        Bookings.inlineEmbed({
+                            url: "https://zigo1.zohobookings.com/portal-embed#/5013970000000035045",
+                            parent: "#inline-container",
+                            height: "750px"
+                        });
+                    });
+                </script>
             </div>
         </section>
     </main>

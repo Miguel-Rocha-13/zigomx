@@ -386,7 +386,7 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     background-clip: text;
 }
 .contenedor-agenda-section {
-    padding: 20px 40px 80px 40px;
+    padding: 40px 40px 80px 40px;
     max-width: 1300px;
     margin: 0 auto;
 
@@ -469,6 +469,24 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     background: rgba(2, 16, 43, 0.9);
 }
 
+#inline-container {
+    background-color: #02102b;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 435px; /* Muestra las filas del 1 al 30 y oculta la Zona horaria */
+    position: relative;
+}
+
+#inline-container iframe {
+    filter: invert(1) hue-rotate(180deg) contrast(1.05);
+    mix-blend-mode: lighten;
+    margin-top: -210px; /* Mantiene oculto el encabezado de Zoho */
+    height: 950px !important; /* Altura suficiente para eliminar la barra de scroll interna */
+    width: 100%;
+    border: 0;
+}
+
+
 /* Responsivo para celulares */
 @media (max-width: 992px) {
     .agenda-glass-card {
@@ -482,6 +500,18 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
         padding-bottom: 20px;
     }
 }
+
+@media (max-width: 768px) {
+    #inline-container {
+    height: 760px; /* Altura suficiente para ver los días del 1 al 30 y los horarios apilados */
+    }
+
+    #inline-container iframe {
+    margin-top: -235px; /* Sube un poco más porque en móvil el título de Zoho ocupa dos líneas */
+    height: 1200px !important; /* Evita que aparezca la barra de desplazamiento interna en celular */
+    }
+}
+
 
 
 /* ============================================================

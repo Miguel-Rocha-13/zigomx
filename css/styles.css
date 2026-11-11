@@ -27,19 +27,60 @@ body {
     overflow-x: hidden;
 }
 
+/* Animación global para los radares y tarjetas */
+@keyframes radar-infinito {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 /*============================================================
                             HEADER
 ============================================================*/
 .contenedor-menu {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Eliminamos flex-wrap para obligar al header a mantenerse en una línea 
-       hasta que nosotros decidamos romperlo con Media Queries */
     gap: 20px;
-    padding: 20px 60px; /* Un poco más de padding lateral para pantallas grandes */
-    max-width: 1800px; 
-    margin: 0 auto;    
+    padding: 15px 40px;
+    margin: 25px auto; 
+    max-width: 1400px;
+    width: 95%; 
+    box-sizing: border-box;
+    border-radius: 50px;
+    overflow: hidden; 
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.15); 
+    
+    /* FUNDAMENTAL: Crea un contexto de apilamiento para que 
+       el z-index negativo del fondo no se escape del header */
+    isolation: isolate; 
+    z-index: 100;
+}
+
+/* 1. EL HAZ DE LUZ GIRATORIO DEL HEADER (EL RADAR) */
+.contenedor-menu::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%; 
+    height: 1000%;
+    background: conic-gradient(transparent 65%, var(--neon-cyan) 85%, var(--neon-purple) 100%);
+    transform: translate(-50%, -50%);
+    animation: radar-infinito 6s linear infinite;
+    z-index: -2; 
+}
+
+/* 2. EL FONDO DE NEBLINA (CRISTAL ESMERILADO) DEL HEADER */
+.contenedor-menu::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Grosor del borde */
+    border-radius: 47px;
+    background: rgba(2, 16, 43, 0.4); 
+    backdrop-filter: blur(20px); 
+    -webkit-backdrop-filter: blur(20px);
+    z-index: -1; 
 }
 
 /*******************************
@@ -57,9 +98,14 @@ body {
     transition: filter 0.3s ease;
 }
 
-.logo img:hover {
-    filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(0, 240, 255, 1));
-}
+.logo img:hover { filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(0, 240, 255, 1)); }
+
+nav { flex: 1 1 auto; display: flex; justify-content: center; }
+nav ul { display: flex; list-style: none; gap: 30px; padding: 0; margin: 0; white-space: nowrap; }
+li a { font-weight: 900; color: var(--text-white); text-decoration: none; font-size: 15px; transition: color 0.3s ease; }
+li a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 10px; }
+
+.botones-menu { display: flex; align-items: center; justify-content: flex-end; gap: 20px; flex: 0 0 auto; }
 
 /*******************************
         MENU - NAV (CENTRADO)
@@ -105,6 +151,8 @@ li a:hover {
     gap: 20px;
     /* Ocupa el tercio derecho */
     flex: 0 0 auto; 
+    position: relative;
+    z-index: 1;
 }
 
 /* Buscador y Botón Agenda conservan tus estilos previos */

@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <!-- Configuramos el viewport para garantizar un renderizado uno a uno en dispositivos móviles y habilitar media queries -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <title>ziGO - Ciencia y Arte en tu Mirada</title>
+    <link rel="icon" href="./img/mascota_logo2.ico">
     <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX. Lleva tu mirada al siguiente nivel con nuestro probador virtual.">
-    
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    
     <!-- Vinculamos las hojas de estilo asegurando un control de caché mediante el versionado del archivo -->
     <link rel="stylesheet" href="./css/styles.css?v=2.2">
     <link rel="stylesheet" href="./css/fonts.css">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Vinculamos el codigo java script-->
+    <script src="./js/script.js" defer></script>
 </head>
 <body>
     <!-- Estructuramos el header como un componente aislado para manejar su propio contexto de apilamiento (z-index) y albergar el efecto glassmorphism -->
@@ -43,12 +42,12 @@
         <!-- El Hero Section se divide en dos bloques fluidos para facilitar el apilamiento vertical en móviles -->
         <section class="contenedor-main" aria-label="Introducción"> 
             <div class="hero-texto">
-                <h1><span class="titulo-main">¡En <span>ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
+                <h1><span class="titulo-main">¡En <span style="text-transform: none;">ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
                 <p>CIENCIA Y ARTE EN TU MIRADA.</p>
                 <p>Explora lentes de contacto, pupilentes de color y exámenes de vista con la tecnología y el estilo más fresco del universo.</p>
                 <div class="grupo-botones-hero">
-                    <button type="button" class="ver-catalogo">Ver catálogo</button> 
-                    <button type="button" class="agendar-examen">Agendar examen</button>
+                    <a href=".//pages/armazones.html"  class="ver-catalogo">Ver catálogo</a> 
+                    <a href="./pages/probador.html" class="agendar-examen">Probador virtual</a>
                 </div>
             </div>
             <div class="hero-imagen">
@@ -60,7 +59,7 @@
         <section class="contenedor-tarjetas-neon">
             <article class="tarjeta-neon tarjeta-verde">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton1.webp" alt="Examen de la vista" loading="lazy">
+                    <img src="./img/boton1.webp" alt="Examen de la vista" loading="lazy" width="1024" height="572">
                     <h3>Examen de la vista</h3>
                     <p>Tecnología espacial para tus ojos</p>
                 </div>
@@ -68,7 +67,7 @@
 
             <article class="tarjeta-neon tarjeta-cian">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton2.webp" alt="Pupilentes y color" loading="lazy">
+                    <img src="./img/boton2.webp" alt="Pupilentes y color" loading="lazy" width="1024" height="572">
                     <h3>Pupilentes y color</h3>
                     <p>Atrévete a cambiar tu universo visual</p>
                 </div>
@@ -76,7 +75,7 @@
 
             <article class="tarjeta-neon tarjeta-purpura">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton3.webp" alt="Envíos cósmicos" loading="lazy">
+                    <img src="./img/boton3.webp" alt="Envíos cósmicos" loading="lazy" width="1024" height="572">
                     <h3>Envíos cósmicos</h3>
                     <p>Rápidos y seguros hasta tu órbita</p>
                 </div>
@@ -134,35 +133,35 @@
                 </article>
             </div>
         </section>
-    </main>
-
-    <!-- El footer mantiene una estructura de flex-column para centralizar la información legal y redes -->
-    <footer class="footer-zigo">
-        <div class="footer-container">
-            <div class="redes-sociales">
-                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
-            </div>
-            <div class="direccion">
-                <address>
-                    <p>Av. Principal 123, Local 4</p>
-                    <p>Ciudad de México, CP 01234</p>
-                </address>
-            </div>
-            <nav aria-label="Enlaces legales">
-                <ul class="enlaces-legales">
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="#">Productos</a></li>
-                    <li><a href="#">Legal</a></li>
-                    <li><a href="#">Contacto</a></li>
-                </ul>
-            </nav>
-        </div>
-    </footer>
-</body>
-</html>
+    x</main>
+x
+    x<!-- El footer mantiene una estructura de flex-column para centralizar la información legal y redes -->
+    x<footer class="footer-zigo">
+    x    <div class="footer-container">
+    x        <div class="redes-sociales">
+    x            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+    x            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+    x            <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+    x            <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+    x            <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+    x            <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+    x            <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+    x        </div>
+    x        <div class="direccion">
+    x            <address>
+    x                <p>Av. Principal 123, Local 4</p>
+    x                <p>Ciudad de México, CP 01234</p>
+    x            </address>
+    x        </div>
+    x        <nav aria-label="Enlaces legales">
+    x            <ul class="enlaces-legales">
+    x                <li><a href="index.html">Inicio</a></li>
+    x                <li><a href="#">Productos</a></li>
+    x                <li><a href="#">Legal</a></li>
+    x                <li><a href="#">Contacto</a></li>
+    x            </ul>
+    x        </nav>
+    x    </div>
+    x</footer>
+</boxdy>
+</htxml>

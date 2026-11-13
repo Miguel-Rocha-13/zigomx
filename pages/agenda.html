@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ziGO - Agendar Cita</title>
-    <meta name="description" content="Agenda tu examen de la vista a domicilio con ziGO de forma rápida y sencilla.">
-    
+    <title>ziGO - Agendar cita</title>
+    <link rel="icon" href="../img/mascota_logo2.ico">
+    <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX.">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="./css/styles.css?v=2.2">
-    <link rel="stylesheet" href="../css/styles.css">
+    <!-- Actualización en ruteo de CSS -->
+    <link rel="stylesheet" href="../css/styles.css?v=2.3">
+    <script src="../js/script.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <!-- Header unificado con efecto píldora y cristal -->
     <header class="contenedor-menu">
         <div class="logo">
             <a href="../index.html"> 
@@ -22,19 +22,18 @@
         <nav aria-label="Menú principal">
             <ul>
                 <li><a href="../index.html">Inicio</a></li>
-                <li><a href="#">Lentes de contacto</a></li>
+                <li><a href="./armazones.html">Lentes oftalmicos</a></li>
                 <li><a href="#">Pupilentes</a></li>
                 <li><a href="#">Promociones</a></li>
             </ul>
         </nav>
         <div class="botones-menu">
             <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
-            <a href="./pages/agenda.html" class="boton-agenda">Agendar cita</a>
+            <a href="./agenda.html" class="boton-agenda">Agendar cita</a>
         </div>
     </header>
 
     <main>
-        <!-- Sección del Calendario Integrado con Estética Cósmica y Cristal -->
         <section class="contenedor-agenda-section">
             <h1 class="seccion-titulo">Agenda tu Examen de la Vista</h1>
             
@@ -50,11 +49,19 @@
                     </div>
                     <p class="duracion-cita"><i class="far fa-clock"></i> Duración estimada: 2 horas 30 mins</p>
                     <p class="descripcion-servicio">Tecnología espacial y diagnósticos precisos directamente hasta la comodidad de tu órbita o domicilio.</p>
+                    
+                    <!-- NUEVO: Contenedor Dinámico para los Armazones Seleccionados (Manipulado por JS) -->
+                    <div id="notas-armazones-box" class="notas-armazones-box oculto">
+                        <h3>Modelos de Interés Seleccionados:</h3>
+                        <!-- La lista se inyectará aquí desde script.js -->
+                        <ul id="lista-armazones-interes" style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--text-white); display: flex; flex-direction: column; gap: 5px;">
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Columna del Calendario (Iframe sincronizado con Google Calendar gratuito) -->
+                <!-- Columna del Calendario Zoho -->
                 <div class="agenda-iframe-container">
-                    <div id="inline-container" style="border-radius: 12px; overflow: hidden;"></div>
+                    <div id="inline-container"></div>
                 </div>
 
                 <script src="https://bookings.nimbuspop.com/assets/embed.js"></script>
@@ -71,17 +78,17 @@
         </section>
     </main>
 
-    <!-- Footer unificado -->
+    <!-- Footer Unificado -->
     <footer class="footer-zigo">
         <div class="footer-container">
             <div class="redes-sociales">
-                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" aria-label="X"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></a>
             </div>
             <div class="direccion">
                 <address>
@@ -91,7 +98,7 @@
             </div>
             <nav aria-label="Enlaces legales">
                 <ul class="enlaces-legales">
-                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="../index.html">Inicio</a></li>
                     <li><a href="#">Productos</a></li>
                     <li><a href="#">Legal</a></li>
                     <li><a href="#">Contacto</a></li>

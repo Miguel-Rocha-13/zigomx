@@ -1,7 +1,7 @@
 /*============================================================
                     CONFIGURACIÓN BASE Y RESET
 ============================================================*/
-/* Centralizamos los tokens de diseño (variables) en el root para mantener una paleta coherente y facilitar futuros temas */
+/* Centralizamos los tokens de diseño en el root. Esto nos permite cambiar la paleta de colores de todo el sitio desde un solo lugar. */
 :root {
     --bg-color-dark: #02102b;
     --text-white: #ffffff;
@@ -11,8 +11,6 @@
     --neon-purple: #ff00ff;
 }
 
-/* Establecemos el comportamiento base del renderizado. 
-   El overflow-x: hidden es crítico en el html y body para evitar scrolls horizontales accidentales en dispositivos móviles. */
 html, body {
     background-color: var(--bg-color-dark);
     background-image: url('../img/fondo-cosmico.jpg'); 
@@ -22,15 +20,15 @@ html, body {
     font-family: "Roboto", sans-serif;
     margin: 0;
     padding: 0;
+    /* Evitamos que los elementos que rotan o se expanden generen barras de desplazamiento horizontales */
     overflow-x: hidden; 
 }
 
-a{
+a {
     text-decoration: none;
 }
 
-/* Declaramos la animación de radar globalmente para reutilizarla en headers y botones.
-   El motor gráfico optimiza transformaciones como 'rotate', mejorando el performance sin forzar repaints. */
+/* Animación global de radar. Al usar transform, el navegador lo procesa en la tarjeta gráfica (GPU), optimizando el rendimiento. */
 @keyframes radar-infinito {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
@@ -40,8 +38,6 @@ a{
 /*============================================================
                         HEADER (NAVBAR)
 ============================================================*/
-/* Para simular la perspectiva de zoom al 90% en la interfaz global, reducimos ligeramente el max-width a 1250px (anteriormente 1400/1800).
-   Esto compacta elegantemente la interfaz en monitores anchos. */
 .contenedor-menu {
     position: relative;
     display: flex;
@@ -57,13 +53,11 @@ a{
     overflow: hidden; 
     box-shadow: 0 0 25px rgba(0, 240, 255, 0.15); 
     
-    /* El isolation: isolate genera un nuevo stacking context local, 
-       garantizando que los pseudo-elementos del cristal no interfieran con el z-index de otras secciones */
+    /* Creamos un contexto de apilamiento aislado para que el ::after y ::before no se escapen por debajo del z-index global */
     isolation: isolate; 
     z-index: 100;
 }
 
-/* Renderiza el rayo giratorio extendiendo sus dimensiones para abarcar los extremos de la píldora. */
 .contenedor-menu::before {
     content: '';
     position: absolute;
@@ -77,8 +71,6 @@ a{
     z-index: -2; 
 }
 
-/* Aplica el filtro glassmorphism (cristal esmerilado). 
-   Dejamos 2px libres mediante 'inset' para permitir que el radar se asome exclusivamente por el borde. */
 .contenedor-menu::after {
     content: '';
     position: absolute;
@@ -90,13 +82,11 @@ a{
     z-index: -1; 
 }
 
-/* Forzamos a todos los hijos directos del header a colocarse sobre el filtro del cristal */
 .contenedor-menu > * {
     position: relative;
     z-index: 1;
 }
 
-/* Escalamos el logo proporcionalmente para el nuevo zoom general */
 .logo { flex: 0 0 auto; }
 .logo img {
     width: 150px;
@@ -109,7 +99,7 @@ a{
 
 nav { flex: 1 1 auto; display: flex; justify-content: center; }
 nav ul { display: flex; list-style: none; gap: 30px; padding: 0; margin: 0; white-space: nowrap; }
-li a { font-weight: 900; color: var(--text-white); text-decoration: none; font-size: 14px; transition: color 0.3s ease; }
+li a { font-weight: 900; color: var(--text-white); font-size: 14px; transition: color 0.3s ease; }
 li a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 10px; }
 
 .botones-menu { display: flex; align-items: center; justify-content: flex-end; gap: 15px; flex: 0 0 auto; }
@@ -132,7 +122,7 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     background-size: 18px;
 }
 .buscador::placeholder { color: #718096; font-weight: 300; }
-.buscador:hover { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 240, 255, 0.7); cursor: pointer; }
+.buscador:hover { border-color: var(--neon-cyan); cursor: pointer; }
 .buscador:focus { border-color: var(--neon-cyan); box-shadow: 0 0 25px rgba(0, 240, 255, 0.9); width: 200px; }
 
 .boton-agenda {
@@ -154,7 +144,6 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 /*============================================================
                             MAIN (HERO)
 ============================================================*/
-/* Unificamos el contenedor principal al max-width de 1400px para evitar espacios laterales excesivos (estrategia zoom 90%) */
 .contenedor-main {
     display: flex;
     justify-content: space-between;
@@ -168,15 +157,8 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 
 .hero-texto { flex: 1 1 50%; max-width: 650px; }
 .hero-imagen { flex: 1 1 50%; display: flex; justify-content: flex-end; }
+.contenedor-main img { width: 100%; max-width: 750px; height: auto; object-fit: contain; }
 
-.contenedor-main img {
-    width: 100%;
-    max-width: 750px; 
-    height: auto;
-    object-fit: contain; 
-}
-
-/* Utilizamos clamp() para escalar la tipografía de forma fluida basándonos en el viewport width (vw). */
 .contenedor-main .titulo-main {
     font-size: clamp(32px, 3.5vw, 50px); 
     font-weight: 900;
@@ -188,14 +170,12 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
-
+.contenedor-main .nomrbre_marca { color: var(--text-white); -webkit-text-fill-color: var(--text-white); }
 .contenedor-main p:nth-of-type(1) { font-weight: 700; font-size: 16px; letter-spacing: 2px; margin-bottom: 12px; }
 .contenedor-main p:nth-of-type(2) { color: var(--text-gray); font-size: 15px; line-height: 1.6; margin-bottom: 30px; max-width: 90%; }
 
-/* Contenedor Flex dedicado para alinear correctamente la botonería primaria */
 .grupo-botones-hero { display: flex; gap: 15px; flex-wrap: wrap; }
 
-/* Botones principales con efecto cristal heredando la misma estructura de radar que el nav */
 .ver-catalogo, .agendar-examen {
     position: relative;
     overflow: hidden;
@@ -212,46 +192,28 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     isolation: isolate; 
 }
-
 .ver-catalogo { color: var(--neon-green); }
 .agendar-examen { color: var(--neon-cyan); }
 
-.ver-catalogo::before, 
-.agendar-examen::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300%;
-    height: 300%;
-    transform: translate(-50%, -50%);
-    z-index: -2;
-    animation: radar-infinito 3s linear infinite;
+.ver-catalogo::before, .agendar-examen::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%;
+    transform: translate(-50%, -50%); z-index: -2; animation: radar-infinito 3s linear infinite;
 }
-
 .ver-catalogo::before { background: conic-gradient(transparent 50%, var(--neon-green) 100%); }
 .agendar-examen::before { background: conic-gradient(transparent 50%, var(--neon-cyan) 100%); }
 
-.ver-catalogo::after, 
-.agendar-examen::after {
-    content: '';
-    position: absolute;
-    inset: 2px; 
-    border-radius: 48px;
-    background: rgba(2, 16, 43, 0.7); 
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: -1;
+.ver-catalogo::after, .agendar-examen::after {
+    content: ''; position: absolute; inset: 2px; border-radius: 48px;
+    background: rgba(2, 16, 43, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: -1;
 }
 
-/* Modificamos el timing-function on hover para un feedback de interacción más agresivo */
 .ver-catalogo:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(57, 255, 20, 0.4); }
 .agendar-examen:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 240, 255, 0.4); }
 .ver-catalogo:hover::before, .agendar-examen:hover::before { animation: radar-infinito 1s linear infinite; }
 
 
 /*============================================================
-                SECCIÓN DE SERVICIOS (TARJETAS NEÓN)
+                SECCIÓN DE SERVICIOS (TARJETAS NEÓN MAIN)
 ============================================================*/
 .contenedor-tarjetas-neon {
     display: flex;
@@ -264,7 +226,6 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
     flex-wrap: wrap; 
 }
 
-/* Redimensionamos ligeramente el layout base de las tarjetas para escalar mejor en grid en pantallas medianas */
 .tarjeta-neon {
     position: relative;
     width: 300px;
@@ -285,59 +246,26 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 .tarjeta-neon:hover { transform: translateY(-5px); }
 
 .tarjeta-neon::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 150%; 
-    height: 150%;
+    content: ''; position: absolute; top: 50%; left: 50%; width: 150%; height: 150%;
     background: conic-gradient(transparent 70%, var(--color-luz) 100%);
-    transform: translate(-50%, -50%);
-    animation: radar-infinito 3s linear infinite;
-    z-index: -2; 
+    transform: translate(-50%, -50%); animation: radar-infinito 3s linear infinite; z-index: -2; 
 }
-
 .tarjeta-neon::after {
-    content: '';
-    position: absolute;
-    inset: 3px; 
-    border-radius: 14px; 
-    background: rgba(2, 16, 43, 0.7); 
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    z-index: -1; 
+    content: ''; position: absolute; inset: 3px; border-radius: 14px; 
+    background: rgba(2, 16, 43, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: -1; 
 }
 
-.contenido-tarjeta {
-    position: relative;
-    z-index: 1; 
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.contenido-tarjeta img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
+.contenido-tarjeta { position: relative; z-index: 1; width: 100%; height: 100%; display: flex; flex-direction: column; }
+.contenido-tarjeta img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
 .contenido-tarjeta h3 { color: var(--text-white); font-size: 15px; font-weight: 900; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
 .contenido-tarjeta p { color: var(--text-gray); font-size: 13px; margin: 0; line-height: 1.4; }
 
 .tarjeta-verde { --color-luz: var(--neon-green); }
 .tarjeta-verde:hover { box-shadow: 0 0 25px rgba(57, 255, 20, 0.3); }
-
 .tarjeta-cian { --color-luz: var(--neon-cyan); }
 .tarjeta-cian:hover { box-shadow: 0 0 25px rgba(0, 240, 255, 0.3); }
-
 .tarjeta-purpura { --color-luz: var(--neon-purple); }
 .tarjeta-purpura:hover { box-shadow: 0 0 25px rgba(255, 0, 255, 0.3); }
-
 .tarjeta-neon:hover::before { animation: radar-infinito 1.5s linear infinite; background: conic-gradient(transparent 50%, var(--color-luz) 100%); }
 
 
@@ -347,8 +275,10 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 .testimonios-google-section { padding: 50px 40px 80px 40px; max-width: 1250px; margin: 0 auto; }
 .seccion-titulo { background: linear-gradient(to right, #00f0ff 0%, #00f0ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; font-size: 36px; margin-bottom: 40px; }
 .testimonios-google-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+
 .testimonio-google-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 0, 255, 0.3); box-shadow: 0 4px 20px rgba(255, 0, 255, 0.15); display: flex; flex-direction: column; gap: 15px; transition: transform 0.3s ease, border-color 0.3s ease; }
 .testimonio-google-card:hover { transform: translateY(-5px); border-color: var(--neon-purple); }
+
 .card-header { display: flex; align-items: center; gap: 15px; }
 .avatar-placeholder { width: 40px; height: 40px; background-color: #e0e0e0; color: #091d33; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .reviewer-name { font-weight: bold; color: var(--text-white); font-size: 15px; margin: 0; }
@@ -359,229 +289,404 @@ li a:hover { color: var(--neon-green); text-decoration: underline; text-underlin
 
 .footer-zigo { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(5px); padding: 40px 20px; border-top: 1px solid rgba(0, 240, 255, 0.2); }
 .footer-container { display: flex; flex-direction: column; align-items: center; max-width: 1000px; margin: 0 auto; gap: 25px; }
-.redes-sociales { display: flex; justify-content: center; align-items: center; gap: 20px; }
+
+/* Aplicamos flex-wrap para que si los iconos no caben en una línea en el celular, bajen orgánicamente en lugar de cortarse */
+.redes-sociales { display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; }
 .redes-sociales a { display: inline-flex; justify-content: center; align-items: center; color: var(--text-white); font-size: 20px; text-decoration: none; width: 40px; height: 40px; border: 2px solid transparent; border-radius: 50%; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
 .redes-sociales a:hover { color: var(--neon-cyan); border-color: var(--neon-cyan); background-color: rgba(0, 229, 255, 0.05); box-shadow: 0 0 10px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2); transform: scale(1.1); }
+
 .direccion p { font-size: 13px; color: var(--text-gray); margin: 4px 0; text-align: center; }
-.enlaces-legales { list-style: none; display: flex; gap: 25px; padding: 0; margin: 0; }
+.enlaces-legales { list-style: none; display: flex; gap: 25px; padding: 0; margin: 0; flex-wrap: wrap; justify-content: center;}
 .enlaces-legales a { color: var(--text-white); font-size: 13px; text-decoration: none; transition: color 0.3s ease; }
 .enlaces-legales a:hover { color: var(--neon-green); text-decoration: underline; text-underline-offset: 5px; }
-
-
-
-
-/*||||||||||||||||||||||||||||||||||||||||AGENDA|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||*/
-
-
-
 
 
 /*============================================================
                 SECCIÓN AGENDA / CALENDARIO
 ============================================================*/
-.seccion-titulo{
-    background: linear-gradient(to right, var(--neon-green) 10%, var(--neon-cyan) 45%, var(--neon-purple) 65%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.contenedor-agenda-section {
-    padding: 40px 40px 80px 40px;
-    max-width: 1300px;
-    margin: 0 auto;
-
-}
+.contenedor-agenda-section { padding: 40px 40px 80px 40px; max-width: 1300px; margin: 0 auto; }
 
 .agenda-glass-card {
     position: relative;
     background: rgba(2, 16, 43, 0.65);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 20px; padding: 35px;
+    display: grid; grid-template-columns: 350px 1fr; gap: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.1);
+    color: var(--text-white);
+}
+
+.agenda-info-servicio { display: flex; flex-direction: column; gap: 20px; border-right: 1px solid rgba(255, 255, 255, 0.1); padding-right: 25px; }
+.servicio-header { display: flex; align-items: center; gap: 15px; }
+.avatar-optica { width: 50px; height: 50px; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--bg-color-dark); box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+.agenda-info-servicio h2 { font-size: 18px; font-weight: 900; margin: 0 0 5px 0; }
+.especialista { color: var(--text-gray); font-size: 13px; margin: 0; }
+.duracion-cita { color: var(--neon-green); font-weight: 700; font-size: 14px; margin: 0; }
+.descripcion-servicio { color: var(--text-gray); font-size: 14px; line-height: 1.5; margin: 0; }
+
+/* Contenedor dinámico donde inyectaremos las notas o armazones seleccionados */
+.notas-armazones-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 240, 255, 0.1);
+    border-left: 4px solid var(--neon-cyan);
+    border-radius: 4px 8px 8px 4px;
+}
+.notas-armazones-box.oculto { display: none; }
+.notas-armazones-box h3 { font-size: 14px; margin: 0 0 8px 0; color: var(--neon-cyan); }
+.notas-armazones-box p { font-size: 13px; margin: 0; color: var(--text-white); line-height: 1.4;}
+
+
+#inline-container { background-color: #02102b; border-radius: 12px; overflow: hidden; height: 435px; position: relative; }
+#inline-container iframe { filter: invert(1) hue-rotate(180deg) contrast(1.05); mix-blend-mode: lighten; margin-top: -210px; height: 950px !important; width: 100%; border: 0; }
+
+
+/*============================================================
+    MÓDULO: COLECCIÓN DE ARMAZONES Y FILTROS
+============================================================*/
+.seccion-titulo{
+    background: linear-gradient(to right, var(--neon-green) 10%, var(--neon-cyan) 50%, var(--neon-purple) 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.coleccion-section { padding: 60px 20px; max-width: 1300px; margin: 0 auto; }
+
+.filtros-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; flex-wrap: wrap; }
+.btn-filtro { padding: 10px 25px; background-color: transparent; color: var(--text-white); border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-filtro:hover, .btn-filtro.activo { background-color: rgba(255,255,255,0.1); border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+
+.armazon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+
+/* Convertimos el contenedor blanco aburrido en tarjetas de neón interactivas */
+.armazon-card {
+    position: relative;
+    background: rgba(2, 16, 43, 0.6);
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    padding: 25px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+/* Usamos nth-child para asignar los colores cíclicamente a la cuadrícula: 
+   columna 1: verde, columna 2: cian, columna 3: morado. 
+   Así mantenemos la coherencia visual sin añadir clases manuales una por una */
+.armazon-card:nth-child(3n+1) { --color-borde: var(--neon-green); }
+.armazon-card:nth-child(3n+2) { --color-borde: var(--neon-cyan); }
+.armazon-card:nth-child(3n+3) { --color-borde: var(--neon-purple); }
+
+/* Borde brillante del armazón */
+.armazon-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: 16px;
+    padding: 2px; /* Grosor del borde brillante */
+    background: linear-gradient(135deg, transparent 20%, var(--color-borde) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+}
+
+.armazon-card:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--color-borde); }
+
+/* Elementos del Armazón */
+.checkbox-container { font-size: 13px; color: var(--text-gray); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; width: 100%; justify-content: center; }
+.checkbox-container input { display: none; }
+.checkmark { width: 20px; height: 20px; background-color: transparent; border: 1px solid var(--text-gray); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+.checkbox-container input:checked ~ .checkmark { background-color: var(--neon-cyan); border-color: var(--neon-cyan); }
+.checkbox-container input:checked ~ .checkmark::after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #000; font-size: 12px; }
+.texto-checkbox { font-weight: 500; }
+
+.imagen-container { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; width: 100%; margin-bottom: 15px; box-sizing: border-box;}
+.armazon-img { width: 100%; height: 140px; object-fit: contain; }
+
+.armazon-nombre { font-size: 20px; color: var(--text-white); margin: 0 0 5px 0; }
+.armazon-material { font-size: 13px; color: var(--text-gray); margin: 0 0 20px 0; }
+
+.btn-detalles {
+    background: transparent;
+    color: var(--color-borde);
+    border: 1px solid var(--color-borde);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: auto;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-detalles:hover { background: var(--color-borde); color: #000; box-shadow: 0 0 15px var(--color-borde); }
+
+
+/*============================================================
+        MODAL Y PANEL FLOTANTE
+============================================================*/
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(2, 16, 43, 0.85); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background-color: #091d33; border: 1px solid var(--neon-cyan); padding: 30px; border-radius: 12px; max-width: 400px; width: 90%; text-align: center; position: relative; box-shadow: 0 10px 40px rgba(0,240,255,0.2); }
+.modal-cerrar { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--text-white); transition: color 0.3s; }
+.modal-cerrar:hover { color: var(--neon-cyan); }
+.modal-img { width: 100%; height: 170px; object-fit: contain; margin-bottom: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; box-sizing: border-box;}
+.modal-content h2 { color: var(--text-white); font-size: 22px; margin-bottom: 5px; }
+.modal-sub { color: var(--neon-cyan); font-weight: bold; font-size: 13px; margin-bottom: 12px; }
+.modal-desc { color: var(--text-gray); font-size: 13px; line-height: 1.5; }
+
+.panel-agendar-flotante {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    background: rgba(2, 16, 43, 0.95); backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 240, 255, 0.3);
+    color: white;
+    padding: 15px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    /* Aseguramos que la barra flote por encima del footer */
+    z-index: 9999; 
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.panel-agendar-flotante.activo { transform: translateY(0); }
+.btn-agendar-general { background-color: var(--neon-green); color: #000; border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 13px; box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: all 0.3s; }
+.btn-agendar-general:hover { box-shadow: 0 0 20px var(--neon-green); transform: scale(1.05); }
+
+.pop-anim { display: inline-block; animation: pop 0.4s ease-out; }
+@keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.6); color: var(--neon-cyan); } 100% { transform: scale(1); } }
+
+/*============================================================
+                PROBADOR VIRTUAL AR & IA
+============================================================*/
+.probador-ar-section {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.probador-glass-card {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    background: rgba(2, 16, 43, 0.6);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 240, 255, 0.3);
-    border-radius: 20px;
-    padding: 35px;
-    display: grid;
-    grid-template-columns: 350px 1fr;
-    gap: 40px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 240, 255, 0.1);
-    color: var(--text-white);
-    
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.1);
+    isolation: isolate;
 }
 
-.agenda-info-servicio {
+/* Contenedor de la cámara */
+.ar-visor-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background-color: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+    border: 1px solid rgba(57, 255, 20, 0.4);
+}
+
+#webcam-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); /* Efecto espejo fundamental para probadores */
+}
+
+#ar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Para que los clicks pasen a los botones */
+}
+
+/* Interfaz superpuesta (Botón cámara y estado) */
+.ar-hud {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.ar-status {
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--text-white);
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(4px);
+}
+
+.punto-rojo {
+    width: 8px;
+    height: 8px;
+    background-color: #ff0055;
+    border-radius: 50%;
+    animation: parpadeo 1.5s infinite;
+}
+
+.btn-circular {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--text-white);
+    color: var(--text-white);
+    font-size: 24px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    /* Centramos el contenedor dentro del espacio flex */
+    margin: 0 auto; 
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.btn-circular:hover {
+    background: var(--text-white);
+    color: var(--bg-color-dark);
+    box-shadow: 0 0 20px var(--text-white);
+}
+
+/* Panel Lateral IA */
+.ar-panel-lateral {
+    color: var(--text-white);
     display: flex;
     flex-direction: column;
     gap: 20px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    padding-right: 25px;
 }
 
-.servicio-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
+.panel-titulo { font-size: 24px; margin: 0; background: linear-gradient(to right, var(--neon-cyan), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.panel-desc { font-size: 14px; color: var(--text-gray); margin: 0; }
+.w-100 { width: 100%; box-sizing: border-box; text-align: center; justify-content: center; display: flex; align-items: center; gap: 10px; }
 
-.avatar-optica {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--bg-color-dark);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-}
-
-.agenda-info-servicio h2 {
-    font-size: 18px;
-    font-weight: 900;
-    margin: 0 0 5px 0;
-}
-
-.especialista {
-    color: var(--text-gray);
-    font-size: 13px;
-    margin: 0;
-}
-
-.duracion-cita {
-    color: var(--neon-green);
-    font-weight: 700;
-    font-size: 14px;
-    margin: 0;
-}
-
-.descripcion-servicio {
-    color: var(--text-gray);
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-.agenda-iframe-container iframe {
-    width: 100%;
-    height: 500px;
+.resultado-ia {
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
-    /* Filtro opcional para adaptar calendarios blancos nativos al modo oscuro cósmico */
-    background: rgba(2, 16, 43, 0.9);
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fade-in 0.5s ease forwards;
 }
 
-#inline-container {
-    background-color: #02102b;
-    border-radius: 12px;
-    overflow: hidden;
-    height: 435px; /* Muestra las filas del 1 al 30 y oculta la Zona horaria */
-    position: relative;
+.resultado-ia.oculto { display: none; }
+
+.ia-match { color: var(--neon-green); font-weight: bold; margin-bottom: 10px; }
+.ia-match span { color: var(--text-white); font-weight: normal; }
+.resultado-ia p { font-size: 13px; color: var(--text-gray); line-height: 1.5; margin-bottom: 20px; }
+
+.mini-titulo { font-size: 14px; margin: 0 0 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+
+.catalogo-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-modelo-lente {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px;
+    color: var(--text-white);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
+.btn-modelo-lente img { width: 100%; border-radius: 4px; }
+.btn-modelo-lente:hover, .btn-modelo-lente.activo { border-color: var(--neon-cyan); background: rgba(0, 240, 255, 0.1); }
 
-#inline-container iframe {
-    filter: invert(1) hue-rotate(180deg) contrast(1.05);
-    mix-blend-mode: lighten;
-    margin-top: -210px; /* Mantiene oculto el encabezado de Zoho */
-    height: 950px !important; /* Altura suficiente para eliminar la barra de scroll interna */
-    width: 100%;
-    border: 0;
-}
+@keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 
-/* Responsivo para celulares */
-@media (max-width: 992px) {
-    .agenda-glass-card {
-        grid-template-columns: 1fr;
-        padding: 20px;
-    }
-    .agenda-info-servicio {
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-right: 0;
-        padding-bottom: 20px;
-    }
-}
-
-@media (max-width: 768px) {
-    #inline-container {
-    height: 760px; /* Altura suficiente para ver los días del 1 al 30 y los horarios apilados */
-    }
-
-    #inline-container iframe {
-    margin-top: -235px; /* Sube un poco más porque en móvil el título de Zoho ocupa dos líneas */
-    height: 1200px !important; /* Evita que aparezca la barra de desplazamiento interna en celular */
-    }
-}
-
-
-
-/* ============================================================
+/*============================================================
         MEDIA QUERIES (ARQUITECTURA DESKTOP FIRST)
-============================================================ */
+        Todo el responsivo se concentra estrictamente aquí al final.
+============================================================*/
 
-/* 1. Monitores medianos y Laptops (hasta 1200px) 
-   Comenzamos a reducir los márgenes internos para evitar colisiones en la barra superior. */
+/* 1. Laptops y Escritorios Pequeños (hasta 1200px) */
 @media (max-width: 1200px) {
     .contenedor-menu { padding: 15px 20px; }
     nav ul { gap: 15px; }
 }
 
-/* 2. Tablets (hasta 992px)
-    Modificamos la flex-direction del contenedor principal a columna. 
-   Es crítico remover la limitación white-space: nowrap del menú de navegación para prevenir desbordes horizontales. */
+/* 2. Tablets Horizontales (hasta 992px) */
 @media (max-width: 992px) {
-    .contenedor-menu { 
-        flex-direction: column; 
-        gap: 20px; 
-        padding: 25px 20px; 
-        border-radius: 20px; 
-    }
-    .contenedor-menu::after { border-radius: 17px; } /* Ajustamos el inset radius proporcionalmente al contendor */
-    
-    nav ul { 
-        justify-content: center; 
-        flex-wrap: wrap; 
-        white-space: normal; /* FUNDAMENTAL: Habilita el text-wrapping dinámico para evitar cortes. */
-        gap: 20px;
-    }
-    
-    .botones-menu { justify-content: center; width: 100%; flex-wrap: wrap;}
+    /* Header */
+    .contenedor-menu { flex-direction: column; gap: 20px; padding: 25px 20px; border-radius: 20px; }
+    .contenedor-menu::after { border-radius: 17px; } 
+    nav ul { justify-content: center; flex-wrap: wrap; white-space: normal; gap: 20px; }
+    .botones-menu { justify-content: center; width: 100%; flex-wrap: wrap; }
 
-    /* Invertimos el hero-section para priorizar el contenido textual sobre la gráfica */
+    /* Hero */
     .contenedor-main { flex-direction: column-reverse; text-align: center; gap: 30px; margin-top: 20px; padding: 0 20px; }
     .hero-texto { max-width: 100%; }
     .contenedor-main p:nth-of-type(1), .contenedor-main p:nth-of-type(2) { text-align: center; margin-left: auto; margin-right: auto; }
-    
     .grupo-botones-hero { justify-content: center; }
     .contenedor-main img { max-width: 450px; }
 
-    /* Forzamos el wrapping de testimonios a dos columnas (grid) */
+    /* Testimonios y Armazones */
     .testimonios-google-grid { grid-template-columns: repeat(2, 1fr); }
+    .armazon-grid { grid-template-columns: repeat(2, 1fr); }
+
+    /* Agenda */
+    .agenda-glass-card { grid-template-columns: 1fr; padding: 20px; }
+    .agenda-info-servicio { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-right: 0; padding-bottom: 20px; }
 }
 
-/* 3. Dispositivos Móviles (hasta 576px)
-   Maximizamos la legibilidad colapsando todos los flex items a 100% de width (width: 100%). */
+/* Responsivo del Probador */
+@media (max-width: 900px) {
+    .probador-glass-card { grid-template-columns: 1fr; }
+    .ar-visor-container { aspect-ratio: 3/4; /* Más alto para celulares */ }
+}
+
+/* 3. Tablets Verticales (hasta 768px) */
+@media (max-width: 768px) {
+    /* Ajuste específico para el iframe de Zoho en pantallas estrechas */
+    #inline-container { height: 760px; }
+    #inline-container iframe { margin-top: -235px; height: 1200px !important; }
+}
+
+/* 4. Dispositivos Móviles (hasta 576px) */
 @media (max-width: 576px) {
+    /* Header Full Width */
     .contenedor-menu { width: 100%; border-radius: 0; margin: 0; padding: 20px 10px; }
     .contenedor-menu::after { border-radius: 0; }
+    nav ul { flex-direction: column; align-items: center; gap: 15px; width: 100%; }
     
-    /* Apilamos los enlaces verticalmente para evitar miss-clicks en móviles (mejora de UI/UX) */
-    nav ul {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-        width: 100%;
-    }
-
     .contenedor-main .titulo-main { font-size: 28px; }
     .botones-menu { flex-direction: column; width: 100%; gap: 15px; }
-    
     .grupo-botones-hero { flex-direction: column; align-items: center; width: 100%; }
-    
-    /* Los CTA primarios heredan ancho total para rellenar la pantalla (thumb zone compliance) */
     .ver-catalogo, .agendar-examen { width: 100%; max-width: 100%; }
 
-    /* Degradación de columnas a listas de un solo bloque (1fr) */
+    /* Forzar diseño de 1 columna */
     .testimonios-google-grid { grid-template-columns: 1fr; }
+    .armazon-grid { grid-template-columns: 1fr; }
     
     .enlaces-legales { flex-direction: column; text-align: center; gap: 15px; }
+
+    /* Adaptar el panel flotante para que no aplaste el contenido en el celular */
+    .panel-agendar-flotante {
+        flex-direction: column;
+        gap: 10px;
+        padding-bottom: 20px; /* Margen de seguridad para pantallas con barra de gestos inferior */
+    }
 }

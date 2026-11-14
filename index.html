@@ -1,22 +1,51 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
-    <!-- Configuramos el viewport para garantizar un renderizado uno a uno en dispositivos móviles y habilitar media queries -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ziGO - Ciencia y Arte en tu Mirada</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>ziGO | Optometría, Lentes Oftálmicos y Recomendación Visual en CDMX</title>
     <link rel="icon" href="./img/mascota_logo2.ico">
-    <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX. Lleva tu mirada al siguiente nivel con nuestro probador virtual.">
+    <meta name="description" content="En ziGO combinamos ciencia y arte en tu mirada. Exámenes de la vista profesionales con la Dra. Escarlet Alcocer, armazones exclusivos y probador virtual con Inteligencia Artificial en CDMX.">
+    <meta name="keywords" content="óptica CDMX, examen de la vista, lentes oftálmicos, armazones, probador virtual lentes, Dra Escarlet Alcocer, ziGO óptica">
+    <meta name="author" content="ziGO - Soluciones en Movimiento">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="ziGO | Ciencia y Arte en tu Mirada">
+    <meta property="og:description" content="Descubre tu armazón ideal con nuestra Recomendación IA y agenda tu examen de la vista profesional en CDMX.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="./img/hero.webp">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Optician",
+      "name": "ziGO - Soluciones en Movimiento",
+      "description": "Servicios profesionales de optometría, exámenes de la vista y selección personalizada de armazones en Ciudad de México.",
+      "image": "./img/logo.png",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Ciudad de México",
+        "addressRegion": "CDMX",
+        "addressCountry": "MX"
+      },
+      "employee": {
+        "@type": "Person",
+        "name": "Dra. Escarlet Alcocer",
+        "jobTitle": "Optometrista Especialista"
+      }
+    }
+    </script>
+
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <!-- Vinculamos las hojas de estilo asegurando un control de caché mediante el versionado del archivo -->
-    <link rel="stylesheet" href="./css/styles.css?v=2.2">
+    <link rel="stylesheet" href="./css/styles.css?v=4.0">
     <link rel="stylesheet" href="./css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Vinculamos el codigo java script-->
-    <script src="./js/script.js" defer></script>
+    <script src="./js/script.js?v=4.0" defer></script>
 </head>
 <body>
-    <!-- Estructuramos el header como un componente aislado para manejar su propio contexto de apilamiento (z-index) y albergar el efecto glassmorphism -->
+    <div class="cielo-estrellado" aria-hidden="true"></div>
+
+    <!-- Header Principal -->
     <header class="contenedor-menu">
         <div class="logo">
             <a href="./index.html"> 
@@ -24,82 +53,85 @@
             </a>
         </div>
         <nav aria-label="Menú principal">
-            <!-- La lista de navegación se controla mediante Flexbox para distribuir espacios de manera equitativa -->
             <ul>
-                <li><a href="./index.html">Inicio</a></li>
-                <li><a href="#">Lentes de contacto</a></li>
-                <li><a href="#">Pupilentes</a></li>
-                <li><a href="#">Promociones</a></li>
+                <li><a href="./index.html" class="enlace-activo">Inicio</a></li>
+                <li><a href="./pages/armazones.html">Armazones</a></li>
+                <li><a href="./pages/probador.html">Recomendación IA</a></li>
+                <li><a href="./pages/experiencias.html">Experiencias</a></li>
+                <li><a href="./pages/nosotros.html">Nosotros</a></li>
             </ul>
         </nav>
         <div class="botones-menu">
-            <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
+            <form class="form-buscador" role="search" onsubmit="return false;">
+                <input type="search" id="input-buscador-global" placeholder="Buscar..." class="buscador" aria-label="Buscar en ziGO">
+                <button type="button" id="btn-lupa-buscador" class="btn-lupa-invisible" aria-label="Ejecutar búsqueda"></button>
+            </form>
             <a href="./pages/agenda.html" class="boton-agenda">Agendar cita</a>
         </div>
     </header>
 
-    <main>
-        <!-- El Hero Section se divide en dos bloques fluidos para facilitar el apilamiento vertical en móviles -->
+    <main id="contenido-principal">
+        <!-- Hero Section -->
         <section class="contenedor-main" aria-label="Introducción"> 
             <div class="hero-texto">
-                <h1><span class="titulo-main">¡En <span style="text-transform: none;">ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
-                <p>CIENCIA Y ARTE EN TU MIRADA.</p>
-                <p>Explora lentes de contacto, pupilentes de color y exámenes de vista con la tecnología y el estilo más fresco del universo.</p>
+                <h1><span class="titulo-main">¡En <span class="marca-normal">ziGO</span> llevamos tu mirada al siguiente nivel!</span> 🚀</h1>
+                <p class="subtitulo-hero">CIENCIA Y ARTE EN TU MIRADA.</p>
+                <p class="descripcion-hero">Explora armazones de diseño, lentes de contacto y exámenes visuales con tecnología de diagnóstico de precisión y atención personalizada.</p>
                 <div class="grupo-botones-hero">
-                    <a href=".//pages/armazones.html"  class="ver-catalogo">Ver catálogo</a> 
-                    <a href="./pages/probador.html" class="agendar-examen">Probador virtual</a>
+                    <a href="./pages/armazones.html" class="ver-catalogo">Ver catálogo</a> 
+                    <a href="./pages/probador.html" class="agendar-examen">Tu Lente Ideal IA</a>
                 </div>
             </div>
             <div class="hero-imagen">
-                <img src="./img/hero.webp" alt="Modelos luciendo lentes de diseño ziGO" width="1024" height="572">
+                <img src="./img/hero.webp" alt="Modelos y mascota cósmica luciendo lentes ziGO" width="1024" height="572">
             </div>
         </section>
 
-        <!-- Módulo de tarjetas renderizado con Flexbox wrap para que el layout fluya automáticamente según la resolución de la pantalla -->
-        <section class="contenedor-tarjetas-neon">
+        <!-- Etiquetas Informativas de Pilares de Servicio -->
+        <section class="contenedor-tarjetas-neon" aria-label="Pilares de servicio ziGO">
             <article class="tarjeta-neon tarjeta-verde">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton1.webp" alt="Examen de la vista" loading="lazy" width="1024" height="572">
+                    <img src="./img/boton1.webp" alt="Examen de la vista profesional" loading="lazy" width="1024" height="572">
                     <h3>Examen de la vista</h3>
-                    <p>Tecnología espacial para tus ojos</p>
+                    <p>Tecnología diagnóstica precisa para cuidar tu salud visual</p>
                 </div>
             </article>
 
             <article class="tarjeta-neon tarjeta-cian">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton2.webp" alt="Pupilentes y color" loading="lazy" width="1024" height="572">
+                    <img src="./img/boton2.webp" alt="Pupilentes y lentes de contacto" loading="lazy" width="1024" height="572">
                     <h3>Pupilentes y color</h3>
-                    <p>Atrévete a cambiar tu universo visual</p>
+                    <p>Atrévete a transformar tu estilo y expresión visual</p>
                 </div>
             </article>
 
             <article class="tarjeta-neon tarjeta-purpura">
                 <div class="contenido-tarjeta">
-                    <img src="./img/boton3.webp" alt="Envíos cósmicos" loading="lazy" width="1024" height="572">
-                    <h3>Envíos cósmicos</h3>
-                    <p>Rápidos y seguros hasta tu órbita</p>
+                    <img src="./img/boton3.webp" alt="Rapidez con calidad óptica" loading="lazy" width="1024" height="572">
+                    <h3>Rapidez con calidad</h3>
+                    <p>Atención ágil, puntual y con acabados de alto nivel</p>
                 </div>
             </article>
         </section>
 
-        <!-- Utilizamos CSS Grid para la sección de testimonios, lo que permite un control bidimensional preciso de las tarjetas -->
-        <section class="testimonios-google-section">
-            <h2 class="seccion-titulo">Lo que dicen nuestros clientes</h2>
-            <div class="testimonios-google-grid">
-                
+        <!-- Sección de Testimonios Verificados 5 Estrellas -->
+        <section class="testimonios-google-section" aria-label="Reseñas de clientes">
+            <h2 class="seccion-titulo">Lo que dicen nuestros pacientes</h2>
+            <p class="subtitulo-seccion">Experiencias reales</p>
+            <div id="grid-testimonios-dinamicos" class="testimonios-google-grid">
                 <article class="testimonio-google-card"> 
                     <div class="card-header">
                         <div class="avatar-placeholder" aria-hidden="true">M</div> 
                         <div class="reviewer-info">
                             <p class="reviewer-name">Miguel Rocha</p>
-                            <p class="review-date">Mayo 2024</p>
+                            <p class="review-date">Reseña Verificada</p>
                         </div>
-                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                        <img src="./img/google-logo.webp" alt="Google" class="google-icon-small" loading="lazy">
                     </div>
                     <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
                         <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
                     </div>
-                    <blockquote class="review-text">"Excelente servicio a domicilio. Me encantó la variedad de armazones que tienen. Mis lentes quedaron perfectos."</blockquote> 
+                    <blockquote class="review-text">"Excelente atención profesional. Me encantó la variedad de armazones y el cuidado en cada medición. Mis lentes quedaron perfectos."</blockquote> 
                 </article>
 
                 <article class="testimonio-google-card">
@@ -107,14 +139,14 @@
                         <div class="avatar-placeholder" aria-hidden="true">J</div>
                         <div class="reviewer-info">
                             <p class="reviewer-name">Julio César B.</p>
-                            <p class="review-date">Junio 2024</p>
+                            <p class="review-date">Reseña Verificada</p>
                         </div>
-                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                        <img src="./img/google-logo.webp" alt="Google" class="google-icon-small" loading="lazy">
                     </div>
                     <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
                         <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
                     </div>
-                    <blockquote class="review-text">"¡La atención al cliente es increíble! Todo el proceso fue muy cómodo y a un precio bastante accesible. ¡Súper recomendado!"</blockquote>
+                    <blockquote class="review-text">"¡La atención al paciente es increíble! Todo el proceso fue muy cómodo, claro y con un trato humano excepcional. ¡Súper recomendado!"</blockquote>
                 </article>
 
                 <article class="testimonio-google-card">
@@ -122,45 +154,47 @@
                         <div class="avatar-placeholder" aria-hidden="true">A</div>
                         <div class="reviewer-info">
                             <p class="reviewer-name">Arantza L.</p>
-                            <p class="review-date">Marzo 2024</p>
+                            <p class="review-date">Reseña Verificada</p>
                         </div>
-                        <img src="img/google-logo.webp" alt="Reseña de Google" class="google-icon-small" loading="lazy">
+                        <img src="./img/google-logo.webp" alt="Google" class="google-icon-small" loading="lazy">
                     </div>
                     <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
                         <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star" aria-hidden="true"></i>
                     </div>
-                    <blockquote class="review-text">"La doctora Escarlet es una excelente especialista. Me explicó todo a detalle y el proceso de selección fue muy profesional."</blockquote>
+                    <blockquote class="review-text">"La doctora Escarlet es una excelente especialista. Me explicó cada detalle de mi diagnóstico y el proceso de selección fue muy profesional."</blockquote>
                 </article>
             </div>
         </section>
-        </main>
-        <!-- El footer mantiene una estructura de flex-column para centralizar la información legal y redes -->
-        <footer class="footer-zigo">
-            <div class="footer-container">
-                <div class="redes-sociales">
-                    <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
-                    <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-                    <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
-                    <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
-                    <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-                    <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
-                    <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
-                </div>
-                <div class="direccion">
-                    <address>
-                        <p>Av. Principal 123, Local 4</p>
-                        <p>Ciudad de México, CP 01234</p>
-                    </address>
-                </div>
-                <nav aria-label="Enlaces legales">
-                    <ul class="enlaces-legales">
-                        <li><a href="index.html">Inicio</a></li>
-                        <li><a href="#">Productos</a></li>
-                        <li><a href="#">Legal</a></li>
-                        <li><a href="#">Contacto</a></li>
-                    </ul>
-                </nav>
+    </main>
+
+    <!-- Footer Unificado -->
+    <footer class="footer-zigo">
+        <div class="footer-container">
+            <div class="redes-sociales">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Facebook de ziGO"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Instagram de ziGO"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Threads de ziGO"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar X de ziGO"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar TikTok de ziGO"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" aria-label="Visitar Telegram de ziGO"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
             </div>
-        </footer>
-</boxdy>
-</htxml>
+            <nav aria-label="Navegación inferior">
+                <ul class="enlaces-legales">
+                    <li><a href="./index.html">Inicio</a></li>
+                    <li><a href="./pages/armazones.html">Armazones</a></li>
+                    <li><a href="./pages/probador.html">Recomendación IA</a></li>
+                    <li><a href="./pages/experiencias.html">Experiencias</a></li>
+                    <li><a href="./pages/nosotros.html">Nosotros</a></li>
+                    <li><a href="./pages/agenda.html">Agendar cita</a></li>
+                    <li><a href="./pages/legal.html">Legal y Privacidad</a></li>
+                </ul>
+            </nav>
+            <div class="direccion">
+                <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
+                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

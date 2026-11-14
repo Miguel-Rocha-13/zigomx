@@ -1,18 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ziGO - Agendar cita</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>ziGO | Agendar Examen de la Vista con la Dra. Escarlet Alcocer</title>
     <link rel="icon" href="../img/mascota_logo2.ico">
-    <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX.">
+    <meta name="description" content="Agenda tu examen de la vista profesional en ziGO con la Dra. Escarlet Alcocer. Elige modalidad, selecciona tus armazones y comparte tu ubicación GPS de forma segura.">
+    <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <!-- Actualización en ruteo de CSS -->
-    <link rel="stylesheet" href="../css/styles.css?v=2.3">
-    <script src="../js/script.js" defer></script>
+    <link rel="stylesheet" href="../css/styles.css?v=4.0">
+    <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+    <script src="https://bookings.nimbuspop.com/assets/embed.js" defer></script>
+    <script src="../js/script.js?v=4.0" defer></script>
 </head>
 <body>
+    <div class="cielo-estrellado" aria-hidden="true"></div>
+
     <header class="contenedor-menu">
         <div class="logo">
             <a href="../index.html"> 
@@ -22,40 +28,87 @@
         <nav aria-label="Menú principal">
             <ul>
                 <li><a href="../index.html">Inicio</a></li>
-                <li><a href="./armazones.html">Lentes oftalmicos</a></li>
-                <li><a href="#">Pupilentes</a></li>
-                <li><a href="#">Promociones</a></li>
+                <li><a href="./armazones.html">Armazones</a></li>
+                <li><a href="./probador.html">Recomendación IA</a></li>
+                <li><a href="./experiencias.html">Experiencias</a></li>
+                <li><a href="./nosotros.html">Nosotros</a></li>
             </ul>
         </nav>
         <div class="botones-menu">
-            <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
+            <form class="form-buscador" role="search" onsubmit="return false;">
+                <input type="search" id="input-buscador-global" placeholder="Buscar..." class="buscador" aria-label="Buscar en ziGO">
+                <button type="button" id="btn-lupa-buscador" class="btn-lupa-invisible" aria-label="Ejecutar búsqueda"></button>
+            </form>
             <a href="./agenda.html" class="boton-agenda">Agendar cita</a>
         </div>
     </header>
 
-    <main>
+    <main id="contenido-principal">
         <section class="contenedor-agenda-section">
             <h1 class="seccion-titulo">Agenda tu Examen de la Vista</h1>
             
+            <div class="accesos-previos-agenda">
+                <a href="./armazones.html" class="btn-detalles">
+                    <i class="fas fa-glasses" aria-hidden="true"></i> Elegir armazones del catálogo
+                </a>
+                <a href="./probador.html" class="btn-probar-ar">
+                    <i class="fas fa-magic" aria-hidden="true"></i> Descubre qué lentes te quedan con IA
+                </a>
+            </div>
+
             <div class="agenda-glass-card">
-                <!-- Columna de Detalle del Servicio -->
+                <!-- Columna de Configuración de Cita, Ubicación y Resumen Automático -->
                 <div class="agenda-info-servicio">
                     <div class="servicio-header">
-                        <div class="avatar-optica"><i class="fas fa-eye"></i></div>
+                        <div class="avatar-optica"><i class="fas fa-eye" aria-hidden="true"></i></div>
                         <div>
-                            <h2>Examen de la Vista / Cita Óptica ziGO</h2>
+                            <h2>Examen de la Vista · ziGO</h2>
                             <p class="especialista">Especialista: Dra. Escarlet Alcocer</p>
                         </div>
                     </div>
-                    <p class="duracion-cita"><i class="far fa-clock"></i> Duración estimada: 2 horas 30 mins</p>
-                    <p class="descripcion-servicio">Tecnología espacial y diagnósticos precisos directamente hasta la comodidad de tu órbita o domicilio.</p>
+                    <p class="duracion-cita"><i class="far fa-clock" aria-hidden="true"></i> Duración estimada: 2 horas 30 mins</p>
+
+                    <!-- Selector de Modalidad de Atención -->
+                    <div class="bloque-config-cita">
+                        <h3>1. Modalidad de Atención</h3>
+                        <div class="opciones-modalidad">
+                            <label class="opcion-radio-card">
+                                <input type="radio" name="modalidad-cita" value="En Consultorio / Punto de Atención (Lunes a Viernes)" checked>
+                                <span><i class="fas fa-clinic-medical" aria-hidden="true"></i> En Sitio / Consultorio (Entre semana)</span>
+                            </label>
+                            <label class="opcion-radio-card">
+                                <input type="radio" name="modalidad-cita" value="Visita a Domicilio del Paciente (Fines de Semana)">
+                                <span><i class="fas fa-home" aria-hidden="true"></i> A Domicilio (Fines de semana)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Selector Interactivo de Ubicación GPS Real -->
+                    <div class="bloque-config-cita">
+                        <h3>2. Ubicación Exacta (Opcional para Domicilio)</h3>
+                        <p class="notas-ayuda">Usamos la señal GPS real de tu dispositivo (sin estimaciones por IP) únicamente para generar el pin de Google Maps en tu cita.</p>
+                        
+                        <div class="controles-mapa-agenda">
+                            <button type="button" id="btn-mi-ubicacion" class="btn-copiar-notas">
+                                <i class="fas fa-location-crosshairs" aria-hidden="true"></i> Compartir mi ubicación GPS actual
+                            </button>
+                            <div class="buscador-direccion-row">
+                                <input type="text" id="input-buscar-direccion" placeholder="Escribe calle, colonia o alcaldía..." class="input-direccion-agenda" aria-label="Buscar dirección en el mapa">
+                                <button type="button" id="btn-buscar-direccion" class="btn-copiar-notas" aria-label="Buscar en mapa">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="mapa-ubicacion-agenda" class="mapa-agenda-box" aria-label="Mapa interactivo para seleccionar ubicación"></div>
+                        <p id="texto-coordenadas-elegidas" class="coordenadas-status">Haz clic en el mapa o presiona "Compartir mi ubicación GPS actual".</p>
+                    </div>
                     
-                    <!-- NUEVO: Contenedor Dinámico para los Armazones Seleccionados (Manipulado por JS) -->
-                    <div id="notas-armazones-box" class="notas-armazones-box oculto">
-                        <h3>Modelos de Interés Seleccionados:</h3>
-                        <!-- La lista se inyectará aquí desde script.js -->
-                        <ul id="lista-armazones-interes" style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--text-white); display: flex; flex-direction: column; gap: 5px;">
-                        </ul>
+                    <!-- Resumen Sincronizado Automáticamente con el Calendario -->
+                    <div id="notas-armazones-box" class="notas-armazones-box">
+                        <h3><i class="fas fa-check-circle" style="color: var(--neon-green);" aria-hidden="true"></i> Datos vinculados automáticamente a tu cita:</h3>
+                        <div id="resumen-datos-cita" class="resumen-texto-cita"></div>
+                        <p class="notas-ayuda">Tus preferencias se envían automáticamente al calendario de la derecha. Solo elige día, hora y confirma tus datos de contacto.</p>
                     </div>
                 </div>
 
@@ -63,17 +116,6 @@
                 <div class="agenda-iframe-container">
                     <div id="inline-container"></div>
                 </div>
-
-                <script src="https://bookings.nimbuspop.com/assets/embed.js"></script>
-                <script>
-                    window.addEventListener("load", function() {
-                        Bookings.inlineEmbed({
-                            url: "https://zigo1.zohobookings.com/portal-embed#/5013970000000035045",
-                            parent: "#inline-container",
-                            height: "750px"
-                        });
-                    });
-                </script>
             </div>
         </section>
     </main>
@@ -82,28 +124,29 @@
     <footer class="footer-zigo">
         <div class="footer-container">
             <div class="redes-sociales">
-                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter"></i></a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok"></i></a>
-                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram"></i></a>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Facebook de ziGO"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Instagram de ziGO"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Threads de ziGO"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar X de ziGO"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar TikTok de ziGO"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" aria-label="Visitar Telegram de ziGO"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
             </div>
-            <div class="direccion">
-                <address>
-                    <p>Av. Principal 123, Local 4</p>
-                    <p>Ciudad de México, CP 01234</p>
-                </address>
-            </div>
-            <nav aria-label="Enlaces legales">
+            <nav aria-label="Navegación inferior">
                 <ul class="enlaces-legales">
                     <li><a href="../index.html">Inicio</a></li>
-                    <li><a href="#">Productos</a></li>
-                    <li><a href="#">Legal</a></li>
-                    <li><a href="#">Contacto</a></li>
+                    <li><a href="./armazones.html">Armazones</a></li>
+                    <li><a href="./probador.html">Recomendación IA</a></li>
+                    <li><a href="./experiencias.html">Experiencias</a></li>
+                    <li><a href="./nosotros.html">Nosotros</a></li>
+                    <li><a href="./agenda.html">Agendar cita</a></li>
+                    <li><a href="./legal.html">Legal y Privacidad</a></li>
                 </ul>
             </nav>
+            <div class="direccion">
+                <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
+                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 </body>

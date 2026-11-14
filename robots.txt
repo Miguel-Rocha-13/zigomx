@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zigomx.com/sitemap.xml

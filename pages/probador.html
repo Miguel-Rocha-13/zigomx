@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
-    <!-- Configuramos el viewport para garantizar un renderizado uno a uno en dispositivos móviles y habilitar media queries -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ziGO - Ciencia y Arte en tu Mirada</title>
-    <link rel="icon" href="./img/mascota_logo2.ico">
-    <meta name="description" content="En ziGO ofrecemos lentes de contacto, pupilentes y exámenes de la vista a domicilio en CDMX. Lleva tu mirada al siguiente nivel con nuestro probador virtual.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>ziGO | Recomendación IA - Descubre tu Armazón Ideal</title>
+    <link rel="icon" href="../img/mascota_logo2.ico">
+    <meta name="description" content="Analiza la geometría de tu rostro con Inteligencia Artificial en tiempo real o sube tu foto para recibir recomendaciones personalizadas de armazones ziGO.">
+    <meta name="robots" content="index, follow">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <!-- Vinculamos las hojas de estilo asegurando un control de caché mediante el versionado del archivo -->
-    <link rel="stylesheet" href="../css/styles.css?v=2.2">
+    <link rel="stylesheet" href="../css/styles.css?v=4.0">
     <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Vinculamos el codigo java script-->
-    <script src="../js/script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+<script src="../js/script.js"></script>
 </head>
 <body>
-    <!-- Estructuramos el header como un componente aislado para manejar su propio contexto de apilamiento (z-index) y albergar el efecto glassmorphism -->
+    <div class="cielo-estrellado" aria-hidden="true"></div>
+
     <header class="contenedor-menu">
         <div class="logo">
             <a href="../index.html"> 
@@ -24,103 +24,179 @@
             </a>
         </div>
         <nav aria-label="Menú principal">
-            <!-- La lista de navegación se controla mediante Flexbox para distribuir espacios de manera equitativa -->
             <ul>
                 <li><a href="../index.html">Inicio</a></li>
-                <li><a href="#">Lentes de contacto</a></li>
-                <li><a href="#">Pupilentes</a></li>
-                <li><a href="#">Promociones</a></li>
+                <li><a href="./armazones.html">Armazones</a></li>
+                <li><a href="./probador.html" class="enlace-activo">Recomendación IA</a></li>
+                <li><a href="./experiencias.html">Experiencias</a></li>
+                <li><a href="./nosotros.html">Nosotros</a></li>
             </ul>
         </nav>
         <div class="botones-menu">
-            <input type="search" placeholder="Buscador" class="buscador" aria-label="Buscar en el sitio web">
-            <a href="./pages/agenda.html" class="boton-agenda">Agendar cita</a>
+            <form class="form-buscador" role="search" onsubmit="return false;">
+                <input type="search" id="input-buscador-global" placeholder="Buscar..." class="buscador" aria-label="Buscar en ziGO">
+                <button type="button" id="btn-lupa-buscador" class="btn-lupa-invisible" aria-label="Ejecutar búsqueda"></button>
+            </form>
+            <a href="./agenda.html" class="boton-agenda">Agendar cita</a>
         </div>
     </header>
 
-    <main>
-        <!-- Módulo de Probador Virtual AR -->
-    <section class="probador-ar-section">
-        <div class="probador-glass-card">
-            
-            <!-- Área de la Cámara y Realidad Aumentada -->
-            <div class="ar-visor-container">
-                <!-- El video muestra la cámara del usuario -->
-                <video id="webcam-feed" autoplay playsinline></video>
-                
-                <!-- El canvas es donde la librería 3D dibujará los lentes sobre el rostro -->
-                <canvas id="ar-overlay"></canvas>
-                
-                <!-- Interfaz superpuesta (HUD) -->
-                <div class="ar-hud">
-                    <div class="ar-status">
-                        <span class="punto-rojo"></span> Cámara activa
-                    </div>
-                    <!-- Botón de captura de pantalla que solicitaste -->
-                    <button id="btn-captura" class="btn-circular" aria-label="Tomar foto" title="Tomar captura">
-                        <i class="fas fa-camera"></i>
-                    </button>
+    <main id="contenido-principal">
+        <section class="probador-ar-section">
+            <h1 class="seccion-titulo">Recomendación IA · Tu Lente Ideal Según tu Rostro</h1>
+            <p class="subtitulo-seccion">Analizamos tus proporciones faciales en vivo o desde una foto de tu rostro para sugerirte y probarte los armazones ideales</p>
+
+            <!-- Instrucciones y Aviso de Ciberseguridad -->
+            <div class="banner-seguridad-ia">
+                <div>
+                    <strong><i class="fas fa-info-circle" style="color: var(--neon-cyan);" aria-hidden="true"></i> Instrucciones:</strong>
+                    <span>1. Enciende tu cámara o sube una foto clara de tu rostro · 2. Ajusta la luz si lo necesitas · 3. Presiona "Analizar mi Rostro" o elige cualquier modelo del catálogo.</span>
+                </div>
+                <div>
+                    <strong><i class="fas fa-lock" style="color: var(--neon-green);" aria-hidden="true"></i> Privacidad Garantizada:</strong>
+                    <span>Procesamiento 100% local en tu navegador. No almacenamos fotos ni datos biométricos, y bloqueamos imágenes que no correspondan a un rostro humano.</span>
                 </div>
             </div>
 
-            <!-- Panel Lateral: Recomendación IA y Catálogo -->
-            <div class="ar-panel-lateral">
-                <h2 class="panel-titulo">Asistente IA ziGO</h2>
-                <p class="panel-desc">Escanea tu rostro para recibir recomendaciones personalizadas.</p>
-                
-                <button id="btn-escanear-ia" class="boton-agenda w-100">
-                    <i class="fas fa-magic"></i> Analizar Rostro
-                </button>
+            <div class="probador-glass-card">
+                <!-- Columna Izquierda: Visor + Controles de Luz y Foto -->
+                <div class="ar-columna-visor">
+                    <div class="ar-visor-container">
+                        <video id="webcam-feed" autoplay playsinline muted></video>
+                        <img id="foto-rostro-preview" class="foto-rostro-preview oculto" alt="Foto de rostro subida para prueba">
+                        <canvas id="ar-overlay"></canvas>
+                        
+                        <div class="ar-hud">
+                            <div class="ar-status">
+                                <span id="ar-status-dot" class="punto-estado"></span>
+                                <span id="ar-status-texto">Cámara apagada</span>
+                            </div>
+                            
+                            <button type="button" id="btn-captura" class="btn-circular" aria-label="Capturar foto en dispositivo" title="Tomar captura">
+                                <i class="fas fa-camera" aria-hidden="true"></i>
+                            </button>
 
-                <!-- Resultados de la IA (Ocultos por defecto) -->
-                <div id="resultado-ia" class="resultado-ia oculto">
-                    <div class="ia-match">
-                        <i class="fas fa-check-circle"></i> Rostro Detectado: <span>Ovalado</span>
+                            <button type="button" id="btn-activar-camara" class="btn-activar-camara">
+                                <i class="fas fa-video" aria-hidden="true"></i> Encender cámara
+                            </button>
+                        </div>
                     </div>
-                    <p><strong>Recomendación:</strong> Te favorecen los armazones rectangulares o geométricos para contrastar las curvas naturales de tu rostro.</p>
+
+                    <!-- Barra de Subir Foto + Controles de Brillo, Contraste y Ajuste -->
+                    <div class="controles-visor-extra">
+                        <div class="fila-botones-foto">
+                            <label for="input-subir-foto-ia" class="btn-activar-camara" style="cursor:pointer;">
+                                <i class="fas fa-upload" aria-hidden="true"></i> Subir foto de mi rostro
+                            </label>
+                            <input type="file" id="input-subir-foto-ia" accept="image/jpeg,image/png,image/webp" class="oculto">
+
+                            <button type="button" id="btn-volver-camara-ia" class="btn-detalles oculto" style="padding: 8px 14px; flex: 0 1 auto;">
+                                <i class="fas fa-video" aria-hidden="true"></i> Volver a cámara en vivo
+                            </button>
+                        </div>
+
+                        <div class="ar-controles-ajuste" style="margin-top: 12px; margin-bottom: 0;">
+                            <label>
+                                <i class="fas fa-sun" style="color: var(--neon-cyan);"></i> Brillo de cámara: <span id="val-brillo-ia">100%</span>
+                                <input type="range" id="ia-brillo" min="60" max="170" step="5" value="100">
+                            </label>
+                            <label>
+                                <i class="fas fa-adjust" style="color: var(--neon-cyan);"></i> Contraste: <span id="val-contraste-ia">100%</span>
+                                <input type="range" id="ia-contraste" min="70" max="150" step="5" value="100">
+                            </label>
+                            <label>
+                                Ajuste tamaño del lente
+                                <input type="range" id="ia-ar-escala" min="0.7" max="1.4" step="0.05" value="1">
+                            </label>
+                            <label>
+                                Altura en puente nasal
+                                <input type="range" id="ia-ar-posicion-y" min="-30" max="30" step="1" value="0">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Lateral de Diagnóstico IA y Catálogo Interactivo -->
+                <div class="ar-panel-lateral">
+                    <h2 class="panel-titulo">Diagnóstico Inteligente ziGO</h2>
+                    <p class="panel-desc">Detectamos la proporción entre frente, pómulos y mandíbula para probar automáticamente el modelo principal sobre tu rostro.</p>
                     
-                    <h3 class="mini-titulo">Modelos Recomendados</h3>
-                    <div class="catalogo-mini">
-                        <button class="btn-modelo-lente" data-modelo="modelo1">
-                            <img src="./img/lente1.png" alt="Armazón 1">
-                            <span>Neo-Square</span>
-                        </button>
-                        <button class="btn-modelo-lente" data-modelo="modelo2">
-                            <img src="./img/lente2.png" alt="Armazón 2">
-                            <span>Cyber-Retro</span>
-                        </button>
+                    <button type="button" id="btn-escanear-ia" class="boton-agenda w-100">
+                        <i class="fas fa-magic" aria-hidden="true"></i> Analizar mi Rostro
+                    </button>
+
+                    <!-- Alerta si no hay cámara activa o rostro detectado -->
+                    <div id="alerta-ia-rostro" class="alerta-ia-aviso oculto" role="alert"></div>
+
+                    <!-- Resultados Reales del Escaneo Biométrico -->
+                    <div id="resultado-ia" class="resultado-ia oculto">
+                        <div class="ia-match">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i> Tipo de Rostro: <span id="ia-tipo-rostro">---</span>
+                        </div>
+                        <p id="ia-explicacion-rostro"></p>
+                        
+                        <h3 class="mini-titulo">Recomendación Principal + Alternativas (Haz clic para probar)</h3>
+                        <div id="contenedor-botones-recomendados" class="catalogo-mini-3"></div>
+                    </div>
+
+                    <!-- Selector Manual de Todos los Armazones del Catálogo -->
+                    <div class="selector-catalogo-ia">
+                        <h3 class="mini-titulo">Probar cualquier armazón del catálogo</h3>
+                        <select id="select-armazon-ia" class="select-neon" aria-label="Seleccionar armazón del catálogo para probar en vivo">
+                            <option value="">-- Elige un armazón para probártelo --</option>
+                            <option value="ziGO Focus|img/armazones/1.jpeg">ziGO Focus (Acetato Rectangular)</option>
+                            <option value="ziGO Kinetic|img/armazones/2.avif">ziGO Kinetic (Titanio Geométrico)</option>
+                            <option value="ziGO Metro|img/armazones/3.jpeg">ziGO Metro (Acetato Redondeado)</option>
+                            <option value="ziGO Edge|img/armazones/4.avif">ziGO Edge (Polímero Cuadrado)</option>
+                            <option value="ziGO Urban|img/armazones/5.webp">ziGO Urban (Metálico Aviador)</option>
+                            <option value="ziGO Sport|img/armazones/6.webp">ziGO Sport (TR90 Ovalado)</option>
+                            <option value="ziGO Nova|img/armazones/7.jpeg">ziGO Nova (Minimalista Semi-aire)</option>
+                            <option value="ziGO Flex|img/armazones/8.webp">ziGO Flex (Reforzado Rectangular)</option>
+                            <option value="ziGO Bold|img/armazones/9.avif">ziGO Bold (Contemporáneo Cuadrado)</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de Acción Directa -->
+                    <div class="acciones-finales-ia">
+                        <a href="./armazones.html" class="btn-detalles w-100">
+                            <i class="fas fa-glasses" aria-hidden="true"></i> Seleccionar armazones disponibles
+                        </a>
+                        <a id="btn-agendar-desde-ia" href="./agenda.html" class="btn-agendar-general w-100" style="text-align: center;">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i> Agendar cita con mi recomendación
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
     </main>
-    <!-- El footer mantiene una estructura de flex-column para centralizar la información legal y redes -->
+
+    <!-- Footer Unificado -->
     <footer class="footer-zigo">
         <div class="footer-container">
             <div class="redes-sociales">
-                <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
-                <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
-                <a href="https://threads.com" target="_blank" rel="noopener" aria-label="Visitar nuestro Threads"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
-                <a href="https://x.com" target="_blank" rel="noopener" aria-label="Visitar nuestro X / Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
-                <a href="https://tiktok.com" target="_blank" rel="noopener" aria-label="Visitar nuestro TikTok"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-                <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Visitar nuestro Telegram"><i class="fab fa-telegram" aria-hidden="true"></i></a>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Facebook de ziGO"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Instagram de ziGO"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                <a href="https://threads.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Threads de ziGO"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar X de ziGO"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar TikTok de ziGO"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
+                <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" aria-label="Visitar Telegram de ziGO"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
             </div>
-            <div class="direccion">
-                <address>
-                    <p>Av. Principal 123, Local 4</p>
-                    <p>Ciudad de México, CP 01234</p>
-                </address>
-            </div>
-            <nav aria-label="Enlaces legales">
+            <nav aria-label="Navegación inferior">
                 <ul class="enlaces-legales">
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="#">Productos</a></li>
-                    <li><a href="#">Legal</a></li>
-                    <li><a href="#">Contacto</a></li>
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="./armazones.html">Armazones</a></li>
+                    <li><a href="./probador.html">Recomendación IA</a></li>
+                    <li><a href="./experiencias.html">Experiencias</a></li>
+                    <li><a href="./nosotros.html">Nosotros</a></li>
+                    <li><a href="./agenda.html">Agendar cita</a></li>
+                    <li><a href="./legal.html">Legal y Privacidad</a></li>
                 </ul>
             </nav>
+            <div class="direccion">
+                <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
+                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 </body>

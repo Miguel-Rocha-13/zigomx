@@ -8,10 +8,11 @@
     --text-gray: #cbd5e1;
     --zigo-blue: #00b4d8;
     --zigo-blue-dark: #0077b6;
-    --neon-green: #00e676;
-    --neon-green-mid: #22c55e;
+    --neon-green: rgba(57, 255, 20, 0.9);
+    --neon-green-mid: rgba(57, 255, 20, 0.72);
     --neon-cyan: #00f0ff;
     --neon-purple: #a855f7;
+    --neon-purple-bright: #c084fc;
     --btn-primario-bg: #00b4d8;
     --btn-primario-hover: #0096c7;
     --btn-primario-texto: #ffffff;
@@ -76,7 +77,7 @@ a {
         radial-gradient(2px 2px at 45% 15%, rgba(255, 255, 255, 0.75), transparent),
         radial-gradient(1.2px 1.2px at 67% 33%, rgba(168, 85, 247, 0.6), transparent),
         radial-gradient(1.5px 1.5px at 84% 22%, rgba(255, 255, 255, 0.85), transparent),
-        radial-gradient(1px 1px at 19% 76%, rgba(0, 230, 118, 0.65), transparent),
+        radial-gradient(1px 1px at 19% 76%, rgba(57, 255, 20, 0.65), transparent),
         radial-gradient(1.8px 1.8px at 56% 81%, rgba(255, 255, 255, 0.7), transparent),
         radial-gradient(1.2px 1.2px at 91% 68%, rgba(0, 180, 216, 0.65), transparent);
     animation: destello-estelar 7s ease-in-out infinite alternate;
@@ -84,7 +85,6 @@ a {
 
 header, main, footer {
     position: relative;
-    z-index: 1;
 }
 
 
@@ -105,14 +105,14 @@ header, main, footer {
     border-radius: 50px;
     overflow: hidden;
     box-shadow:
-        -10px 0 22px rgba(0, 230, 118, 0.12),
-        0 0 24px rgba(0, 240, 255, 0.18),
-        10px 0 22px rgba(168, 85, 247, 0.16);
+        -10px 0 24px rgba(0, 230, 118, 0.14),
+        0 0 28px rgba(0, 240, 255, 0.22),
+        10px 0 24px rgba(168, 85, 247, 0.18);
     isolation: isolate;
     z-index: 100;
 }
 
-/* Cuadrado 1:1 continuo con verde sutil + azul ziGO + morado sin cortes en esquinas */
+/* Halo continuo 1:1 a velocidad 4.5s con verde esmeralda + azul ziGO + morado */
 .contenedor-menu::before {
     content: '';
     position: absolute;
@@ -124,13 +124,12 @@ header, main, footer {
     background: conic-gradient(
         from 0deg,
         transparent 0deg,
-        transparent 105deg,
-        rgba(0, 230, 118, 0.4) 140deg,
-        var(--neon-green) 170deg,
-        var(--neon-green) 205deg,
-        var(--neon-cyan) 250deg,
-        var(--neon-purple) 300deg,
-        rgba(168, 85, 247, 0.35) 335deg,
+        transparent 95deg,
+        rgba(0, 230, 118, 0.35) 135deg,
+        rgba(0, 230, 118, 0.85) 170deg,
+        var(--neon-cyan) 225deg,
+        var(--neon-purple) 285deg,
+        rgba(168, 85, 247, 0.32) 325deg,
         transparent 360deg
     );
     transform: translate(-50%, -50%);
@@ -138,14 +137,16 @@ header, main, footer {
     z-index: -2;
 }
 
+/* Cristal translúcido estilo Google para que la luz ilumine suavemente el interior */
 .contenedor-menu::after {
     content: '';
     position: absolute;
-    inset: 2.5px;
+    inset: 2px;
     border-radius: 48px;
-    background: rgba(2, 16, 43, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(2, 16, 43, 0.56);
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
+    box-shadow: inset 0 0 24px rgba(0, 240, 255, 0.14);
     z-index: -1;
 }
 
@@ -158,7 +159,7 @@ header, main, footer {
 .switch-tema-menu-izq {
     display: inline-flex;
     align-items: center;
-    background: rgba(7, 10, 21, 0.9);
+    background: rgba(7, 10, 21, 0.85);
     border: 1.5px solid var(--zigo-blue);
     border-radius: 50px;
     padding: 3px;
@@ -224,6 +225,7 @@ li a {
     font-weight: 800;
     color: var(--text-white);
     font-size: 0.88rem;
+    text-shadow: 0 1px 6px rgba(2, 16, 43, 0.7);
     transition: color 0.3s ease;
 }
 
@@ -249,7 +251,7 @@ li a.enlace-activo {
 }
 
 .buscador {
-    background-color: #070A15;
+    background-color: rgba(7, 10, 21, 0.88);
     color: #ffffff;
     font-family: 'Roboto', sans-serif;
     font-size: 0.84rem;
@@ -620,7 +622,7 @@ body.modo-alto-contraste .boton-agenda {
 
 
 /*============================================================
-    TEMAS DE COLOR PERSONALIZABLES
+    TEMAS DE COLOR PERSONALIZABLES (CLARO, UVEG Y MORADO)
 ============================================================*/
 body.tema-claro {
     --bg-color-dark: #f2f8f9;
@@ -630,7 +632,7 @@ body.tema-claro {
     --zigo-blue: #01707F;
     --zigo-blue-dark: #01545f;
     --neon-cyan: #015f6b;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #6b21a8;
     --btn-primario-bg: #01707F;
     --btn-primario-texto: #ffffff;
@@ -649,7 +651,7 @@ body.tema-azul-uveg {
     --zigo-blue: #1d4ed8;
     --zigo-blue-dark: #1e3a8a;
     --neon-cyan: #1d4ed8;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #4338ca;
     --btn-primario-bg: #1d4ed8;
     --btn-primario-texto: #ffffff;
@@ -668,7 +670,7 @@ body.tema-morado {
     --zigo-blue: #6d28d9;
     --zigo-blue-dark: #5b21b6;
     --neon-cyan: #6d28d9;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #a21caf;
     --btn-primario-bg: #6d28d9;
     --btn-primario-texto: #ffffff;
@@ -687,7 +689,7 @@ body.tema-azul-botones {
     --zigo-blue: #0284c7;
     --zigo-blue-dark: #0369a1;
     --neon-cyan: #0284c7;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #1d4ed8;
     --btn-primario-bg: #0284c7;
     --btn-primario-texto: #ffffff;
@@ -706,7 +708,7 @@ body.tema-menta-uveg {
     --zigo-blue: #059669;
     --zigo-blue-dark: #047857;
     --neon-cyan: #059669;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #0f766e;
     --btn-primario-bg: #059669;
     --btn-primario-texto: #ffffff;
@@ -725,7 +727,7 @@ body.tema-pizarra-uveg {
     --zigo-blue: #475569;
     --zigo-blue-dark: #334155;
     --neon-cyan: #475569;
-    --neon-green: #00b85c;
+    --neon-green: #22c55e;
     --neon-purple: #64748b;
     --btn-primario-bg: #334155;
     --btn-primario-texto: #ffffff;
@@ -766,6 +768,7 @@ body[class*="tema-"] .contenedor-menu::before {
 body[class*="tema-"] .contenedor-menu::after {
     background: var(--fondo-imagen-tema) !important;
     backdrop-filter: none;
+    box-shadow: none;
 }
 
 body[class*="tema-"] .logo img {
@@ -774,6 +777,7 @@ body[class*="tema-"] .logo img {
 
 body[class*="tema-"] .contenedor-menu nav li a {
     color: #ffffff !important;
+    text-shadow: none;
 }
 
 body[class*="tema-"] .contenedor-menu nav li a:hover,
@@ -790,7 +794,7 @@ body[class*="tema-"] .contenedor-menu .buscador {
 body[class*="tema-"] .contenedor-main .titulo-main,
 body[class*="tema-"] .seccion-titulo,
 body[class*="tema-"] .panel-titulo {
-    background: linear-gradient(90deg, #00a854 0%, #00994d 20%, var(--btn-primario-bg) 56%, #6d28d9 100%);
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 22%, var(--btn-primario-bg) 48%, #6d28d9 72%, #9333ea 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -816,10 +820,10 @@ body[class*="tema-"] .tarjeta-neon::after {
 }
 
 body[class*="tema-"] .tarjeta-verde {
-    background: #00b85c !important;
+    background: #16a34a !important;
 }
 body[class*="tema-"] .tarjeta-verde .contenido-tarjeta h3 {
-    color: #00994d !important;
+    color: #15803d !important;
 }
 
 body[class*="tema-"] .tarjeta-cian {
@@ -886,7 +890,7 @@ body[class*="tema-"] .privacidad-aviso {
 }
 
 body[class*="tema-"] .ver-catalogo::after {
-    background: #00b85c !important;
+    background: #16a34a !important;
 }
 
 body[class*="tema-"] .agendar-examen::after,
@@ -1016,11 +1020,11 @@ body.vista-simplificada * {
     inset: 0;
     background: rgba(2, 16, 43, 0.85);
     backdrop-filter: blur(8px);
-    z-index: 20000;
+    z-index: 99999;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 85px;
+    padding-top: 90px;
 }
 
 .modal-busqueda-caja {
@@ -1136,14 +1140,14 @@ body.vista-simplificada * {
     border-radius: 18px;
 }
 
-/* Degradado original con verde esmeralda puro, azul cian y morado */
+/* Degradado con verde neón rgba(57, 255, 20, 0.9), azul cian y mayor presencia morada */
 .contenedor-main .titulo-main {
     font-size: clamp(30px, 3.4vw, 48px);
     font-weight: 900;
     text-transform: uppercase;
     line-height: 1.15;
     margin-bottom: 18px;
-    background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-green-mid) 22%, var(--neon-cyan) 58%, var(--neon-purple) 100%);
+    background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-green-mid) 22%, var(--neon-cyan) 46%, var(--neon-purple) 68%, var(--neon-purple-bright) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1193,12 +1197,12 @@ body.vista-simplificada * {
     isolation: isolate;
 }
 
-/* Ver Catálogo en el verde original */
+/* Ver Catálogo en verde neón rgba(57, 255, 20, 0.9) */
 .ver-catalogo {
     color: var(--neon-green);
 }
 
-/* Agendar Examen / Tu Lente Ideal en azul cian */
+/* Tu Lente Ideal IA / Agendar Examen en azul cian */
 .agendar-examen,
 .tu-lente-ideal {
     color: var(--neon-cyan);
@@ -1261,7 +1265,7 @@ body.vista-simplificada * {
 
 .ver-catalogo:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(0, 230, 118, 0.42);
+    box-shadow: 0 6px 22px rgba(57, 255, 20, 0.45);
 }
 
 .agendar-examen:hover,
@@ -1382,7 +1386,7 @@ body.vista-simplificada * {
 }
 
 .seccion-titulo {
-    background: linear-gradient(90deg, var(--neon-green) 8%, var(--neon-green-mid) 25%, var(--neon-cyan) 58%, var(--neon-purple) 92%);
+    background: linear-gradient(90deg, var(--neon-green) 4%, var(--neon-green-mid) 22%, var(--neon-cyan) 46%, var(--neon-purple) 68%, var(--neon-purple-bright) 96%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1654,51 +1658,66 @@ body.vista-simplificada * {
     transform: translateY(-2px);
 }
 
-/* Modales de Detalles y Probador AR */
+/* Modales de Detalles y Probador AR (sin choque con el menú y sin scroll) */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(2, 16, 43, 0.9);
+    background-color: rgba(2, 16, 43, 0.88);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20000 !important;
-    padding: 16px;
-    overflow-y: auto;
+    z-index: 99999 !important;
+    padding: 88px 16px 16px 16px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .modal-content {
     background-color: #091d33;
     border: 1.5px solid var(--zigo-blue);
-    padding: 24px;
+    padding: 16px 20px;
     border-radius: 18px;
     max-width: 440px;
     width: 100%;
-    max-height: calc(100dvh - 32px);
+    max-height: calc(100dvh - 104px);
+    overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: none;
     text-align: center;
     position: relative;
     box-shadow: 0 10px 40px rgba(0, 180, 216, 0.32);
     color: #ffffff;
     box-sizing: border-box;
-    margin: auto;
+    margin: 0 auto;
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
 }
 
 .modal-ar-content {
-    max-width: 540px;
+    max-width: 500px;
+    overflow: hidden;
+}
+
+.modal-ar-content h2,
+.modal-ar-content h3 {
+    margin: 2px 0 8px 0;
+    font-size: 18px;
+    line-height: 1.25;
 }
 
 .modal-cerrar {
-    position: sticky;
-    top: 0;
-    float: right;
-    width: 34px;
-    height: 34px;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: rgba(239, 68, 68, 0.92);
+    background: rgba(239, 68, 68, 0.94);
     border: none;
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
     cursor: pointer;
     color: #ffffff !important;
@@ -1717,54 +1736,52 @@ body.vista-simplificada * {
 /* Pedestal blanco de estudio dentro de "Ver detalles" para que luzca el armazón */
 .modal-img {
     width: 100%;
-    height: 185px;
+    height: 175px;
     object-fit: contain;
-    margin: 8px 0 16px 0;
+    margin: 14px 0 14px 0;
     background: #ffffff !important;
     border: 2px solid var(--zigo-blue);
     border-radius: 14px;
-    padding: 16px;
+    padding: 14px;
     box-sizing: border-box;
     mix-blend-mode: normal !important;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
     filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
-    clear: both;
 }
 
 .modal-sub {
     color: var(--neon-cyan);
     font-weight: bold;
     font-size: 13.5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .modal-desc {
     color: #cbd5e1;
-    font-size: 14px;
-    line-height: 1.55;
+    font-size: 13.5px;
+    line-height: 1.5;
 }
 
 .privacidad-aviso {
-    font-size: 12px;
+    font-size: 11px;
     color: #cbd5e1;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(0, 180, 216, 0.3);
-    padding: 9px 12px;
+    padding: 6px 10px;
     border-radius: 8px;
-    margin: 10px 0 14px 0;
-    line-height: 1.4;
-    clear: both;
+    margin: 0 0 8px 0;
+    line-height: 1.32;
 }
 
 .probador-video-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/3;
+    height: 215px;
     background: #000;
     border-radius: 12px;
     overflow: hidden;
     border: 1.5px solid var(--zigo-blue);
-    margin-bottom: 14px;
+    margin-bottom: 8px;
 }
 
 #webcam-ar {
@@ -1785,12 +1802,12 @@ body.vista-simplificada * {
 
 .ar-badge-tracking {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    bottom: 8px;
+    left: 8px;
     background: rgba(0, 0, 0, 0.78);
     color: #ffffff;
-    font-size: 11px;
-    padding: 5px 10px;
+    font-size: 10.5px;
+    padding: 4px 10px;
     border-radius: 50px;
     display: flex;
     align-items: center;
@@ -1801,13 +1818,13 @@ body.vista-simplificada * {
 .ar-controles-ajuste {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
+    gap: 6px 12px;
+    margin-bottom: 8px;
     text-align: left;
-    font-size: 12px;
+    font-size: 11px;
     color: #cbd5e1;
     background: rgba(255, 255, 255, 0.04);
-    padding: 10px 12px;
+    padding: 7px 10px;
     border-radius: 10px;
     border: 1px solid rgba(0, 180, 216, 0.25);
 }
@@ -1815,13 +1832,20 @@ body.vista-simplificada * {
 .ar-controles-ajuste label {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .ar-controles-ajuste input[type="range"] {
     accent-color: var(--btn-primario-bg);
     cursor: pointer;
     width: 100%;
+    margin: 0;
+}
+
+.modal-ar-content .btn-agendar-general {
+    padding: 8px 16px;
+    font-size: 11.5px;
+    margin-top: 6px !important;
 }
 
 .panel-agendar-flotante {
@@ -2020,11 +2044,11 @@ body.vista-simplificada * {
     gap: 16px;
 }
 
-/* Combinación Verde esmeralda original, Azul y Morado en el título del panel IA */
+/* Combinación Verde neón rgba(57, 255, 20, 0.9), Azul y mayor presencia Morada en el panel IA */
 .panel-titulo {
     font-size: 23px;
     margin: 0;
-    background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-green-mid) 22%, var(--neon-cyan) 58%, var(--neon-purple) 100%);
+    background: linear-gradient(90deg, var(--neon-green) 0%, var(--neon-green-mid) 22%, var(--neon-cyan) 46%, var(--neon-purple) 68%, var(--neon-purple-bright) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -2841,6 +2865,14 @@ body[class*="tema-"] #inline-container iframe {
         flex-direction: column;
         gap: 10px;
         padding: 12px 16px;
+    }
+
+    .modal-overlay {
+        padding: 16px;
+    }
+
+    .modal-ar-content {
+        overflow-y: auto;
     }
 }
 

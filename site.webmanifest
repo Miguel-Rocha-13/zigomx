@@ -1,0 +1,16 @@
+{
+    "name": "ziGO - Soluciones en Movimiento",
+    "short_name": "ziGO",
+    "description": "Optometría profesional, exámenes de la vista, armazones y probador virtual con Inteligencia Artificial en CDMX.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#02102b",
+    "theme_color": "#00b4d8",
+    "icons": [
+    {
+    "src": "/img/logo.png",
+    "sizes": "297x159",
+    "type": "image/png"
+    }
+    ]
+}

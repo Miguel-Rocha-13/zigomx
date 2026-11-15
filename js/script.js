@@ -1,26 +1,31 @@
 /**
 ***********************************************************************
-    Motor Integral ziGO - Versión Producción:
-    1. Extracción Óptica Sin Fondo + Recorte de Frente + Color Real de Armazón
-    2. Proyección 3D Anatómica en Rostro (Puente Nasal, Perspectiva y Patitas)
-    3. Switch Claro/Oscuro al Extremo Izquierdo del Menú + Paleta UVEG/Morado
-    4. Audio TTS Real Multi-plataforma + Buscador Inteligente
-    5. Contactos Directos Escarlet (55 7383 9561) y Buzón de Quejas a Ángel/Miguel
+    Motor Integral ziGO - Versión Producción v2.1:
+    1. Fondo Estelar Optimizado (con pausa automática en segundo plano)
+    2. Extracción Óptica Sin Fondo (Flood-Fill + soporte local file://)
+    3. Proyección 3D Anatómica Suavizada en Tiempo Real (60fps)
+    4. Buscador Inteligente Tolerante a Errores (Sanitizado contra XSS)
+    5. Accesibilidad Visual (incluye Tema Rosa) + Buzón de Quejas Flotante
+    6. SEO Estructurado (JSON-LD) + Panel de Estadísticas ziGO
 ***********************************************************************
  */
+'use strict';
 
 /*============================================================
     0. CONFIGURACIÓN DE CONTACTOS, DIRECCIÓN Y CATÁLOGO ziGO
 ============================================================*/
 const CONFIG_ZIGO = {
+    nombreNegocio: 'ziGO Óptica & Salud Visual',
+    sitioWeb: 'https://zigomx.com',
     whatsappEscarlet: '5215573839561',
     telegramUsuario: '+525573839561',
     telefonoEscarlet: '55 7383 9561',
     correoEscarlet: 'skar@zigomx.com',
     correoQuejasPrincipal: 'angel.rochab@zigomx.com',
     correoQuejasCopia: 'miguel.rochab@zigomx.com',
-    // Cuando hables con la dueña, pega aquí la dirección exacta del consultorio ziGO:
-    direccionSitioZigo: 'Consultorio ziGO · Ciudad de México (Dirección exacta confirmada al reservar cita)'
+    direccionSitioZigo: 'Consultorio ziGO · Ciudad de México (Dirección exacta confirmada al reservar cita)',
+    // Pega aquí tu ID de Google Analytics 4 (ej. 'G-XXXXXXXXXX') cuando publiques en zigomx.com:
+    ga4MeasurementId: ''
 };
 
 const RUTA_BASE = window.location.pathname.includes('/pages/') ? '../' : './';
@@ -37,11 +42,30 @@ const CATALOGO_ARMAZONES = [
     { nombre: 'ziGO Bold', archivo: 'img/armazones/9.avif', forma: 'Cuadrado', material: 'Estilo Contemporáneo' }
 ];
 
-
 /*============================================================
-    1. EXTRACCIÓN ÓPTICA SIN FONDO Y RECORTE DE CATÁLOGO
+    UTILIDADES GLOBALES DE SEGURIDAD Y ENLACES
 ============================================================*/
-const cacheArmazonesAR = {};
+function escaparHTML(texto) {
+    return String(texto ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function construirUrlWhatsApp(mensaje) {
+    return `https://wa.me/${CONFIG_ZIGO.whatsappEscarlet}?text=${encodeURIComponent(mensaje)}`;
+}
+
+function construirUrlTelegram(mensaje) {
+    const usuario = CONFIG_ZIGO.telegramUsuario.trim();
+    if (usuario.startsWith('+')) {
+        return `https://t.me/${usuario}`;
+    }
+    const limpio = usuario.replace(/^@/, '');
+    return `https://t.me/${limpio}?text=${encodeURIComponent(mensaje)}`;
+}
 
 function resolverRutaSegura(ruta) {
     if (!ruta) return '';
@@ -50,13 +74,542 @@ function resolverRutaSegura(ruta) {
     return `${RUTA_BASE}${limpia}`;
 }
 
-/**
- * Procesa cada imagen de armazón para:
- * - Eliminar el fondo claro (tanto exterior como el blanco dentro de cada aro)
- * - Conservar un tinte antirreflejante sutil dentro de las micas
- * - Descartar el texto/logo superior de catálogo ("Rectangular/Cuadrado")
- * - Extraer el frente exacto de los dos aros y detectar el color real del armazón para las patitas 3D
- */
+/*============================================================
+    MÓDULO DE ESTADÍSTICAS Y TELEMETRÍA ziGO (LOCAL + GA4)
+============================================================*/
+const ZigoAnalytics = (function () {
+    const STORAGE_KEY = 'zigo_analytics_v1';
+    const SESSION_KEY = 'zigo_session_activa';
+
+    function obtenerEstadoInicial() {
+        return {
+            inicioRegistro: new Date().toISOString(),
+            sesiones: 0,
+            visitasPagina: {},
+            busquedas: [],
+            busquedasSinResultado: {},
+            armazonesProbadosAR: {},
+            rostrosDetectadosIA: {},
+            modalidadesCita: {},
+            conversiones: {
+                whatsapp: 0,
+                telegram: 0,
+                llamada: 0,
+                buzonQuejas: 0,
+                capturasAR: 0
+            },
+            ultimosEventos: []
+        };
+    }
+
+// Detección automática de fuentes de tráfico (Google vs Redes Sociales vs Directo)
+function registrarVistaPagina() {
+    const datos = cargarDatos();
+    if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        datos.sesiones = (datos.sesiones || 0) + 1;
+
+        // Analizar origen del tráfico (referrer)
+        const ref = document.referrer.toLowerCase();
+        datos.fuentesTráfico = datos.fuentesTráfico || { Google: 0, RedesSociales: 0, Directo: 0 };
+        
+        if (ref.includes('google.') || ref.includes('bing.') || ref.includes('yahoo.')) {
+            datos.fuentesTráfico.Google = (datos.fuentesTráfico.Google || 0) + 1;
+        } else if (ref.includes('facebook.') || ref.includes('instagram.') || ref.includes('tiktok.') || ref.includes('t.co') || ref.includes('whatsapp.')) {
+            datos.fuentesTráfico.RedesSociales = (datos.fuentesTráfico.RedesSociales || 0) + 1;
+        } else {
+            datos.fuentesTráfico.Directo = (datos.fuentesTráfico.Directo || 0) + 1;
+        }
+    }
+    const ruta = window.location.pathname.split('/').pop() || 'index.html';
+    datos.visitasPagina[ruta] = (datos.visitasPagina[ruta] || 0) + 1;
+    guardarDatos(datos);
+}
+
+// Inyección del Botón "Estadísticas ziGO" centrado en la parte inferior de todas las páginas
+document.addEventListener('DOMContentLoaded', () => {
+    const footer = document.querySelector('footer') || document.body;
+    if (footer && !document.getElementById('btn-footer-stats-zigo')) {
+        const contenedorBoton = document.createElement('div');
+        contenedorBoton.style.cssText = 'text-align:center; padding:1.5rem 0; margin-top:2rem; width:100%; display:flex; justify-content:center;';
+        
+        const esPaginaInterna = window.location.pathname.includes('/pages/');
+        const rutaAdmin = esPaginaInterna ? 'admin.html' : 'pages/admin.html';
+
+        contenedorBoton.innerHTML = `
+            <a href="${rutaAdmin}" id="btn-footer-stats-zigo" style="background:#0b192c; color:#38bdf8; border:1px solid #1e3a5f; padding:0.6rem 1.4rem; border-radius:999px; font-weight:700; font-size:0.85rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:all 0.2s;">
+                <i class="fas fa-chart-bar"></i> Estadísticas ziGO
+            </a>
+        `;
+        footer.appendChild(contenedorBoton);
+    }
+});
+
+    function cargarDatos() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return obtenerEstadoInicial();
+            const parsed = JSON.parse(raw);
+            return {
+                ...obtenerEstadoInicial(),
+                ...parsed,
+                conversiones: {
+                    ...obtenerEstadoInicial().conversiones,
+                    ...(parsed.conversiones || {})
+                }
+            };
+        } catch (e) {
+            return obtenerEstadoInicial();
+        }
+    }
+
+    function guardarDatos(datos) {
+        try {
+            if (datos.ultimosEventos.length > 60) datos.ultimosEventos = datos.ultimosEventos.slice(-60);
+            if (datos.busquedas.length > 100) datos.busquedas = datos.busquedas.slice(-100);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+        } catch (e) {}
+    }
+
+    function enviarAGoogleAnalytics(nombreEvento, params = {}) {
+        if (typeof window.gtag === 'function') {
+            window.gtag('event', nombreEvento, params);
+        } else if (Array.isArray(window.dataLayer)) {
+            window.dataLayer.push({ event: nombreEvento, ...params });
+        }
+    }
+
+    function registrarEvento(tipo, detalle = '', meta = {}) {
+        const datos = cargarDatos();
+        datos.ultimosEventos.push({
+            fecha: new Date().toISOString(),
+            tipo,
+            detalle
+        });
+        guardarDatos(datos);
+        enviarAGoogleAnalytics(tipo, { detalle, ...meta });
+    }
+
+    function registrarVistaPagina() {
+        const datos = cargarDatos();
+        if (!sessionStorage.getItem(SESSION_KEY)) {
+            sessionStorage.setItem(SESSION_KEY, '1');
+            datos.sesiones = (datos.sesiones || 0) + 1;
+        }
+        const ruta = window.location.pathname.split('/').pop() || 'index.html';
+        datos.visitasPagina[ruta] = (datos.visitasPagina[ruta] || 0) + 1;
+        guardarDatos(datos);
+        enviarAGoogleAnalytics('page_view', { page_path: ruta });
+    }
+
+    function registrarBusqueda(termino, resultadosCount) {
+        const limpio = (termino || '').trim().toLowerCase();
+        if (!limpio) return;
+        const datos = cargarDatos();
+        datos.busquedas.push({
+            termino: limpio,
+            resultados: resultadosCount,
+            fecha: new Date().toISOString()
+        });
+        if (resultadosCount === 0) {
+            datos.busquedasSinResultado[limpio] = (datos.busquedasSinResultado[limpio] || 0) + 1;
+        }
+        guardarDatos(datos);
+        enviarAGoogleAnalytics('search', { search_term: limpio, results_count: resultadosCount });
+    }
+
+    function registrarPruebaAR(nombreArmazon, origen = 'catalogo') {
+        if (!nombreArmazon) return;
+        const datos = cargarDatos();
+        datos.armazonesProbadosAR[nombreArmazon] = (datos.armazonesProbadosAR[nombreArmazon] || 0) + 1;
+        guardarDatos(datos);
+        registrarEvento('prueba_ar', `${nombreArmazon} (${origen})`, { armazon: nombreArmazon, origen });
+    }
+
+    function registrarRostroIA(tipoRostro) {
+        if (!tipoRostro) return;
+        const datos = cargarDatos();
+        datos.rostrosDetectadosIA[tipoRostro] = (datos.rostrosDetectadosIA[tipoRostro] || 0) + 1;
+        guardarDatos(datos);
+        registrarEvento('diagnostico_rostro_ia', tipoRostro, { tipo_rostro: tipoRostro });
+    }
+
+    function registrarModalidadCita(modalidad) {
+        if (!modalidad) return;
+        const datos = cargarDatos();
+        datos.modalidadesCita[modalidad] = (datos.modalidadesCita[modalidad] || 0) + 1;
+        guardarDatos(datos);
+        registrarEvento('seleccion_modalidad_cita', modalidad, { modalidad });
+    }
+
+    function registrarConversion(canal, detalle = '') {
+        const datos = cargarDatos();
+        if (Object.prototype.hasOwnProperty.call(datos.conversiones, canal)) {
+            datos.conversiones[canal] += 1;
+        }
+        guardarDatos(datos);
+        registrarEvento(`conversion_${canal}`, detalle, { canal });
+    }
+
+    function exportarCSV() {
+        const d = cargarDatos();
+        const filas = [
+            ['Categoria', 'Metrica', 'Valor'],
+            ['General', 'Inicio de registro', d.inicioRegistro],
+            ['General', 'Sesiones unicas', d.sesiones],
+            ...Object.entries(d.visitasPagina).map(([k, v]) => ['Visitas por Pagina', k, v]),
+            ...Object.entries(d.armazonesProbadosAR).map(([k, v]) => ['Armazones Probados AR', k, v]),
+            ...Object.entries(d.rostrosDetectadosIA).map(([k, v]) => ['Rostros Detectados IA', k, v]),
+            ...Object.entries(d.modalidadesCita).map(([k, v]) => ['Modalidad Cita', k, v]),
+            ...Object.entries(d.conversiones).map(([k, v]) => ['Conversiones', k, v]),
+            ...Object.entries(d.busquedasSinResultado).map(([k, v]) => ['Busquedas Sin Resultado', k, v])
+        ];
+
+        const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Estadisticas-ziGO-${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function mostrarPanelEstadisticas() {
+        const d = cargarDatos();
+        let modal = document.getElementById('modal-estadisticas-zigo');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-estadisticas-zigo';
+            modal.className = 'modal-busqueda-overlay';
+            document.body.appendChild(modal);
+        }
+
+        const renderListaTop = (obj, vacioMsg) => {
+            const entradas = Object.entries(obj || {}).sort((a, b) => b[1] - a[1]);
+            if (entradas.length === 0) return `<p style="font-size:12px;opacity:0.75;">${vacioMsg}</p>`;
+            return entradas.map(([k, v]) => `
+                <div style="display:flex;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.08);margin-bottom:5px;font-size:13px;">
+                    <span>${escaparHTML(k)}</span>
+                    <strong>${v}</strong>
+                </div>
+            `).join('');
+        };
+
+        const totalVisitas = Object.values(d.visitasPagina).reduce((a, b) => a + b, 0);
+        const totalPruebasAR = Object.values(d.armazonesProbadosAR).reduce((a, b) => a + b, 0);
+        const totalConversiones = Object.values(d.conversiones).reduce((a, b) => a + b, 0);
+
+        modal.innerHTML = `
+            <div class="modal-busqueda-caja" role="dialog" aria-modal="true" aria-label="Estadísticas del sitio ziGO" style="max-width:680px;max-height:86vh;overflow-y:auto;">
+                <button type="button" class="modal-cerrar" id="cerrar-stats-modal" aria-label="Cerrar estadísticas">&times;</button>
+                <h3 style="margin:0 0 6px 0;"><i class="fas fa-chart-line" style="color:var(--neon-cyan);"></i> Estadísticas y Métricas ziGO</h3>
+                <p style="font-size:12px;opacity:0.8;margin-bottom:14px;">Registro activo desde: ${new Date(d.inicioRegistro).toLocaleDateString('es-MX')}</p>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;">
+                    <div style="padding:12px;border-radius:12px;background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);text-align:center;">
+                        <div style="font-size:22px;font-weight:800;">${d.sesiones}</div>
+                        <div style="font-size:11px;opacity:0.85;">Sesiones</div>
+                    </div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);text-align:center;">
+                        <div style="font-size:22px;font-weight:800;">${totalVisitas}</div>
+                        <div style="font-size:11px;opacity:0.85;">Páginas Vistas</div>
+                    </div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(217,70,239,0.12);border:1px solid rgba(217,70,239,0.3);text-align:center;">
+                        <div style="font-size:22px;font-weight:800;">${totalPruebasAR}</div>
+                        <div style="font-size:11px;opacity:0.85;">Pruebas AR</div>
+                    </div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(250,204,21,0.12);border:1px solid rgba(250,204,21,0.3);text-align:center;">
+                        <div style="font-size:22px;font-weight:800;">${totalConversiones}</div>
+                        <div style="font-size:11px;opacity:0.85;">Contactos / Leads</div>
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+                    <div>
+                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-glasses"></i> Armazones más probados en AR</h4>
+                        ${renderListaTop(d.armazonesProbadosAR, 'Aún no hay pruebas AR registradas.')}
+                    </div>
+                    <div>
+                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-bullseye"></i> Conversiones por Canal</h4>
+                        ${renderListaTop(d.conversiones, 'Aún no hay clics de contacto.')}
+                    </div>
+                    <div>
+                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-user-check"></i> Tipos de Rostro (IA)</h4>
+                        ${renderListaTop(d.rostrosDetectadosIA, 'Aún no hay escaneos faciales.')}
+                    </div>
+                    <div>
+                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-file-alt"></i> Visitas por Sección</h4>
+                        ${renderListaTop(d.visitasPagina, 'Sin visitas registradas.')}
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;justify-content:flex-end;">
+                    <button type="button" id="btn-exportar-csv-zigo" class="boton-agenda" style="font-size:12px;padding:9px 14px;">
+                        <i class="fas fa-file-csv"></i> Descargar Reporte CSV
+                    </button>
+                    <button type="button" id="btn-limpiar-stats-zigo" class="btn-detalles" style="font-size:12px;padding:9px 14px;">
+                        <i class="fas fa-trash-alt"></i> Reiniciar Contadores
+                    </button>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+
+        document.getElementById('cerrar-stats-modal').onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+        document.getElementById('btn-exportar-csv-zigo').onclick = exportarCSV;
+        document.getElementById('btn-limpiar-stats-zigo').onclick = () => {
+            if (confirm('¿Deseas reiniciar las estadísticas locales acumuladas?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                mostrarPanelEstadisticas();
+            }
+        };
+    }
+
+    function inicializarGA4Opcional() {
+        const id = (CONFIG_ZIGO.ga4MeasurementId || '').trim();
+        if (!id || document.getElementById('script-ga4-zigo')) return;
+
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', id, { anonymize_ip: true });
+
+        const s = document.createElement('script');
+        s.id = 'script-ga4-zigo';
+        s.async = true;
+        s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+        document.head.appendChild(s);
+    }
+
+    return {
+        inicializarGA4Opcional,
+        registrarVistaPagina,
+        registrarBusqueda,
+        registrarPruebaAR,
+        registrarRostroIA,
+        registrarModalidadCita,
+        registrarConversion,
+        mostrarPanelEstadisticas,
+        exportarCSV
+    };
+})();
+
+window.verEstadisticasZigo = () => ZigoAnalytics.mostrarPanelEstadisticas();
+
+/*============================================================
+    SEO ESTRUCTURADO DINÁMICO (SCHEMA.ORG JSON-LD + ALT TAGS)
+============================================================*/
+function inicializarSEOEstructurado() {
+    document.querySelectorAll('img').forEach((img) => {
+        if (!img.hasAttribute('alt') || img.getAttribute('alt').trim() === '') {
+            const src = img.getAttribute('src') || '';
+            const nombreArchivo = src.split('/').pop()?.split('.')[0] || 'Óptica ziGO';
+            img.setAttribute('alt', `${CONFIG_ZIGO.nombreNegocio} - ${nombreArchivo.replace(/[-_]/g, ' ')}`);
+        }
+    });
+
+    if (document.getElementById('zigo-schema-jsonld')) return;
+
+    const schemaData = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': ['Optician', 'MedicalBusiness'],
+                '@id': `${CONFIG_ZIGO.sitioWeb}/#optica`,
+                name: CONFIG_ZIGO.nombreNegocio,
+                url: CONFIG_ZIGO.sitioWeb,
+                telephone: `+${CONFIG_ZIGO.whatsappEscarlet}`,
+                email: CONFIG_ZIGO.correoEscarlet,
+                priceRange: '$$',
+                areaServed: { '@type': 'City', name: 'Ciudad de México' },
+                address: {
+                    '@type': 'PostalAddress',
+                    addressLocality: 'Ciudad de México',
+                    addressRegion: 'CDMX',
+                    addressCountry: 'MX'
+                },
+                medicalSpecialty: 'Optometry',
+                founder: {
+                    '@type': 'Person',
+                    name: 'Dra. Escarlet Alcocer',
+                    jobTitle: 'Especialista en Optometría'
+                },
+                aggregateRating: {
+                    '@type': 'AggregateRating',
+                    ratingValue: '5.0',
+                    reviewCount: '5'
+                }
+            },
+            {
+                '@type': 'WebSite',
+                '@id': `${CONFIG_ZIGO.sitioWeb}/#website`,
+                url: CONFIG_ZIGO.sitioWeb,
+                name: CONFIG_ZIGO.nombreNegocio,
+                inLanguage: 'es-MX',
+                publisher: { '@id': `${CONFIG_ZIGO.sitioWeb}/#optica` }
+            },
+            {
+                '@type': 'ItemList',
+                name: 'Catálogo de Armazones Ópticos ziGO',
+                itemListElement: CATALOGO_ARMAZONES.map((arm, index) => ({
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    item: {
+                        '@type': 'Product',
+                        name: arm.nombre,
+                        material: arm.material,
+                        category: `Armazón óptico ${arm.forma}`,
+                        brand: { '@type': 'Brand', name: 'ziGO' }
+                    }
+                }))
+            }
+        ]
+    };
+
+    const scriptLD = document.createElement('script');
+    scriptLD.id = 'zigo-schema-jsonld';
+    scriptLD.type = 'application/ld+json';
+    scriptLD.textContent = JSON.stringify(schemaData);
+    document.head.appendChild(scriptLD);
+}
+
+/*============================================================
+    1. ESTILO ESTELAR ZIGO (IIFE + AHORRO DE ENERGÍA)
+============================================================*/
+(function () {
+    const canvas = document.getElementById('zigo-starfield');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const colors = [
+        { core: '#ffffff', glow: 'rgba(255, 255, 255, 0.85)' },
+        { core: '#a5f3fc', glow: 'rgba(0, 229, 255, 0.85)' },
+        { core: '#f5d0fe', glow: 'rgba(217, 70, 239, 0.80)' },
+        { core: '#bbf7d0', glow: 'rgba(16, 185, 129, 0.75)' }
+    ];
+
+    let stars = [];
+    let sparkles = [];
+    let rafEstelar = null;
+    const prefiereMenosMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initStars();
+    }
+
+    function initStars() {
+        const area = canvas.width * canvas.height;
+        const starCount = Math.min(220, Math.floor(area / 7500));
+        const sparkleCount = Math.min(18, Math.floor(area / 95000));
+
+        stars = Array.from({ length: starCount }, () => {
+            const palette = colors[Math.floor(Math.random() * colors.length)];
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 1.4 + 0.4,
+                palette,
+                alpha: Math.random() * 0.6 + 0.25,
+                speed: (Math.random() * 0.012 + 0.004) * (Math.random() < 0.5 ? 1 : -1)
+            };
+        });
+
+        sparkles = Array.from({ length: sparkleCount }, () => {
+            const palette = colors[Math.floor(Math.random() * 3)];
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 5 + 4,
+                palette,
+                alpha: Math.random() * 0.5 + 0.4,
+                speed: (Math.random() * 0.01 + 0.003) * (Math.random() < 0.5 ? 1 : -1)
+            };
+        });
+    }
+
+    function drawSparkle(s) {
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.globalAlpha = s.alpha;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = s.palette.glow;
+        ctx.fillStyle = s.palette.core;
+
+        ctx.beginPath();
+        const outer = s.size;
+        const inner = s.size * 0.18;
+        for (let i = 0; i < 8; i++) {
+            const radius = i % 2 === 0 ? outer : inner;
+            const angle = (i * Math.PI) / 4;
+            const px = Math.cos(angle) * radius;
+            const py = Math.sin(angle) * radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function dibujarFotograma() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (const st of stars) {
+            if (!prefiereMenosMovimiento) {
+                st.alpha += st.speed;
+                if (st.alpha >= 0.9 || st.alpha <= 0.15) st.speed *= -1;
+            }
+            ctx.save();
+            ctx.globalAlpha = st.alpha;
+            ctx.shadowBlur = st.r > 1.2 ? 8 : 3;
+            ctx.shadowColor = st.palette.glow;
+            ctx.fillStyle = st.palette.core;
+            ctx.beginPath();
+            ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        for (const sp of sparkles) {
+            if (!prefiereMenosMovimiento) {
+                sp.alpha += sp.speed;
+                if (sp.alpha >= 0.95 || sp.alpha <= 0.25) sp.speed *= -1;
+            }
+            drawSparkle(sp);
+        }
+    }
+
+    function animate() {
+        if (document.hidden) {
+            rafEstelar = null;
+            return;
+        }
+        dibujarFotograma();
+        if (!prefiereMenosMovimiento) {
+            rafEstelar = requestAnimationFrame(animate);
+        }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && !rafEstelar && !prefiereMenosMovimiento) {
+            animate();
+        }
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+    animate();
+})();
+
+/*============================================================
+    2. EXTRACCIÓN ÓPTICA SIN FONDO (FLOOD-FILL + SOPORTE FILE://)
+============================================================*/
+const cacheArmazonesAR = {};
+
 function procesarArmazonTransparente(imgElement) {
     const w = imgElement.naturalWidth || imgElement.width;
     const h = imgElement.naturalHeight || imgElement.height;
@@ -78,33 +631,67 @@ function procesarArmazonTransparente(imgElement) {
     try {
         const imgData = ctx.getImageData(0, 0, w, h);
         const data = imgData.data;
-
         const rBg = data[0], gBg = data[1], bBg = data[2];
-        const esFondo = new Uint8Array(w * h);
 
-        // Detectar todos los píxeles pertenecientes al fondo blanco/gris uniforme
-        for (let i = 0; i < w * h; i++) {
-            const idx = i * 4;
+        const esPixelClaroFondo = (idx) => {
             const r = data[idx], g = data[idx + 1], b = data[idx + 2], a = data[idx + 3];
-            if (a < 30) {
-                esFondo[i] = 1;
-                continue;
-            }
+            if (a < 30) return true;
             const lum = 0.299 * r + 0.587 * g + 0.114 * b;
             const sat = Math.max(r, g, b) - Math.min(r, g, b);
             const diffBg = (Math.abs(r - rBg) + Math.abs(g - gBg) + Math.abs(b - bBg)) / 3;
+            return (lum > 214 && sat < 26) || diffBg < 28;
+        };
 
-            if ((lum > 214 && sat < 26) || diffBg < 28) {
-                esFondo[i] = 1;
-                data[idx + 3] = 0;
-            } else if (lum > 192 && sat < 24) {
-                // Suavizado anti-aliasing en los bordes del armazón
-                const alphaSuave = Math.round(((214 - lum) / 22) * 255);
-                data[idx + 3] = Math.max(0, Math.min(255, alphaSuave));
+        const esFondo = new Uint8Array(w * h);
+        const colaFondo = [];
+
+        for (let x = 0; x < w; x++) {
+            colaFondo.push([x, 0], [x, h - 1]);
+        }
+        for (let y = 0; y < h; y++) {
+            colaFondo.push([0, y], [w - 1, y]);
+        }
+        const semillasMicas = [
+            [Math.round(w * 0.28), Math.round(h * 0.52)],
+            [Math.round(w * 0.72), Math.round(h * 0.52)]
+        ];
+        for (const [sx, sy] of semillasMicas) {
+            if (sx >= 0 && sx < w && sy >= 0 && sy < h && esPixelClaroFondo((sy * w + sx) * 4)) {
+                colaFondo.push([sx, sy]);
             }
         }
 
-        // Conservar únicamente el componente conectado más grande (el armazón) y descartar textos/logos de esquina
+        while (colaFondo.length > 0) {
+            const [cx, cy] = colaFondo.pop();
+            if (cx < 0 || cx >= w || cy < 0 || cy >= h) continue;
+            const pos = cy * w + cx;
+            if (esFondo[pos]) continue;
+
+            const idx = pos * 4;
+            if (esPixelClaroFondo(idx)) {
+                esFondo[pos] = 1;
+                data[idx + 3] = 0;
+                colaFondo.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+            }
+        }
+
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+                const pos = y * w + x;
+                if (esFondo[pos]) continue;
+                const tocaFondo = esFondo[pos - 1] || esFondo[pos + 1] || esFondo[pos - w] || esFondo[pos + w];
+                if (tocaFondo) {
+                    const idx = pos * 4;
+                    const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+                    const sat = Math.max(data[idx], data[idx + 1], data[idx + 2]) - Math.min(data[idx], data[idx + 1], data[idx + 2]);
+                    if (lum > 192 && sat < 24) {
+                        const alphaSuave = Math.round(((214 - lum) / 22) * 255);
+                        data[idx + 3] = Math.max(0, Math.min(255, alphaSuave));
+                    }
+                }
+            }
+        }
+
         const visitado = new Uint8Array(w * h);
         let mayorComponente = [];
 
@@ -175,7 +762,6 @@ function procesarArmazonTransparente(imgElement) {
 
         ctx.putImageData(imgData, 0, 0);
 
-        // Versión limpia completa para tarjetas de catálogo y modal "Ver detalles" (sobre fondo blanco)
         const catW = Math.max(30, maxX - minX + 1);
         const catH = Math.max(15, maxY - minY + 1);
         const canvasCatalogo = document.createElement('canvas');
@@ -183,7 +769,6 @@ function procesarArmazonTransparente(imgElement) {
         canvasCatalogo.height = catH;
         canvasCatalogo.getContext('2d').drawImage(canvas, minX, minY, catW, catH, 0, 0, catW, catH);
 
-        // Separar únicamente el frente óptico de los dos aros (recortando la pata lateral si la foto está en ángulo 3/4)
         const alturasCol = new Float32Array(catW);
         let maxAlturaCol = 0;
         for (let x = minX; x <= maxX; x++) {
@@ -225,7 +810,7 @@ function procesarArmazonTransparente(imgElement) {
             colorPatita
         };
     } catch (e) {
-        // Respaldo cuando se abre en protocolo file:// sin servidor local: recortar el encabezado superior de texto
+        // Respaldo limpio para vista local file:// (donde getImageData está restringido por CORS local)
         const corteTop = Math.round(h * 0.25);
         const cropH = Math.max(24, h - corteTop);
         canvas.width = w;
@@ -264,9 +849,8 @@ function obtenerArmazonProcesado(rutaEntrada) {
     });
 }
 
-
 /*============================================================
-    2. ADAPTACIÓN DE IMÁGENES DEL INDEX AL TEMA DE COLOR
+    3. ADAPTACIÓN DE IMÁGENES DEL INDEX AL TEMA DE COLOR
 ============================================================*/
 function adaptarImagenesIndexATema() {
     const esIndex = !window.location.pathname.includes('/pages/');
@@ -320,11 +904,17 @@ function adaptarImagenesIndexATema() {
     });
 }
 
-
 /*============================================================
-    3. RENOMBRADO UX, NÚMEROS EN NEGRITAS Y SWITCH EN MENÚ IZQUIERDO
+    4. RENOMBRADO UX, ELIMINACIÓN DE SKIP-LINK Y SWITCH MODO
 ============================================================*/
 function prepararIdentidadEInclusionDOM() {
+    // Eliminar enlaces de "Saltar al contenido principal"
+    document.querySelectorAll('.skip-link, .saltar-contenido, a[href="#contenido-principal"], a[href="#main-content"]').forEach(el => {
+        if (el.textContent.toLowerCase().includes('saltar') || el.classList.contains('skip-link')) {
+            el.remove();
+        }
+    });
+
     document.querySelectorAll('a[href*="probador.html"]').forEach(enlace => {
         const texto = enlace.textContent.trim();
         if (texto === 'Asesor IA') enlace.textContent = 'Recomendación IA';
@@ -335,7 +925,6 @@ function prepararIdentidadEInclusionDOM() {
         p.innerHTML = p.innerHTML.replace(/(^|\s)(\d+\.)/g, '$1<strong>$2</strong>');
     });
 
-    // Colocar el selector Claro / Oscuro hasta el extremo izquierdo dentro del menú principal
     const menuContenedor = document.querySelector('.contenedor-menu');
     if (menuContenedor && !document.getElementById('switch-tema-menu-izq')) {
         const switchIzq = document.createElement('div');
@@ -345,10 +934,10 @@ function prepararIdentidadEInclusionDOM() {
         switchIzq.setAttribute('aria-label', 'Cambiar modo oscuro o claro');
         switchIzq.innerHTML = `
             <button type="button" class="btn-switch-top" id="btn-top-oscuro" title="Activar Modo Oscuro">
-                <i class="fas fa-moon"></i> Oscuro
+                <i class="fas fa-moon" aria-hidden="true"></i> Oscuro
             </button>
             <button type="button" class="btn-switch-top" id="btn-top-claro" title="Activar Modo Claro">
-                <i class="fas fa-sun"></i> Claro
+                <i class="fas fa-sun" aria-hidden="true"></i> Claro
             </button>
         `;
         menuContenedor.insertBefore(switchIzq, menuContenedor.firstChild);
@@ -370,9 +959,8 @@ function prepararIdentidadEInclusionDOM() {
     }
 }
 
-
 /*============================================================
-    4. BUSCADOR TOLERANTE A ERRORES Y CONTACTOS ESCARLET
+    5. BUSCADOR TOLERANTE A ERRORES (SANITIZADO CONTRA XSS)
 ============================================================*/
 function normalizarFonetico(txt) {
     return (txt || '')
@@ -434,7 +1022,8 @@ function inicializarBuscadorInterno() {
         markar: 'Contactos y llamada', yamar: 'Llamar / Contacto', telefono: 'Teléfono y WhatsApp',
         wasap: 'WhatsApp', telegram: 'Telegram', ubikasion: 'Ubicación / Domicilio',
         direksion: 'Dirección', doktora: 'Dra. Escarlet Alcocer', eskarlet: 'Dra. Escarlet Alcocer',
-        skarlet: 'Dra. Escarlet Alcocer', probador: 'Recomendación Facial IA', rostro: 'Recomendación Facial IA'
+        skarlet: 'Dra. Escarlet Alcocer', probador: 'Recomendación Facial IA', rostro: 'Recomendación Facial IA',
+        keja: 'Quejas y sugerencias', quejas: 'Quejas y sugerencias'
     };
 
     const indiceSitio = [
@@ -469,10 +1058,10 @@ function inicializarBuscadorInterno() {
             tags: 'experiencias fotos pacientes consulta proceso testimonio'
         },
         {
-            titulo: 'Nosotros · Dra. Escarlet Alcocer y Buzón',
-            desc: 'Conoce a nuestra especialista, misión, visión y buzón de sugerencias.',
+            titulo: 'Nosotros · Dra. Escarlet Alcocer y Buzón de Quejas',
+            desc: 'Conoce a nuestra especialista, misión, visión y buzón de quejas y sugerencias.',
             url: `${RUTA_BASE}pages/nosotros.html`,
-            tags: 'nosotros mision vision valores doctora escarlet alcocer quejas sugerencias'
+            tags: 'nosotros mision vision valores doctora escarlet alcocer quejas sugerencias reclamo'
         },
         ...CATALOGO_ARMAZONES.map(arm => ({
             titulo: `Armazón ${arm.nombre}`,
@@ -489,6 +1078,8 @@ function inicializarBuscadorInterno() {
             return;
         }
 
+        const consultaSegura = escaparHTML(consultaOriginal);
+
         let modalBusqueda = document.getElementById('modal-busqueda-global');
         if (!modalBusqueda) {
             modalBusqueda = document.createElement('div');
@@ -499,7 +1090,7 @@ function inicializarBuscadorInterno() {
 
         const tokens = normalizarFonetico(consultaOriginal).split(' ');
         const sugerencias = tokens.map(t => diccionarioCorrecciones[t]).filter(Boolean);
-        const sugerenciaUnica = [...new Set(sugerencias)].join(', ');
+        const sugerenciaUnica = escaparHTML([...new Set(sugerencias)].join(', '));
 
         const esContactoDirecto = coincideDifuso(
             consultaOriginal,
@@ -521,20 +1112,23 @@ function inicializarBuscadorInterno() {
             `;
         }
 
+        const msgCita = 'Hola Dra. Escarlet, visité la página de ziGO y me gustaría agendar una cita o solicitar información de costos.';
+        const urlWa = construirUrlWhatsApp(msgCita);
+        const urlTg = construirUrlTelegram(msgCita);
+
         if (esContactoDirecto || esConsultaPrecioPromo) {
-            const msgWa = encodeURIComponent('Hola Dra. Escarlet, visité la página de ziGO y me gustaría agendar una cita o solicitar información de costos.');
             bloquesHTML += `
                 <div class="alerta-promo-escarlet" style="margin-top:10px;">
                     <strong><i class="fas fa-user-md"></i> Atención Directa · Dra. Escarlet Alcocer</strong>
                     <p>Para citas, costos personalizados y promociones vigentes comunícate directamente al <strong>${CONFIG_ZIGO.telefonoEscarlet}</strong> o por mensaje:</p>
                     <div class="acciones-promo-escarlet">
-                        <a href="https://wa.me/${CONFIG_ZIGO.whatsappEscarlet}?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-escarlet">
+                        <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-escarlet">
                             <i class="fab fa-whatsapp"></i> WhatsApp (${CONFIG_ZIGO.telefonoEscarlet})
                         </a>
-                        <a href="https://t.me/${CONFIG_ZIGO.telegramUsuario}?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="boton-agenda" style="font-size:13px;">
+                        <a href="${urlTg}" data-canal="telegram" target="_blank" rel="noopener noreferrer" class="boton-agenda" style="font-size:13px;">
                             <i class="fab fa-telegram"></i> Telegram
                         </a>
-                        <a href="tel:+${CONFIG_ZIGO.whatsappEscarlet}" class="btn-detalles" style="background:#ffffff;color:#02102b;font-size:12px;">
+                        <a href="tel:+${CONFIG_ZIGO.whatsappEscarlet}" data-canal="llamada" class="btn-detalles" style="background:#ffffff;color:#02102b;font-size:12px;">
                             <i class="fas fa-phone"></i> Llamar ahora
                         </a>
                     </div>
@@ -543,21 +1137,21 @@ function inicializarBuscadorInterno() {
         }
 
         const coincidencias = indiceSitio.filter(item => coincideDifuso(consultaOriginal, `${item.titulo} ${item.desc} ${item.tags}`));
+        ZigoAnalytics.registrarBusqueda(consultaOriginal, coincidencias.length);
 
         if (coincidencias.length > 0) {
             bloquesHTML += coincidencias.map(c => `
                 <a href="${c.url}" class="item-resultado-busqueda">
                     <div>
-                        <strong>${c.titulo}</strong>
-                        <div style="font-size: 12px; opacity: 0.85; margin-top: 3px;">${c.desc}</div>
+                        <strong>${escaparHTML(c.titulo)}</strong>
+                        <div style="font-size: 12px; opacity: 0.85; margin-top: 3px;">${escaparHTML(c.desc)}</div>
                     </div>
                     <i class="fas fa-arrow-right" style="color: var(--neon-cyan);"></i>
                 </a>
             `).join('');
         } else if (!esContactoDirecto && !esConsultaPrecioPromo) {
-            const msgWa = encodeURIComponent('Hola Dra. Escarlet, quiero agendar una cita o pedir informes en ziGO.');
             bloquesHTML += `
-                <p style="font-size: 14px; margin-bottom: 6px;">No encontramos una coincidencia exacta para "<strong>${consultaOriginal}</strong>", pero quizá buscabas alguna de estas opciones:</p>
+                <p style="font-size: 14px; margin-bottom: 6px;">No encontramos una coincidencia exacta para "<strong>${consultaSegura}</strong>", pero quizá buscabas alguna de estas opciones:</p>
                 <a href="${RUTA_BASE}pages/armazones.html" class="item-resultado-busqueda">
                     <div><strong>Catálogo de Armazones y Probador AR</strong><div style="font-size:12px;opacity:0.85;">Ver modelos de lentes y probarlos en cámara</div></div>
                     <i class="fas fa-glasses"></i>
@@ -566,7 +1160,7 @@ function inicializarBuscadorInterno() {
                     <div><strong>Agendar Examen de la Vista</strong><div style="font-size:12px;opacity:0.85;">Reservar cita en consultorio o a domicilio</div></div>
                     <i class="fas fa-calendar-check"></i>
                 </a>
-                <a href="https://wa.me/${CONFIG_ZIGO.whatsappEscarlet}?text=${msgWa}" target="_blank" rel="noopener noreferrer" class="item-resultado-busqueda">
+                <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="item-resultado-busqueda">
                     <div><strong>Enviar WhatsApp a Escarlet (${CONFIG_ZIGO.telefonoEscarlet})</strong><div style="font-size:12px;opacity:0.85;">Atención directa para citas, llamadas y precios</div></div>
                     <i class="fab fa-whatsapp" style="color:#25D366;"></i>
                 </a>
@@ -576,7 +1170,7 @@ function inicializarBuscadorInterno() {
         modalBusqueda.innerHTML = `
             <div class="modal-busqueda-caja" role="dialog" aria-modal="true" aria-label="Resultados de búsqueda">
                 <button type="button" class="modal-cerrar" id="cerrar-busqueda-modal" aria-label="Cerrar búsqueda">&times;</button>
-                <h3 style="margin: 0;"><i class="fas fa-search"></i> Resultados para: "${consultaOriginal}"</h3>
+                <h3 style="margin: 0;"><i class="fas fa-search"></i> Resultados para: "${consultaSegura}"</h3>
                 <div class="lista-resultados-busqueda">${bloquesHTML}</div>
             </div>
         `;
@@ -602,12 +1196,101 @@ function inicializarBuscadorInterno() {
     }
 }
 
+/*============================================================
+    6. MODAL RÁPIDO DE QUEJAS Y SUGERENCIAS (DESDE MENSAJES)
+============================================================*/
+function abrirModalQuejasGlobal() {
+    let modalQueja = document.getElementById('modal-quejas-rapido-zigo');
+    if (!modalQueja) {
+        modalQueja = document.createElement('div');
+        modalQueja.id = 'modal-quejas-rapido-zigo';
+        modalQueja.className = 'modal-busqueda-overlay';
+        document.body.appendChild(modalQueja);
+    }
+
+    modalQueja.innerHTML = `
+        <div class="modal-busqueda-caja" role="dialog" aria-modal="true" aria-label="Buzón de Quejas y Sugerencias ziGO" style="max-width:480px;">
+            <button type="button" class="modal-cerrar" id="cerrar-modal-queja-rapida" aria-label="Cerrar buzón">&times;</button>
+            <h3 style="margin:0 0 6px 0;"><i class="fas fa-comment-medical" style="color:#f43f5e;"></i> Buzón de Quejas y Sugerencias</h3>
+            <p style="font-size:12px;opacity:0.85;margin-bottom:10px;">Tu opinión nos ayuda a mejorar. Tu reporte llega directamente al área de Calidad ziGO.</p>
+            <form id="form-queja-rapida-modal" class="form-queja-rapida-grid">
+                <input type="text" id="qr-nombre" placeholder="Tu nombre (opcional)">
+                <select id="qr-tipo" required>
+                    <option value="Queja / Inconformidad">Queja / Inconformidad</option>
+                    <option value="Sugerencia de mejora">Sugerencia de mejora</option>
+                    <option value="Felicitación / Reconocimiento">Felicitación / Reconocimiento</option>
+                </select>
+                <textarea id="qr-mensaje" rows="4" required placeholder="Describe tu queja, comentario o sugerencia..."></textarea>
+                <button type="submit" class="boton-agenda" style="justify-content:center;">
+                    <i class="fas fa-paper-plane"></i> Enviar Reporte
+                </button>
+            </form>
+            <div id="qr-respuesta" class="oculto" style="margin-top:12px;padding:10px;border-radius:10px;background:rgba(16,185,129,0.16);border:1px solid rgba(16,185,129,0.4);font-size:13px;"></div>
+        </div>
+    `;
+    modalQueja.style.display = 'flex';
+
+    document.getElementById('cerrar-modal-queja-rapida').onclick = () => {
+        modalQueja.style.display = 'none';
+    };
+    modalQueja.onclick = (e) => {
+        if (e.target === modalQueja) modalQueja.style.display = 'none';
+    };
+
+    const form = document.getElementById('form-queja-rapida-modal');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const nombre = (document.getElementById('qr-nombre').value || '').trim() || 'Paciente Anónimo';
+        const tipo = document.getElementById('qr-tipo').value;
+        const mensaje = (document.getElementById('qr-mensaje').value || '').trim();
+        const folio = `ZIGO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        const txtOrig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando reporte...';
+
+        let enviado = false;
+        try {
+            const resp = await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasPrincipal}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: `[${folio}] ${tipo} - Buzón ziGO`,
+                    _cc: CONFIG_ZIGO.correoQuejasCopia,
+                    _template: 'table',
+                    Folio: folio,
+                    Tipo: tipo,
+                    Paciente: nombre,
+                    Mensaje: mensaje
+                })
+            });
+            enviado = resp.ok;
+        } catch (err) {}
+
+        btn.disabled = false;
+        btn.innerHTML = txtOrig;
+        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
+
+        const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
+        const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
+
+        form.reset();
+        const respBox = document.getElementById('qr-respuesta');
+        respBox.innerHTML = enviado
+            ? `<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Reporte registrado con Folio ${escaparHTML(folio)}.</strong> Fue enviado al equipo de Calidad ziGO.`
+            : `<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Folio generado: ${escaparHTML(folio)}.</strong> <a href="${urlMail}" style="text-decoration:underline;font-weight:bold;">Haz clic aquí para enviarlo por correo</a>.`;
+        respBox.classList.remove('oculto');
+    };
+}
 
 /*============================================================
-    5. INCLUSIÓN VISUAL + ENLACES DIRECTOS WHATSAPP / TELEGRAM
+    7. INCLUSIÓN VISUAL (CON COLOR ROSA) + WIDGET MENSAJES/QUEJAS
 ============================================================*/
 function inicializarAccesibilidadYWidgets() {
-    const mensajeCitaDirecto = encodeURIComponent('Hola Dra. Escarlet, vengo de la página de ziGO y me gustaría agendar una cita.');
+    const mensajeCitaDirecto = 'Hola Dra. Escarlet, vengo de la página de ziGO y me gustaría agendar una cita.';
+    const urlWaDirecto = construirUrlWhatsApp(mensajeCitaDirecto);
+    const urlTgDirecto = construirUrlTelegram(mensajeCitaDirecto);
 
     const widgetAcc = document.createElement('div');
     widgetAcc.id = 'widget-accesibilidad';
@@ -633,6 +1316,7 @@ function inicializarAccesibilidadYWidgets() {
                     <button type="button" class="btn-color-tema" data-tema="azul-botones" title="Azul Botones ziGO" style="background:#0284c7;"></button>
                     <button type="button" class="btn-color-tema" data-tema="menta-uveg" title="Verde Menta UVEG" style="background:#34d399;"></button>
                     <button type="button" class="btn-color-tema" data-tema="pizarra-uveg" title="Gris Pizarra UVEG" style="background:#8e99a8;"></button>
+                    <button type="button" class="btn-color-tema" data-tema="rosa" title="Rosa Suave ziGO" style="background:#ec4899;"></button>
                 </div>
             </div>
 
@@ -666,7 +1350,7 @@ function inicializarAccesibilidadYWidgets() {
                 <i class="fas fa-undo"></i> Restablecer todo
             </button>
         </div>
-        <button type="button" id="btn-toggle-acc" class="btn-burbuja-maestra" aria-label="Abrir menú de accesibilidad" title="Accesibilidad e Inclusión Visual">
+        <button type="button" id="btn-toggle-acc" class="btn-burbuja-maestra" aria-expanded="false" aria-label="Abrir menú de accesibilidad" title="Accesibilidad e Inclusión Visual">
             <i class="fas fa-universal-access"></i>
         </button>
     `;
@@ -677,26 +1361,34 @@ function inicializarAccesibilidadYWidgets() {
     widgetRedes.className = 'widget-flotante-arrastrable';
     widgetRedes.innerHTML = `
         <div id="globos-redes-lista" class="globos-redes-lista oculto">
-            <a href="https://wa.me/${CONFIG_ZIGO.whatsappEscarlet}?text=${mensajeCitaDirecto}" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp · Escarlet</a>
-            <a href="https://t.me/${CONFIG_ZIGO.telegramUsuario}?text=${mensajeCitaDirecto}" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-telegram" style="color:#26A5E4;"></i> Telegram · Escarlet</a>
+            <a href="${urlWaDirecto}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-whatsapp" style="color:#25D366;"></i> WhatsApp · Escarlet</a>
+            <a href="${urlTgDirecto}" data-canal="telegram" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-telegram" style="color:#26A5E4;"></i> Telegram · Escarlet</a>
+            <button type="button" id="btn-abrir-quejas-flotante" class="globo-red-item globo-queja-btn"><i class="fas fa-comment-medical" style="color:#f43f5e;"></i> Quejas y Sugerencias</button>
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-instagram" style="color:#E1306C;"></i> Instagram</a>
             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-facebook-f" style="color:#1877F2;"></i> Facebook</a>
             <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-tiktok" style="color:#00f0ff;"></i> TikTok</a>
             <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fab fa-x-twitter"></i> X / Twitter</a>
             <a href="https://threads.com" target="_blank" rel="noopener noreferrer" class="globo-red-item"><i class="fa-brands fa-threads"></i> Threads</a>
         </div>
-        <button type="button" id="btn-toggle-redes" class="btn-burbuja-maestra btn-burbuja-redes" aria-label="Abrir redes sociales" title="Contáctanos">
+        <button type="button" id="btn-toggle-redes" class="btn-burbuja-maestra btn-burbuja-redes" aria-expanded="false" aria-label="Abrir mensajes y quejas" title="Mensajes, Redes y Quejas">
             <i class="fas fa-comment-dots"></i>
         </button>
     `;
     document.body.appendChild(widgetRedes);
 
-    // Actualizar también los enlaces de WhatsApp y Telegram que ya existan en el footer
+    document.getElementById('btn-abrir-quejas-flotante')?.addEventListener('click', () => {
+        document.getElementById('globos-redes-lista')?.classList.add('oculto');
+        document.getElementById('btn-toggle-redes')?.setAttribute('aria-expanded', 'false');
+        abrirModalQuejasGlobal();
+    });
+
     document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp"]').forEach(a => {
-        a.href = `https://wa.me/${CONFIG_ZIGO.whatsappEscarlet}?text=${mensajeCitaDirecto}`;
+        a.href = urlWaDirecto;
+        a.dataset.canal = 'whatsapp';
     });
     document.querySelectorAll('a[href*="t.me"], a[href*="telegram"]').forEach(a => {
-        a.href = `https://t.me/${CONFIG_ZIGO.telegramUsuario}?text=${mensajeCitaDirecto}`;
+        a.href = urlTgDirecto;
+        a.dataset.canal = 'telegram';
     });
 
     function hacerArrastrable(contenedor, botonDisparador, alHacerClic) {
@@ -752,15 +1444,21 @@ function inicializarAccesibilidadYWidgets() {
 
     const panelAcc = document.getElementById('panel-accesibilidad');
     const listaRedes = document.getElementById('globos-redes-lista');
+    const btnToggleAcc = document.getElementById('btn-toggle-acc');
+    const btnToggleRedes = document.getElementById('btn-toggle-redes');
 
-    hacerArrastrable(widgetAcc, document.getElementById('btn-toggle-acc'), () => {
-        panelAcc.classList.toggle('oculto');
+    hacerArrastrable(widgetAcc, btnToggleAcc, () => {
+        const abierto = !panelAcc.classList.toggle('oculto');
         listaRedes.classList.add('oculto');
+        btnToggleAcc.setAttribute('aria-expanded', String(abierto));
+        btnToggleRedes.setAttribute('aria-expanded', 'false');
     });
 
-    hacerArrastrable(widgetRedes, document.getElementById('btn-toggle-redes'), () => {
-        listaRedes.classList.toggle('oculto');
+    hacerArrastrable(widgetRedes, btnToggleRedes, () => {
+        const abierto = !listaRedes.classList.toggle('oculto');
         panelAcc.classList.add('oculto');
+        btnToggleRedes.setAttribute('aria-expanded', String(abierto));
+        btnToggleAcc.setAttribute('aria-expanded', 'false');
     });
 
     function aplicarTemaColor(nombreTema) {
@@ -771,7 +1469,8 @@ function inicializarAccesibilidadYWidgets() {
             'tema-morado',
             'tema-azul-botones',
             'tema-menta-uveg',
-            'tema-pizarra-uveg'
+            'tema-pizarra-uveg',
+            'tema-rosa'
         );
         if (temaFinal !== 'oscuro') {
             document.body.classList.add(`tema-${temaFinal}`);
@@ -860,7 +1559,7 @@ function inicializarAccesibilidadYWidgets() {
             document.body.appendChild(barra);
         }
         barra.innerHTML = `
-            <div class="barra-lector-texto"><i class="fas fa-volume-up" style="color:var(--neon-cyan);"></i> Escuchando: <span>${textoFrase}</span></div>
+            <div class="barra-lector-texto"><i class="fas fa-volume-up" style="color:var(--neon-cyan);"></i> Escuchando: <span>${escaparHTML(textoFrase)}</span></div>
             <button type="button" class="btn-parar-barra-voz" id="btn-cerrar-barra-voz"><i class="fas fa-stop"></i> Detener</button>
         `;
         document.getElementById('btn-cerrar-barra-voz').onclick = detenerLecturaVoz;
@@ -1072,9 +1771,8 @@ function inicializarAccesibilidadYWidgets() {
     });
 }
 
-
 /*============================================================
-    6. PÁGINA INICIO: RESEÑAS VERIFICADAS 5 ESTRELLAS
+    8. PÁGINA INICIO: RESEÑAS VERIFICADAS 5 ESTRELLAS
 ============================================================*/
 function inicializarTestimonios5Estrellas() {
     const grid = document.getElementById('grid-testimonios-dinamicos');
@@ -1089,14 +1787,14 @@ function inicializarTestimonios5Estrellas() {
     ];
 
     const soloCincoEstrellas = poolResenasGoogle.filter(r => r.estrellas === 5);
-    const mezcladas = soloCincoEstrellas.sort(() => Math.random() - 0.5).slice(0, 3);
+    const mezcladas = [...soloCincoEstrellas].sort(() => Math.random() - 0.5).slice(0, 3);
 
     grid.innerHTML = mezcladas.map(r => `
         <article class="testimonio-google-card">
             <div class="card-header">
-                <div class="avatar-placeholder" aria-hidden="true">${r.inicial}</div>
+                <div class="avatar-placeholder" aria-hidden="true">${escaparHTML(r.inicial)}</div>
                 <div class="reviewer-info">
-                    <p class="reviewer-name">${r.nombre}</p>
+                    <p class="reviewer-name">${escaparHTML(r.nombre)}</p>
                     <p class="review-date">Reseña Verificada 5★</p>
                 </div>
                 <img src="${RUTA_BASE}img/google-logo.webp" alt="Google" class="google-icon-small" loading="lazy">
@@ -1104,27 +1802,35 @@ function inicializarTestimonios5Estrellas() {
             <div class="google-stars-yellow" aria-label="5 estrellas de calificación">
                 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
             </div>
-            <blockquote class="review-text">${r.texto}</blockquote>
+            <blockquote class="review-text">${escaparHTML(r.texto)}</blockquote>
         </article>
     `).join('');
 }
 
-
 /*============================================================
-    7. RENDERIZADO 3D ANATÓMICO REALISTA (PUENTE NASAL + PERSPECTIVA + OREJAS)
+    9. RENDERIZADO 3D ANATÓMICO REALISTA + SUAVIZADO DE MOVIMIENTO
 ============================================================*/
+function suavizarLandmarks(anteriores, nuevos, factor = 0.68) {
+    if (!anteriores || anteriores.length !== nuevos.length) return nuevos;
+    const inv = 1 - factor;
+    return nuevos.map((p, i) => ({
+        x: p.x * factor + anteriores[i].x * inv,
+        y: p.y * factor + anteriores[i].y * inv,
+        z: (p.z || 0) * factor + (anteriores[i].z || 0) * inv
+    }));
+}
+
 function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra = 1, offsetYExtra = 0, espejado = true) {
     if (!armazonData || !armazonData.canvas) return;
 
-    // Nunca usar multiply porque ensucia la piel; si aún no se procesó en servidor HTTP, aplicar contraste limpio
     if (ctx.canvas) {
-        ctx.canvas.style.mixBlendMode = 'normal';
+        // En entorno local file:// (donde transparente=false), multiply vuelve transparente el fondo blanco
+        ctx.canvas.style.mixBlendMode = armazonData.transparente ? 'normal' : 'multiply';
     }
 
     const mapX = (normX) => (espejado ? (1 - normX) : normX) * w;
     const mapY = (normY) => normY * h;
 
-    // 1. Puntos de pupilas (MediaPipe Iris Landmarks 468 y 473)
     const ojoDer = landmarks[468]
         ? { x: mapX(landmarks[468].x), y: mapY(landmarks[468].y) }
         : { x: mapX((landmarks[33].x + landmarks[133].x) / 2), y: mapY((landmarks[33].y + landmarks[133].y) / 2) };
@@ -1136,7 +1842,6 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     const pIzq = ojoIzq.x < ojoDer.x ? ojoIzq : ojoDer;
     const pDer = ojoIzq.x < ojoDer.x ? ojoDer : ojoIzq;
 
-    // 2. Puntos anatómicos clave: Orejas/Sienes (234, 454), Puente Nasal (168), Frente (10), Mentón (152)
     const sienA = { x: mapX(landmarks[234].x), y: mapY(landmarks[234].y) };
     const sienB = { x: mapX(landmarks[454].x), y: mapY(landmarks[454].y) };
     const orejaIzq = sienA.x < sienB.x ? sienA : sienB;
@@ -1150,10 +1855,9 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     const anchoSienes = Math.hypot(orejaDer.x - orejaIzq.x, orejaDer.y - orejaIzq.y);
     const anguloRoll = Math.atan2(pDer.y - pIzq.y, pDer.x - pIzq.x);
 
-    // 3. Cálculo de giro horizontal (Yaw: izquierda / derecha) e inclinación vertical (Pitch: arriba / abajo)
     const distPuenteIzq = Math.abs(puenteNasal.x - orejaIzq.x);
     const distPuenteDer = Math.abs(orejaDer.x - puenteNasal.x);
-    const yaw = Math.max(-0.72, Math.min(0.72, (distPuenteDer - distPuenteIzq) / ((distPuenteDer + distPuenteIzq) || 1)));
+    const yaw = Math.max(-0.75, Math.min(0.75, (distPuenteDer - distPuenteIzq) / ((distPuenteDer + distPuenteIzq) || 1)));
 
     const midPupilasY = (pIzq.y + pDer.y) / 2;
     const distFrenteOjos = Math.abs(midPupilasY - frente.y);
@@ -1161,20 +1865,18 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     const ratioVertical = distFrenteOjos / (distOjosMenton || 1);
     const pitch = Math.max(-0.48, Math.min(0.48, (ratioVertical - 0.56) * 1.45));
 
-    // 4. Anclaje real en el puente nasal (70% puente nasal 168 + 30% centro de pupilas) para que no flote al girar
     const midPupilasX = (pIzq.x + pDer.x) / 2;
-    const centroX = (puenteNasal.x * 0.70 + midPupilasX * 0.30);
-    const centroY = (midPupilasY * 0.82 + puenteNasal.y * 0.18) + offsetYExtra + (pitch * distPupilar * 0.22);
+    const centroX = (puenteNasal.x * 0.72 + midPupilasX * 0.28);
+    const centroY = (midPupilasY * 0.84 + puenteNasal.y * 0.16) + offsetYExtra + (pitch * distPupilar * 0.22);
 
-    const anchoFrente = Math.max(distPupilar * 2.15, anchoSienes * 0.93) * escalaExtra * Math.cos(yaw * 0.68);
+    const anchoFrente = Math.max(distPupilar * 2.18, anchoSienes * 0.94) * escalaExtra * Math.cos(yaw * 0.65);
     const imgCanvas = armazonData.canvas;
     const proporcion = (imgCanvas.height || 150) / (imgCanvas.width || 300);
-    const altoFrente = anchoFrente * proporcion * Math.cos(pitch * 0.55);
+    const altoFrente = anchoFrente * proporcion * Math.cos(pitch * 0.52);
 
     const cosR = Math.cos(anguloRoll);
     const sinR = Math.sin(anguloRoll);
 
-    // Posiciones 3D de las bisagras exteriores del armazón
     const factorIzq = 1 - yaw * 0.22;
     const factorDer = 1 + yaw * 0.22;
 
@@ -1184,16 +1886,14 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     const bisagraDerX = centroX + (anchoFrente * 0.48) * cosR;
     const bisagraDerY = centroY + (anchoFrente * 0.48) * sinR - (altoFrente * 0.16 * factorDer);
 
-    // 5. Dibujar patitas anatómicas con oclusión realista (solo se dibuja el lado visible hacia la oreja)
+    // Patitas laterales dinámicas hacia las sienes/orejas
     ctx.save();
     ctx.strokeStyle = armazonData.colorPatita || 'rgba(28, 32, 38, 0.92)';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Si giras la cabeza hacia la izquierda (yaw > 0.07), tu oreja izquierda queda visible al frente
-    if (yaw > 0.07) {
-        const grosor = Math.max(3.5, anchoFrente * 0.026);
-        ctx.lineWidth = grosor;
+    if (yaw > 0.06) {
+        ctx.lineWidth = Math.max(3.5, anchoFrente * 0.026);
         const destinoOrejaX = orejaIzq.x + 2;
         const destinoOrejaY = orejaIzq.y - (altoFrente * 0.14);
         const ctrlX = (bisagraIzqX + destinoOrejaX) / 2;
@@ -1205,10 +1905,8 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
         ctx.stroke();
     }
 
-    // Si giras la cabeza hacia la derecha (yaw < -0.07), tu oreja derecha queda visible al frente
-    if (yaw < -0.07) {
-        const grosor = Math.max(3.5, anchoFrente * 0.026);
-        ctx.lineWidth = grosor;
+    if (yaw < -0.06) {
+        ctx.lineWidth = Math.max(3.5, anchoFrente * 0.026);
         const destinoOrejaX = orejaDer.x - 2;
         const destinoOrejaY = orejaDer.y - (altoFrente * 0.14);
         const ctrlX = (bisagraDerX + destinoOrejaX) / 2;
@@ -1221,7 +1919,7 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     }
     ctx.restore();
 
-    // 6. Dibujar el frente del armazón con escorzo trapezoidal en 16 bandas para efecto 3D envolvente
+    // Proyección trapezoidal 3D en 16 franjas
     ctx.save();
     ctx.translate(centroX, centroY);
     ctx.rotate(anguloRoll);
@@ -1231,8 +1929,7 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
         ctx.shadowBlur = 9;
         ctx.shadowOffsetY = 4;
     } else {
-        // En modo file:// sin servidor HTTP, aplicar filtro limpio
-        ctx.filter = 'contrast(1.15)';
+        ctx.filter = 'contrast(1.18) saturate(1.08)';
     }
 
     const numFranjas = 16;
@@ -1242,10 +1939,9 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     for (let i = 0; i < numFranjas; i++) {
         const t0 = i / numFranjas;
         const t1 = (i + 1) / numFranjas;
-        const tMid = (t0 + t1) / 2; // 0 = izquierda, 1 = derecha
-        const ladoNormalizado = (tMid - 0.5) * 2; // -1 a +1
+        const tMid = (t0 + t1) / 2;
+        const ladoNormalizado = (tMid - 0.5) * 2;
 
-        // El lado más cercano a la cámara es ligeramente más alto por perspectiva real
         const escalaPerspectiva = 1 + (yaw * 0.24 * ladoNormalizado);
         const dstX = -anchoFrente / 2 + t0 * anchoFrente;
         const dstW = (anchoFrente / numFranjas) + 0.6;
@@ -1264,7 +1960,9 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
 
 function dibujarArmazonCentradoFallback(ctx, w, h, armazonData, escalaExtra = 1, offsetYExtra = 0) {
     if (!armazonData || !armazonData.canvas) return;
-    if (ctx.canvas) ctx.canvas.style.mixBlendMode = 'normal';
+    if (ctx.canvas) {
+        ctx.canvas.style.mixBlendMode = armazonData.transparente ? 'normal' : 'multiply';
+    }
     const imgCanvas = armazonData.canvas;
     const ancho = w * 0.46 * escalaExtra;
     const alto = ancho * ((imgCanvas.height || 150) / (imgCanvas.width || 300));
@@ -1298,8 +1996,9 @@ async function validarFotoRostroBiometrica(archivo) {
         img.src = urlTemporal;
     });
 
+    URL.revokeObjectURL(urlTemporal);
+
     if (!cargada || !img.naturalWidth) {
-        URL.revokeObjectURL(urlTemporal);
         return { valido: false, motivo: 'No se pudo leer la imagen seleccionada.' };
     }
 
@@ -1315,10 +2014,14 @@ async function validarFotoRostroBiometrica(archivo) {
         });
 
         let respondido = false;
+        const liberarDetector = () => {
+            try { detector.close(); } catch (e) {}
+        };
+
         const timeoutId = setTimeout(() => {
             if (!respondido) {
                 respondido = true;
-                URL.revokeObjectURL(urlTemporal);
+                liberarDetector();
                 resolve({ valido: false, motivo: 'No se logró detectar un rostro claro en la fotografía.' });
             }
         }, 8000);
@@ -1327,10 +2030,10 @@ async function validarFotoRostroBiometrica(archivo) {
             if (respondido) return;
             respondido = true;
             clearTimeout(timeoutId);
+            liberarDetector();
 
             const rostros = results.multiFaceLandmarks || [];
             if (rostros.length !== 1) {
-                URL.revokeObjectURL(urlTemporal);
                 resolve({
                     valido: false,
                     motivo: rostros.length === 0
@@ -1354,7 +2057,6 @@ async function validarFotoRostroBiometrica(archivo) {
             );
 
             if (!rostroValido) {
-                URL.revokeObjectURL(urlTemporal);
                 resolve({
                     valido: false,
                     motivo: 'Imagen rechazada: El rostro está muy lejos o recortado. Sube un retrato frontal centrado.'
@@ -1362,23 +2064,22 @@ async function validarFotoRostroBiometrica(archivo) {
                 return;
             }
 
-            resolve({ valido: true, img, landmarks: lm, urlTemporal });
+            resolve({ valido: true, img, landmarks: lm });
         });
 
         detector.send({ image: img }).catch(() => {
             if (!respondido) {
                 respondido = true;
                 clearTimeout(timeoutId);
-                URL.revokeObjectURL(urlTemporal);
+                liberarDetector();
                 resolve({ valido: false, motivo: 'Error al analizar la imagen. Intenta con otra foto.' });
             }
         });
     });
 }
 
-
 /*============================================================
-    8. PÁGINA ARMÁZONES: LIMPIEZA DE FONDOS Y PROBADOR AR
+    10. PÁGINA ARMÁZONES: LIMPIEZA DE FONDOS Y PROBADOR AR
 ============================================================*/
 async function limpiarFondosCatalogoTarjetas() {
     const imagenesCatalogo = document.querySelectorAll('.armazon-img');
@@ -1418,7 +2119,11 @@ let streamARIndividual = null;
 let animacionARIndividualId = null;
 let faceMeshIndividual = null;
 let ultimosLandmarksIndividual = null;
+let framesPerdidosIndividual = 0;
+let procesandoFrameIndividual = false;
 let armazonModalActual = null;
+let armazonNombreModalActual = '';
+let armazonRutaModalActual = '';
 let fotoEstaticaModal = null;
 let landmarksFotoModal = null;
 
@@ -1428,6 +2133,10 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
     const canvas = document.getElementById('canvas-ar-individual');
     const badge = document.getElementById('badge-tracking-individual');
     if (!modal || !video || !canvas) return;
+
+    armazonNombreModalActual = nombre;
+    armazonRutaModalActual = imagenRuta;
+    ZigoAnalytics.registrarPruebaAR(nombre, 'catalogo');
 
     const controlesExistentes = modal.querySelector('.ar-controles-ajuste');
     if (controlesExistentes && !document.getElementById('ar-brillo-modal')) {
@@ -1483,7 +2192,7 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
             landmarksFotoModal = null;
             video.style.display = 'block';
             document.getElementById('btn-volver-camara-modal').classList.add('oculto');
-            abrirProbadorVirtual(nombre, imagenRuta);
+            abrirProbadorVirtual(armazonNombreModalActual, armazonRutaModalActual);
         };
     }
 
@@ -1495,6 +2204,9 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
 
     fotoEstaticaModal = null;
     landmarksFotoModal = null;
+    ultimosLandmarksIndividual = null;
+    framesPerdidosIndividual = 0;
+    procesandoFrameIndividual = false;
     video.style.display = 'block';
     document.getElementById('btn-volver-camara-modal')?.classList.add('oculto');
     modal.style.display = 'flex';
@@ -1504,7 +2216,7 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
     const ctx = canvas.getContext('2d');
     if (animacionARIndividualId) cancelAnimationFrame(animacionARIndividualId);
 
-    async function bucleRenderAR() {
+    function bucleRenderAR() {
         const escalaUsuario = parseFloat(document.getElementById('ar-escala')?.value || '1');
         const offsetYUsuario = parseFloat(document.getElementById('ar-posicion-y')?.value || '0');
         const brillo = document.getElementById('ar-brillo-modal')?.value || '100';
@@ -1513,8 +2225,10 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
         video.style.filter = `brightness(${brillo}%) contrast(${contraste}%)`;
 
         if (fotoEstaticaModal && landmarksFotoModal) {
-            canvas.width = fotoEstaticaModal.naturalWidth || 640;
-            canvas.height = fotoEstaticaModal.naturalHeight || 480;
+            const fw = fotoEstaticaModal.naturalWidth || 640;
+            const fh = fotoEstaticaModal.naturalHeight || 480;
+            if (canvas.width !== fw) canvas.width = fw;
+            if (canvas.height !== fh) canvas.height = fh;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             ctx.filter = `brightness(${brillo}%) contrast(${contraste}%)`;
@@ -1526,12 +2240,17 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
         }
 
         if (!streamARIndividual) return;
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
+        const vw = video.videoWidth || 640;
+        const vh = video.videoHeight || 480;
+        if (canvas.width !== vw) canvas.width = vw;
+        if (canvas.height !== vh) canvas.height = vh;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (faceMeshIndividual && video.readyState >= 2) {
-            try { await faceMeshIndividual.send({ image: video }); } catch (e) {}
+        if (faceMeshIndividual && !procesandoFrameIndividual && video.readyState >= 2) {
+            procesandoFrameIndividual = true;
+            faceMeshIndividual.send({ image: video }).catch(() => {}).finally(() => {
+                procesandoFrameIndividual = false;
+            });
         }
 
         if (ultimosLandmarksIndividual && armazonModalActual) {
@@ -1569,7 +2288,16 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
                 minTrackingConfidence: 0.55
             });
             faceMeshIndividual.onResults((results) => {
-                ultimosLandmarksIndividual = (results.multiFaceLandmarks && results.multiFaceLandmarks[0]) || null;
+                const detectado = results.multiFaceLandmarks && results.multiFaceLandmarks[0];
+                if (detectado) {
+                    ultimosLandmarksIndividual = suavizarLandmarks(ultimosLandmarksIndividual, detectado, 0.72);
+                    framesPerdidosIndividual = 0;
+                } else {
+                    framesPerdidosIndividual++;
+                    if (framesPerdidosIndividual > 12) {
+                        ultimosLandmarksIndividual = null;
+                    }
+                }
             });
         }
 
@@ -1591,6 +2319,7 @@ function cerrarProbadorVirtual() {
     }
     fotoEstaticaModal = null;
     landmarksFotoModal = null;
+    ultimosLandmarksIndividual = null;
     const video = document.getElementById('webcam-ar');
     if (video) video.srcObject = null;
     const modal = document.getElementById('modal-probador-ar');
@@ -1620,6 +2349,7 @@ function tomarCapturaProbadorAR() {
 
     ctx.drawImage(canvasOverlay, 0, 0, canvasFinal.width, canvasFinal.height);
 
+    ZigoAnalytics.registrarConversion('capturasAR', armazonNombreModalActual);
     const enlace = document.createElement('a');
     enlace.href = canvasFinal.toDataURL('image/png');
     enlace.download = 'ziGO-Prueba-AR.png';
@@ -1663,72 +2393,111 @@ function irAColocarCita() {
     window.location.href = `agenda.html?armazones=${encodeURIComponent(seleccionados.join(', '))}`;
 }
 
-
 /*============================================================
-    9. PÁGINA RECOMENDACIÓN FACIAL IA (PROBADOR.HTML)
+    11. PÁGINA RECOMENDACIÓN FACIAL IA (PROBADOR.HTML)
 ============================================================*/
 function inicializarAsistenteIA() {
     const video = document.getElementById('webcam-feed');
     const canvasOverlay = document.getElementById('ar-overlay');
-    const btnActivarCamara = document.getElementById('btn-activar-camara');
-    const btnCaptura = document.getElementById('btn-captura');
-    const btnEscanear = document.getElementById('btn-escanear-ia');
+    if (!video || !canvasOverlay) return;
+
+    // Asegurar que el canvas nunca bloquee clics sobre botones
+    canvasOverlay.style.pointerEvents = 'none';
+
+    const buscarBotonPorTexto = (regex) =>
+        Array.from(document.querySelectorAll('button')).find(b => regex.test((b.textContent || '').trim()));
+
+    const btnActivarCamara = document.getElementById('btn-activar-camara') || buscarBotonPorTexto(/encender c[aá]mara|activar c[aá]mara/i);
+    const btnCaptura = document.getElementById('btn-captura') || document.querySelector('.btn-captura-ar') || buscarBotonPorTexto(/capturar|tomar foto/i);
+    const btnEscanear = document.getElementById('btn-escanear-ia') || buscarBotonPorTexto(/analizar mi rostro|volver a analizar/i);
     const alertaIA = document.getElementById('alerta-ia-rostro');
     const panelResultado = document.getElementById('resultado-ia');
     const statusTexto = document.getElementById('ar-status-texto');
     const statusDot = document.getElementById('ar-status-dot');
-    const selectCatalogo = document.getElementById('select-armazon-ia');
+    const selectCatalogo = document.getElementById('select-armazon-ia') || document.querySelector('select');
 
-    if (!video || !btnEscanear || !canvasOverlay) return;
+    if (!btnEscanear) return;
 
-    const tieneControlesNativos = Boolean(
-        document.getElementById('btn-subir-foto') ||
-        document.getElementById('slider-brillo') ||
-        document.getElementById('slider-escala-ia')
-    );
+    // Detectar o crear controles de foto y sliders sin duplicarlos
+    let btnSubirFoto = document.getElementById('btn-subir-foto') || document.getElementById('btn-subir-foto-ia') || buscarBotonPorTexto(/subir foto/i);
+    let inputSubirFoto = document.getElementById('input-foto-rostro') || document.getElementById('input-subir-foto') || document.getElementById('input-subir-foto-ia') || document.querySelector('input[type="file"]');
+    let btnVolverCamara = document.getElementById('btn-usar-camara') || document.getElementById('btn-volver-camara-ia') || buscarBotonPorTexto(/volver a c[aá]mara|usar c[aá]mara/i);
 
-    const visorContainer = video.closest('.ar-visor-container');
-    if (visorContainer && !tieneControlesNativos && !document.getElementById('controles-extra-probador-ia')) {
+    const visorContainer = video.closest('.ar-visor-container') || video.parentElement;
+
+    if (!btnSubirFoto && visorContainer) {
         visorContainer.insertAdjacentHTML('afterend', `
-            <div id="controles-extra-probador-ia" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;">
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <input type="file" id="input-subir-foto-ia" accept="image/jpeg,image/png,image/webp" style="display:none;">
-                    <button type="button" id="btn-subir-foto-ia" class="btn-detalles">
-                        <i class="fas fa-image"></i> Subir foto de mi rostro
-                    </button>
-                    <button type="button" id="btn-volver-camara-ia" class="btn-detalles oculto">
-                        <i class="fas fa-video"></i> Volver a cámara en vivo
-                    </button>
-                </div>
-                <div class="ar-controles-ajuste" style="margin-bottom:0;">
-                    <label>Brillo de imagen <input type="range" id="ia-brillo" min="60" max="165" step="5" value="100"></label>
-                    <label>Contraste <input type="range" id="ia-contraste" min="70" max="150" step="5" value="100"></label>
-                    <label>Tamaño del armazón <input type="range" id="ia-escala-lente" min="0.7" max="1.4" step="0.05" value="1"></label>
-                    <label>Altura en nariz <input type="range" id="ia-offset-y" min="-30" max="30" step="1" value="0"></label>
-                </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                <input type="file" id="input-subir-foto-ia" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                <button type="button" id="btn-subir-foto-ia" class="btn-detalles">
+                    <i class="fas fa-image"></i> Subir foto de mi rostro
+                </button>
+                <button type="button" id="btn-volver-camara-ia" class="btn-detalles oculto">
+                    <i class="fas fa-video"></i> Volver a cámara en vivo
+                </button>
             </div>
         `);
+        btnSubirFoto = document.getElementById('btn-subir-foto-ia');
+        inputSubirFoto = document.getElementById('input-subir-foto-ia');
+        btnVolverCamara = document.getElementById('btn-volver-camara-ia');
+    } else if (btnSubirFoto && !inputSubirFoto) {
+        const nuevoInput = document.createElement('input');
+        nuevoInput.type = 'file';
+        nuevoInput.id = 'input-subir-foto-ia';
+        nuevoInput.accept = 'image/jpeg,image/png,image/webp';
+        nuevoInput.style.display = 'none';
+        btnSubirFoto.parentElement.appendChild(nuevoInput);
+        inputSubirFoto = nuevoInput;
     }
 
-    const sliderBrillo = document.getElementById('slider-brillo') || document.getElementById('ia-brillo');
-    const sliderContraste = document.getElementById('slider-contraste') || document.getElementById('ia-contraste');
-    const sliderEscala = document.getElementById('slider-escala-ia') || document.getElementById('ia-escala-lente');
-    const sliderOffset = document.getElementById('slider-offset-ia') || document.getElementById('ia-offset-y');
-    const btnSubirFoto = document.getElementById('btn-subir-foto') || document.getElementById('btn-subir-foto-ia');
-    const inputSubirFoto = document.getElementById('input-foto-rostro') || document.getElementById('input-subir-foto-ia');
-    const btnVolverCamara = document.getElementById('btn-usar-camara') || document.getElementById('btn-volver-camara-ia');
+    // Detectar sliders nativos por ID o etiqueta
+    let sliderBrillo = document.getElementById('slider-brillo') || document.getElementById('ia-brillo');
+    let sliderContraste = document.getElementById('slider-contraste') || document.getElementById('ia-contraste');
+    let sliderEscala = document.getElementById('slider-escala-ia') || document.getElementById('ia-escala-lente');
+    let sliderOffset = document.getElementById('slider-offset-ia') || document.getElementById('ia-offset-y');
+
+    document.querySelectorAll('input[type="range"]').forEach(rng => {
+        const textoContenedor = (rng.closest('label')?.textContent || rng.parentElement?.textContent || '').toLowerCase();
+        if (!sliderBrillo && textoContenedor.includes('brillo')) sliderBrillo = rng;
+        if (!sliderContraste && textoContenedor.includes('contraste')) sliderContraste = rng;
+        if (!sliderEscala && (textoContenedor.includes('tamaño') || textoContenedor.includes('escala'))) sliderEscala = rng;
+        if (!sliderOffset && (textoContenedor.includes('altura') || textoContenedor.includes('posición') || textoContenedor.includes('nariz'))) sliderOffset = rng;
+    });
+
+    // Asegurar que existan controles de Tamaño y Altura del lente
+    if (!sliderEscala || !sliderOffset) {
+        const contenedorSliders = (sliderBrillo && sliderBrillo.closest('.ar-controles-ajuste')) || visorContainer;
+        if (contenedorSliders && !document.getElementById('ia-escala-lente')) {
+            const bloqueExtra = `
+                <label>Tamaño del armazón <input type="range" id="ia-escala-lente" min="0.7" max="1.4" step="0.05" value="1"></label>
+                <label>Altura en nariz <input type="range" id="ia-offset-y" min="-35" max="35" step="1" value="0"></label>
+            `;
+            if (contenedorSliders.classList.contains('ar-controles-ajuste')) {
+                contenedorSliders.insertAdjacentHTML('beforeend', bloqueExtra);
+            } else {
+                contenedorSliders.insertAdjacentHTML('afterend', `<div class="ar-controles-ajuste" style="margin-top:10px;">${bloqueExtra}</div>`);
+            }
+            sliderEscala = document.getElementById('ia-escala-lente');
+            sliderOffset = document.getElementById('ia-offset-y');
+        }
+    }
 
     let streamIA = null;
     let faceMeshIA = null;
     let ultimosLandmarksIA = null;
+    let framesPerdidosIA = 0;
+    let procesandoFrameIA = false;
     let armazonActivoIA = null;
     let rafIA = null;
     let fotoSubidaIA = null;
     let landmarksFotoSubidaIA = null;
 
     function mostrarAlertaIA(msg) {
-        if (!alertaIA) return;
-        alertaIA.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
+        if (!alertaIA) {
+            alert(msg);
+            return;
+        }
+        alertaIA.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${escaparHTML(msg)}`;
         alertaIA.classList.remove('oculto');
     }
 
@@ -1746,25 +2515,32 @@ function inicializarAsistenteIA() {
     sliderContraste?.addEventListener('input', aplicarFiltrosLuzIA);
 
     async function seleccionarArmazonEnVivoIA(nombre, rutaRelativa) {
+        ZigoAnalytics.registrarPruebaAR(nombre, 'recomendacion_ia');
         armazonActivoIA = await obtenerArmazonProcesado(rutaRelativa);
         document.querySelectorAll('.btn-modelo-lente').forEach(btn => {
             btn.classList.toggle('activo', btn.getAttribute('data-nombre') === nombre);
         });
+        if (!rafIA && (streamIA || fotoSubidaIA)) {
+            iniciarBucleRenderIA();
+        }
     }
 
     function iniciarBucleRenderIA() {
         if (rafIA) cancelAnimationFrame(rafIA);
         const ctx = canvasOverlay.getContext('2d');
 
-        async function bucleIA() {
+        function bucleIA() {
             const escala = parseFloat(sliderEscala?.value || '1');
             const offsetY = parseFloat(sliderOffset?.value || '0');
             const brillo = sliderBrillo?.value || '100';
             const contraste = sliderContraste?.value || '100';
 
             if (fotoSubidaIA && landmarksFotoSubidaIA) {
-                canvasOverlay.width = fotoSubidaIA.naturalWidth || 640;
-                canvasOverlay.height = fotoSubidaIA.naturalHeight || 480;
+                const fw = fotoSubidaIA.naturalWidth || 640;
+                const fh = fotoSubidaIA.naturalHeight || 480;
+                if (canvasOverlay.width !== fw) canvasOverlay.width = fw;
+                if (canvasOverlay.height !== fh) canvasOverlay.height = fh;
+
                 ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
                 ctx.save();
                 ctx.filter = `brightness(${brillo}%) contrast(${contraste}%)`;
@@ -1779,12 +2555,20 @@ function inicializarAsistenteIA() {
             }
 
             if (!streamIA) return;
-            canvasOverlay.width = video.videoWidth || 640;
-            canvasOverlay.height = video.videoHeight || 480;
+
+            const vw = video.videoWidth || 640;
+            const vh = video.videoHeight || 480;
+            if (canvasOverlay.width !== vw) canvasOverlay.width = vw;
+            if (canvasOverlay.height !== vh) canvasOverlay.height = vh;
+
             ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
 
-            if (faceMeshIA && video.readyState >= 2) {
-                try { await faceMeshIA.send({ image: video }); } catch (e) {}
+            // Envío no bloqueante a MediaPipe para que el renderizado corra fluido a 60fps
+            if (faceMeshIA && !procesandoFrameIA && video.readyState >= 2) {
+                procesandoFrameIA = true;
+                faceMeshIA.send({ image: video }).catch(() => {}).finally(() => {
+                    procesandoFrameIA = false;
+                });
             }
 
             if (ultimosLandmarksIA && armazonActivoIA) {
@@ -1801,12 +2585,18 @@ function inicializarAsistenteIA() {
     async function encenderCamaraIA() {
         fotoSubidaIA = null;
         landmarksFotoSubidaIA = null;
+        ultimosLandmarksIA = null;
+        framesPerdidosIA = 0;
+        procesandoFrameIA = false;
         video.style.display = 'block';
         btnVolverCamara?.classList.add('oculto');
 
-        if (streamIA) return true;
+        if (streamIA) {
+            iniciarBucleRenderIA();
+            return true;
+        }
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            mostrarAlertaIA('Tu navegador no permite acceso directo a cámara. Puedes usar el botón "Subir foto de mi rostro".');
+            mostrarAlertaIA('Tu navegador no permite acceso directo a cámara. Usa el botón "Subir foto de mi rostro".');
             return false;
         }
         try {
@@ -1833,7 +2623,16 @@ function inicializarAsistenteIA() {
                     minTrackingConfidence: 0.55
                 });
                 faceMeshIA.onResults((res) => {
-                    ultimosLandmarksIA = (res.multiFaceLandmarks && res.multiFaceLandmarks[0]) || null;
+                    const detectado = res.multiFaceLandmarks && res.multiFaceLandmarks[0];
+                    if (detectado) {
+                        ultimosLandmarksIA = suavizarLandmarks(ultimosLandmarksIA, detectado, 0.72);
+                        framesPerdidosIA = 0;
+                    } else {
+                        framesPerdidosIA++;
+                        if (framesPerdidosIA > 12) {
+                            ultimosLandmarksIA = null;
+                        }
+                    }
                 });
             }
 
@@ -1846,7 +2645,10 @@ function inicializarAsistenteIA() {
     }
 
     if (btnSubirFoto && inputSubirFoto) {
-        btnSubirFoto.addEventListener('click', () => inputSubirFoto.click());
+        btnSubirFoto.addEventListener('click', (e) => {
+            e.preventDefault();
+            inputSubirFoto.click();
+        });
 
         inputSubirFoto.addEventListener('change', async (e) => {
             const archivo = e.target.files[0];
@@ -1883,8 +2685,15 @@ function inicializarAsistenteIA() {
         });
     }
 
-    btnVolverCamara?.addEventListener('click', encenderCamaraIA);
-    btnActivarCamara?.addEventListener('click', encenderCamaraIA);
+    btnVolverCamara?.addEventListener('click', (e) => {
+        e.preventDefault();
+        encenderCamaraIA();
+    });
+
+    btnActivarCamara?.addEventListener('click', (e) => {
+        e.preventDefault();
+        encenderCamaraIA();
+    });
 
     selectCatalogo?.addEventListener('change', async () => {
         if (!selectCatalogo.value) return;
@@ -1922,13 +2731,13 @@ function inicializarAsistenteIA() {
             recomendados = ['ziGO Metro', 'ziGO Sport', 'ziGO Nova'];
         }
 
+        ZigoAnalytics.registrarRostroIA(tipoRostro);
         document.getElementById('ia-tipo-rostro').innerText = tipoRostro;
         document.getElementById('ia-explicacion-rostro').innerText = explicacion;
 
         const listaObjetosRec = recomendados.map(nom => CATALOGO_ARMAZONES.find(c => c.nombre === nom)).filter(Boolean);
         const contenedorBotones = document.getElementById('contenedor-botones-recomendados');
 
-        // Procesar miniaturas limpias sobre pedestal blanco para que luzcan en el panel derecho
         const tarjetasMini = await Promise.all(listaObjetosRec.map(async (arm, idx) => {
             const proc = await obtenerArmazonProcesado(arm.archivo);
             let srcMini = `${RUTA_BASE}${arm.archivo}`;
@@ -1936,10 +2745,10 @@ function inicializarAsistenteIA() {
                 try { srcMini = proc.canvasCatalogo.toDataURL('image/png'); } catch (e) {}
             }
             return `
-                <button type="button" class="btn-modelo-lente ${idx === 0 ? 'activo' : ''}" data-nombre="${arm.nombre}" data-ruta="${arm.archivo}">
+                <button type="button" class="btn-modelo-lente ${idx === 0 ? 'activo' : ''}" data-nombre="${escaparHTML(arm.nombre)}" data-ruta="${escaparHTML(arm.archivo)}">
                     ${idx === 0 ? '<span class="badge-top-rec">#1 IDEAL</span>' : '<span style="font-size:9px;opacity:0.85;">OPCIÓN ' + (idx + 1) + '</span>'}
-                    <img src="${srcMini}" alt="${arm.nombre}">
-                    <span>${arm.nombre}</span>
+                    <img src="${srcMini}" alt="${escaparHTML(arm.nombre)}">
+                    <span>${escaparHTML(arm.nombre)}</span>
                 </button>
             `;
         }));
@@ -1970,7 +2779,8 @@ function inicializarAsistenteIA() {
         };
     }
 
-    btnEscanear.addEventListener('click', async () => {
+    btnEscanear.addEventListener('click', async (e) => {
+        e.preventDefault();
         if (fotoSubidaIA && landmarksFotoSubidaIA) {
             await calcularYMostrarDiagnostico([extraerMetricasLandmarks(landmarksFotoSubidaIA)]);
             return;
@@ -2005,7 +2815,8 @@ function inicializarAsistenteIA() {
         }, 1800);
     });
 
-    btnCaptura?.addEventListener('click', () => {
+    btnCaptura?.addEventListener('click', (e) => {
+        e.preventDefault();
         if (!streamIA && !fotoSubidaIA) {
             mostrarAlertaIA('Enciende la cámara o sube una foto primero para guardar tu prueba.');
             return;
@@ -2028,6 +2839,7 @@ function inicializarAsistenteIA() {
 
         ctx.drawImage(canvasOverlay, 0, 0, c.width, c.height);
 
+        ZigoAnalytics.registrarConversion('capturasAR', 'Recomendacion_IA');
         const a = document.createElement('a');
         a.href = c.toDataURL('image/png');
         a.download = 'ziGO-Recomendacion-IA.png';
@@ -2037,18 +2849,18 @@ function inicializarAsistenteIA() {
     window.addEventListener('beforeunload', () => {
         if (rafIA) cancelAnimationFrame(rafIA);
         if (streamIA) streamIA.getTracks().forEach(t => t.stop());
+        try { faceMeshIA?.close(); } catch (e) {}
+        try { faceMeshIndividual?.close(); } catch (e) {}
     });
 }
 
-
 /*============================================================
-    10. PÁGINA AGENDA: MASCOTA ziGO + SITIO VS DOMICILIO CONDICIONAL
+    12. PÁGINA AGENDA: MASCOTA ziGO + SITIO VS DOMICILIO CONDICIONAL
 ============================================================*/
 function inicializarAgenda() {
     const inlineContainer = document.getElementById('inline-container');
     if (!inlineContainer) return;
 
-    // Reemplazar el ícono del ojo por la mascota ziGO del <head>
     const avatarOptica = document.querySelector('.avatar-optica');
     if (avatarOptica) {
         const iconoHead = document.querySelector('link[rel*="icon"]')?.getAttribute('href') || '../img/favicon.png';
@@ -2081,7 +2893,6 @@ function inicializarAgenda() {
     const bloqueUbicacion = controlesDomicilio ? controlesDomicilio.closest('.bloque-config-cita') : null;
     const tituloUbicacion = bloqueUbicacion ? bloqueUbicacion.querySelector('h3') : null;
 
-    // Garantizar que el mapa y las coordenadas queden dentro de controlesDomicilio para ocultarlos en modo Sitio
     if (controlesDomicilio) {
         if (mapaBox && !controlesDomicilio.contains(mapaBox)) controlesDomicilio.appendChild(mapaBox);
         if (textoCoords && !controlesDomicilio.contains(textoCoords)) controlesDomicilio.appendChild(textoCoords);
@@ -2094,7 +2905,7 @@ function inicializarAgenda() {
         tarjetaSitio.className = 'tarjeta-direccion-sitio';
         tarjetaSitio.innerHTML = `
             <strong><i class="fas fa-store-alt"></i> Dirección del Consultorio ziGO:</strong>
-            <div style="margin-top:4px;">${CONFIG_ZIGO.direccionSitioZigo}</div>
+            <div style="margin-top:4px;">${escaparHTML(CONFIG_ZIGO.direccionSitioZigo)}</div>
             <div style="font-size:11px; opacity:0.85; margin-top:6px;">(Si deseas consulta en tu hogar, selecciona arriba <strong>"A Domicilio"</strong> para ingresar tu dirección).</div>
         `;
         bloqueUbicacion.insertBefore(tarjetaSitio, controlesDomicilio);
@@ -2149,19 +2960,19 @@ function inicializarAgenda() {
     function actualizarResumenVisual(recargarCalendario = true) {
         const esDomicilio = modalidadSeleccionada.toLowerCase().includes('domicilio');
         if (resumenDiv) {
-            let html = `<div><strong>Modalidad:</strong> ${modalidadSeleccionada}</div>`;
+            let html = `<div><strong>Modalidad:</strong> ${escaparHTML(modalidadSeleccionada)}</div>`;
             if (armazonesURL) {
-                html += `<div><strong>Armazones:</strong> ${armazonesURL}</div>`;
+                html += `<div><strong>Armazones:</strong> ${escaparHTML(armazonesURL)}</div>`;
             }
             if (esDomicilio) {
                 if (direccionDetectada) {
-                    html += `<div><strong>Dirección Domicilio:</strong> ${direccionDetectada}</div>`;
+                    html += `<div><strong>Dirección Domicilio:</strong> ${escaparHTML(direccionDetectada)}</div>`;
                 }
                 if (enlaceGoogleMaps) {
                     html += `<div><strong>Google Maps:</strong> <a href="${enlaceGoogleMaps}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:bold;">Abrir pin exacto</a></div>`;
                 }
             } else {
-                html += `<div><strong>Punto de atención:</strong> ${CONFIG_ZIGO.direccionSitioZigo}</div>`;
+                html += `<div><strong>Punto de atención:</strong> ${escaparHTML(CONFIG_ZIGO.direccionSitioZigo)}</div>`;
             }
             resumenDiv.innerHTML = html;
         }
@@ -2174,6 +2985,7 @@ function inicializarAgenda() {
     document.querySelectorAll('input[name="modalidad-cita"]').forEach(radio => {
         radio.addEventListener('change', () => {
             modalidadSeleccionada = radio.value;
+            ZigoAnalytics.registrarModalidadCita(modalidadSeleccionada);
             actualizarVistaModalidad();
             actualizarResumenVisual(true);
         });
@@ -2219,7 +3031,7 @@ function inicializarAgenda() {
                 const notaAjuste = (precisionMetros && precisionMetros > 300)
                     ? ' <span style="color:#38bdf8;">(Arrastra el pin azul o escribe tu calle y número exactos arriba si deseas afinarlo)</span>'
                     : '';
-                textoCoords.innerHTML = `<i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> Ubicación lista ${etiqueta}: <strong>${direccionDetectada || `${lat.toFixed(5)}, ${lng.toFixed(5)}`}</strong>${notaAjuste}`;
+                textoCoords.innerHTML = `<i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> Ubicación lista ${escaparHTML(etiqueta)}: <strong>${escaparHTML(direccionDetectada || `${lat.toFixed(5)}, ${lng.toFixed(5)}`)}</strong>${notaAjuste}`;
             }
 
             actualizarResumenVisual(true);
@@ -2310,9 +3122,8 @@ function inicializarAgenda() {
     actualizarResumenVisual(true);
 }
 
-
 /*============================================================
-    11. PÁGINA NOSOTROS: BUZÓN DE QUEJAS DIRECTO A ÁNGEL Y MIGUEL
+    13. PÁGINA NOSOTROS: BUZÓN DE QUEJAS DIRECTO A ÁNGEL Y MIGUEL
 ============================================================*/
 function inicializarBuzonQuejas() {
     const formQuejas = document.getElementById('form-quejas-zigo');
@@ -2359,6 +3170,8 @@ function inicializarBuzonQuejas() {
             btnSubmit.innerHTML = textoOriginalBtn;
         }
 
+        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
+
         const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
         const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
 
@@ -2366,9 +3179,9 @@ function inicializarBuzonQuejas() {
 
         if (respuesta) {
             respuesta.innerHTML = enviadoPorCorreo
-                ? `<div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Reporte enviado correctamente (Folio ${folio}).</strong> Tu mensaje fue canalizado al área de Calidad y Atención ziGO para darle seguimiento oportuno.</div>`
+                ? `<div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Reporte enviado correctamente (Folio ${escaparHTML(folio)}).</strong> Tu mensaje fue canalizado al área de Calidad y Atención ziGO para darle seguimiento oportuno.</div>`
                 : `<div style="display:flex; flex-direction:column; gap:10px;">
-                    <div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Folio generado: ${folio}.</strong> Haz clic abajo para completar el envío directo desde tu correo:</div>
+                    <div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Folio generado: ${escaparHTML(folio)}.</strong> Haz clic abajo para completar el envío directo desde tu correo:</div>
                     <div>
                         <a href="${urlMail}" class="boton-agenda" style="font-size:12px; padding:9px 16px; display:inline-flex; align-items:center; gap:6px;">
                             <i class="fas fa-envelope"></i> Enviar reporte por Correo
@@ -2380,9 +3193,8 @@ function inicializarBuzonQuejas() {
     });
 }
 
-
 /*============================================================
-    12. ADAPTACIÓN RESPONSIVA CALENDARIO ZOHO (< 400PX)
+    14. ADAPTACIÓN RESPONSIVA CALENDARIO ZOHO (< 400PX)
 ============================================================*/
 function ajustarCalendarioMovilEstrecho() {
     const contenedor = document.getElementById('inline-container');
@@ -2404,17 +3216,74 @@ function ajustarCalendarioMovilEstrecho() {
     }
 }
 
+/*============================================================
+    15. SEGUIMIENTO DE CONVERSIONES Y ACCESO DIRECTO A ESTADÍSTICAS
+============================================================*/
+function inicializarSeguimientoConversiones() {
+    document.addEventListener('click', (e) => {
+        const enlace = e.target.closest('a');
+        if (!enlace) return;
+        const href = enlace.getAttribute('href') || '';
+        const canal = enlace.dataset.canal || '';
+
+        if (canal === 'whatsapp' || href.includes('wa.me')) {
+            ZigoAnalytics.registrarConversion('whatsapp', href);
+        } else if (canal === 'telegram' || href.includes('t.me')) {
+            ZigoAnalytics.registrarConversion('telegram', href);
+        } else if (canal === 'llamada' || href.startsWith('tel:')) {
+            ZigoAnalytics.registrarConversion('llamada', href);
+        }
+    });
+
+    // Atajo de teclado Ctrl + Shift + E
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+            e.preventDefault();
+            ZigoAnalytics.mostrarPanelEstadisticas();
+        }
+    });
+
+    // Botón discreto en el footer + triple clic para abrir estadísticas en móvil o PC
+    const footer = document.querySelector('footer');
+    if (footer) {
+        if (!document.getElementById('btn-footer-stats-zigo')) {
+            const btnStats = document.createElement('button');
+            btnStats.type = 'button';
+            btnStats.id = 'btn-footer-stats-zigo';
+            btnStats.className = 'btn-footer-stats-zigo';
+            btnStats.innerHTML = '<i class="fas fa-chart-bar"></i> Estadísticas ziGO';
+            btnStats.addEventListener('click', () => ZigoAnalytics.mostrarPanelEstadisticas());
+            footer.appendChild(btnStats);
+        }
+
+        footer.addEventListener('click', (e) => {
+            if (e.detail === 3) {
+                ZigoAnalytics.mostrarPanelEstadisticas();
+            }
+        });
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('stats') === 'zigo' || window.location.hash === '#estadisticas') {
+        setTimeout(() => ZigoAnalytics.mostrarPanelEstadisticas(), 400);
+    }
+}
 
 /*============================================================
     INICIALIZACIÓN GLOBAL DEL SISTEMA
 ============================================================*/
 document.addEventListener('DOMContentLoaded', () => {
+    ZigoAnalytics.inicializarGA4Opcional();
+    ZigoAnalytics.registrarVistaPagina();
+    inicializarSEOEstructurado();
+
     prepararIdentidadEInclusionDOM();
     inicializarBuscadorInterno();
     inicializarAccesibilidadYWidgets();
     inicializarTestimonios5Estrellas();
     adaptarImagenesIndexATema();
     limpiarFondosCatalogoTarjetas();
+    inicializarSeguimientoConversiones();
 
     document.querySelectorAll('.seleccionar-armazon').forEach(box => {
         box.addEventListener('change', actualizarContador);
@@ -2432,3 +3301,78 @@ window.addEventListener('load', () => {
 
 window.addEventListener('resize', ajustarCalendarioMovilEstrecho);
 window.addEventListener('pageshow', actualizarContador);
+
+/*============================================================
+    13. PÁGINA NOSOTROS: BUZÓN DE QUEJAS DIRECTO Y REGISTRO LOCAL
+============================================================*/
+function inicializarBuzonQuejas() {
+    const formQuejas = document.getElementById('form-quejas-zigo');
+    const respuesta = document.getElementById('respuesta-queja');
+    if (!formQuejas) return;
+
+    formQuejas.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = formQuejas.querySelector('button[type="submit"]');
+        const nombre = (document.getElementById('queja-nombre')?.value || '').trim() || 'Paciente Anónimo';
+        const tipo = document.getElementById('queja-tipo')?.value || 'Comentario / Queja';
+        const mensaje = (document.getElementById('queja-mensaje')?.value || '').trim();
+        const folio = `ZIGO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        // Guardar automáticamente en localStorage para que se vea en el panel admin
+        const stats = JSON.parse(localStorage.getItem('zigo_admin_stats') || '{}');
+        stats.calificaciones = stats.calificaciones || [];
+        stats.calificaciones.push({
+            score: tipo.toLowerCase().includes('felicitación') ? 5 : (tipo.toLowerCase().includes('queja') ? 1 : 3),
+            tipo: tipo,
+            comentario: mensaje,
+            nombre: nombre,
+            fecha: new Date().toISOString()
+        });
+        localStorage.setItem('zigo_admin_stats', JSON.stringify(stats));
+
+        const textoOriginalBtn = btnSubmit ? btnSubmit.innerHTML : '';
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando y enviando...';
+        }
+
+        let enviadoPorCorreo = false;
+        try {
+            const resp = await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasPrincipal}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    _subject: `[${folio}] ${tipo} - Buzón de Calidad ziGO`,
+                    _cc: CONFIG_ZIGO.correoQuejasCopia,
+                    _template: 'table',
+                    Folio: folio,
+                    Tipo: tipo,
+                    Paciente: nombre,
+                    Mensaje: mensaje
+                })
+            });
+            enviadoPorCorreo = resp.ok;
+        } catch (err) {}
+
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginalBtn;
+        }
+
+        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
+
+        const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
+        const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
+
+        formQuejas.reset();
+
+        if (respuesta) {
+            respuesta.innerHTML = `<div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Reporte registrado y guardado (Folio ${escaparHTML(folio)}).</strong> Ya es visible en tus estadísticas de administración.</div>`;
+            respuesta.classList.remove('oculto');
+        }
+    });
+}
+

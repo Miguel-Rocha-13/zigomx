@@ -3,36 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>ziGO | Experiencias y Consultas con la Dra. Escarlet Alcocer</title>
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <title>ziGO | Experiencias y Consultas con la Dra. Escarlet Alcocer en CDMX</title>
+    <link rel="canonical" href="https://zigomx.com/pages/experiencias.html">
     <link rel="icon" href="../img/mascota_logo2.ico">
-    <meta name="description" content="Conoce cómo se vive un examen de la vista con la Dra. Escarlet Alcocer en ziGO. Tecnología diagnóstica, calidez humana y asesoría estética personalizada.">
-    <meta name="robots" content="index, follow">
+    <link rel="apple-touch-icon" href="../img/logo.png">
+    <link rel="manifest" href="../site.webmanifest">
+    <meta name="theme-color" content="#02102b">
+    <meta name="description" content="Conoce cómo se vive un examen de la vista con la Dra. Escarlet Alcocer en ziGO CDMX. Tecnología diagnóstica de precisión, calidez humana y asesoría estética personalizada.">
+    <meta name="keywords" content="ziGO, experiencias ziGO, examen de la vista CDMX, Dra Escarlet Alcocer, consulta optométrica ziGO, zigomx">
+    <meta name="author" content="ziGO - Soluciones en Movimiento">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+
+    <meta property="og:site_name" content="ziGO">
+    <meta property="og:locale" content="es_MX">
+    <meta property="og:title" content="ziGO | Experiencias y Consulta Visual Paso a Paso">
+    <meta property="og:description" content="Descubre el proceso de atención visual personalizado con la Dra. Escarlet Alcocer en ziGO.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zigomx.com/pages/experiencias.html">
+    <meta property="og:image" content="https://zigomx.com/img/zigo_main.jpeg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ziGO | Experiencias y Consulta Visual">
+    <meta name="twitter:description" content="Valoración integral de salud visual, refracción de precisión y asesoría estética en ziGO.">
+    <meta name="twitter:image" content="https://zigomx.com/img/zigo_main.jpeg">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "Cómo es una consulta de examen de la vista en ziGO",
+      "description": "Proceso de atención optométrica personalizada con la Dra. Escarlet Alcocer en ziGO.",
+      "inLanguage": "es-MX",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Valoración Integral de Salud Visual",
+          "text": "Entrevista clínica detallada sobre hábitos visuales, uso de pantallas y antecedentes."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Refracción y Pruebas de Precisión",
+          "text": "Evaluación optométrica completa de agudeza visual, salud ocular y graduación exacta."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Asesoría Estética y Ajuste Anatómico",
+          "text": "Elección de armazón acorde a tus facciones y calibración óptica exacta."
+        }
+      ]
+    }
+    </script>
+
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="../css/styles.css?v=3.0">
+    <link rel="stylesheet" href="../css/styles.css?v=6.0">
     <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="../js/script.js?v=3.0" defer></script>
+    <script src="../js/script.js?v=6.0" defer></script>
 </head>
 <body>
+    <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
+    <canvas id="zigo-starfield" aria-hidden="true"></canvas>
     <div class="cielo-estrellado" aria-hidden="true"></div>
 
     <header class="contenedor-menu">
         <div class="logo">
-            <a href="../index.html"> 
-                <img src="../img/logo.png" alt="ziGO - Optometría y Estilo" width="297" height="159">
+            <a href="../index.html" aria-label="Inicio ziGO">
+                <img src="../img/logo.png" alt="ziGO - Optometría y Estilo" width="297" height="159" fetchpriority="high">
             </a>
         </div>
         <nav aria-label="Menú principal">
             <ul>
                 <li><a href="../index.html">Inicio</a></li>
                 <li><a href="./armazones.html">Armazones</a></li>
-                <li><a href="./probador.html">Asesor IA</a></li>
+                <li><a href="./probador.html">Recomendación IA</a></li>
                 <li><a href="./experiencias.html" class="enlace-activo">Experiencias</a></li>
                 <li><a href="./nosotros.html">Nosotros</a></li>
             </ul>
         </nav>
         <div class="botones-menu">
-            <form class="form-buscador" role="search" onsubmit="return false;">
+            <form class="form-buscador" role="search">
                 <input type="search" id="input-buscador-global" placeholder="Buscar..." class="buscador" aria-label="Buscar en ziGO">
                 <button type="button" id="btn-lupa-buscador" class="btn-lupa-invisible" aria-label="Ejecutar búsqueda"></button>
             </form>
@@ -65,10 +118,10 @@
             </div>
 
             <!-- Galería de Consultas con Pacientes -->
-            <h2 class="seccion-titulo" style="font-size: 28px; margin-top: 50px;">Momentos en Consulta con Nuestros Pacientes</h2>
+            <h2 class="seccion-titulo titulo-experiencias-sub">Momentos en Consulta con Nuestros Pacientes</h2>
             <div class="galeria-experiencias-grid">
                 <figure class="experiencia-foto-card">
-                    <img src="../img/zigo_main.jpeg" alt="Dra. Escarlet Alcocer realizando valoración óptica profesional" loading="lazy">
+                    <img src="../img/zigo_main.jpeg" alt="Dra. Escarlet Alcocer realizando valoración óptica profesional" loading="lazy" decoding="async">
                     <figcaption>
                         <strong>Atención Personalizada</strong>
                         <span>Diagnóstico optométrico detallado adaptado a las necesidades diarias de cada paciente.</span>
@@ -76,7 +129,7 @@
                 </figure>
 
                 <figure class="experiencia-foto-card">
-                    <img src="../img/zigo_main_2.jpeg" alt="Selección de armazones y asesoría visual en consulta ziGO" loading="lazy">
+                    <img src="../img/zigo_main_2.jpeg" alt="Selección de armazones y asesoría visual en consulta ziGO" loading="lazy" decoding="async">
                     <figcaption>
                         <strong>Selección Guiada de Estilo</strong>
                         <span>Prueba física de armazones con asesoría especializada de la Dra. Escarlet Alcocer.</span>
@@ -84,7 +137,7 @@
                 </figure>
 
                 <figure class="experiencia-foto-card">
-                    <img src="../img/Probador.jpeg" alt="Tecnología óptica y pruebas visuales de precisión" loading="lazy">
+                    <img src="../img/Probador.jpeg" alt="Tecnología óptica y pruebas visuales de precisión" loading="lazy" decoding="async">
                     <figcaption>
                         <strong>Tecnología y Calidez Humana</strong>
                         <span>Un entorno cercano, moderno y confiable para cuidar tu vista con total seguridad.</span>
@@ -93,11 +146,71 @@
             </div>
 
             <div class="cta-experiencias">
-                <a href="./agenda.html" class="boton-agenda" style="padding: 14px 32px; font-size: 16px;">
+                <a href="./agenda.html" class="boton-agenda btn-cta-experiencias">
                     <i class="fas fa-calendar-check" aria-hidden="true"></i> Vivir mi experiencia ziGO
                 </a>
             </div>
         </section>
+        <!-- Widget de Satisfacción del Cliente (1 a 5 caritas) -->
+<section id="zigo-feedback-widget" style="max-width:560px;margin:2rem auto;padding:1.5rem;background:rgba(11,25,44,0.85);border:1px solid #1e3a5f;border-radius:16px;text-align:center;color:#f1f5f9;">
+  <h3 style="margin:0 0 0.4rem;color:#38bdf8;font-size:1.15rem;">¿Cómo está siendo tu experiencia en ziGO?</h3>
+  <p style="margin:0 0 1rem;color:#94a3b8;font-size:0.88rem;">Tu opinión nos ayuda a mejorar nuestro catálogo y probador virtual.</p>
+
+  <div id="zigo-caritas" style="display:flex;justify-content:center;gap:0.75rem;margin-bottom:1rem;">
+    <button type="button" data-score="1" title="Muy mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😡</button>
+    <button type="button" data-score="2" title="Mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😕</button>
+    <button type="button" data-score="3" title="Regular" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😐</button>
+    <button type="button" data-score="4" title="Buena" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🙂</button>
+    <button type="button" data-score="5" title="Excelente" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🤩</button>
+  </div>
+
+  <div id="zigo-feedback-extra" style="display:none;">
+    <input id="zigo-feedback-texto" type="text" maxlength="180" placeholder="¿Algo que quieras comentarnos? (Opcional)" style="width:100%;padding:0.65rem 0.9rem;border-radius:10px;border:1px solid #334155;background:#061121;color:#f8fafc;margin-bottom:0.75rem;">
+    <button type="button" id="zigo-feedback-enviar" style="background:#0ea5e9;color:#04101e;border:none;font-weight:700;padding:0.6rem 1.4rem;border-radius:999px;cursor:pointer;">Enviar valoración</button>
+  </div>
+
+  <p id="zigo-feedback-gracias" style="display:none;color:#34d399;font-weight:600;margin:0.5rem 0 0;">¡Gracias por calificarnos! Seguimos mejorando para ti.</p>
+</section>
+
+<script>
+(() => {
+  let scoreElegido = 0;
+  const botones = document.querySelectorAll('#zigo-caritas button');
+  const extra = document.getElementById('zigo-feedback-extra');
+  const gracias = document.getElementById('zigo-feedback-gracias');
+
+  botones.forEach(btn => {
+    btn.addEventListener('click', () => {
+      scoreElegido = Number(btn.dataset.score);
+      botones.forEach(b => {
+        b.style.borderColor = 'transparent';
+        b.style.transform = 'scale(1)';
+      });
+      btn.style.borderColor = '#38bdf8';
+      btn.style.transform = 'scale(1.15)';
+      extra.style.display = 'block';
+      gracias.style.display = 'none';
+    });
+  });
+
+  document.getElementById('zigo-feedback-enviar').addEventListener('click', () => {
+    if (!scoreElegido) return;
+    const comentario = document.getElementById('zigo-feedback-texto').value.trim();
+    const stats = JSON.parse(localStorage.getItem('zigo_admin_stats') || '{}');
+    stats.calificaciones = stats.calificaciones || [];
+    stats.calificaciones.push({
+      score: scoreElegido,
+      comentario,
+      fecha: new Date().toISOString()
+    });
+    localStorage.setItem('zigo_admin_stats', JSON.stringify(stats));
+
+    extra.style.display = 'none';
+    document.getElementById('zigo-feedback-texto').value = '';
+    gracias.style.display = 'block';
+  });
+})();
+</script>
     </main>
 
     <!-- Footer Unificado -->
@@ -109,14 +222,14 @@
                 <a href="https://threads.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar Threads de ziGO"><i class="fa-brands fa-threads" aria-hidden="true"></i></a>
                 <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar X de ziGO"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
                 <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="Visitar TikTok de ziGO"><i class="fab fa-tiktok" aria-hidden="true"></i></a>
-                <a href="https://telegram.org" target="_blank" rel="noopener noreferrer" aria-label="Visitar Telegram de ziGO"><i class="fab fa-telegram" aria-hidden="true"></i></a>
-                <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+                <a href="https://t.me/+525573839561" target="_blank" rel="noopener noreferrer" aria-label="Contactar por Telegram a ziGO"><i class="fab fa-telegram" aria-hidden="true"></i></a>
+                <a href="https://wa.me/5215573839561" target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp a ziGO"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
             </div>
             <nav aria-label="Navegación inferior">
                 <ul class="enlaces-legales">
                     <li><a href="../index.html">Inicio</a></li>
                     <li><a href="./armazones.html">Armazones</a></li>
-                    <li><a href="./probador.html">Asesor IA</a></li>
+                    <li><a href="./probador.html">Recomendación IA</a></li>
                     <li><a href="./experiencias.html">Experiencias</a></li>
                     <li><a href="./nosotros.html">Nosotros</a></li>
                     <li><a href="./agenda.html">Agendar cita</a></li>
@@ -125,7 +238,7 @@
             </nav>
             <div class="direccion">
                 <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
-                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+                <p>&copy; 2027 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>

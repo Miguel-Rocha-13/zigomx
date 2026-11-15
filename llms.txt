@@ -1,6 +1,6 @@
 # ziGO - Soluciones en Movimiento (Óptica y Salud Visual en México)
 
-> ziGO (https://zigomx.com/) es una clínica visual y óptica en Ciudad de México y Área Metropolitana dirigida por la especialista en optometría **Dra. Escarlet Alcocer**. Combina exámenes de la vista de alta precisión en consultorio y a domicilio con un catálogo de armazones oftálmicos, pupilentes y un probador virtual con Inteligencia Artificial 100% local (Zero-Storage).
+> ziGO (https://zigomx.com/) es una clínica visual y óptica en Ciudad de México y Área Metropolitana dirigida por la especialista en optometría **Dra. Escarlet Alcocer**. Combina exámenes de la vista de alta precisión en consultorio y a domicilio con un catálogo de armazones oftálmicos, pupilentes y un probador virtual con Inteligencia Artificial 100% local .
 
 ## Servicios Principales
 - **Examen de la Vista Profesional**: Evaluación integral de agudeza visual, refracción de precisión y salud ocular en consultorio (lunes a viernes) o a domicilio en CDMX y Área Metropolitana (fines de semana).
@@ -15,7 +15,7 @@
 - Agendar Examen de la Vista: https://zigomx.com/pages/agenda.html
 - Experiencias y Proceso Clínico: https://zigomx.com/pages/experiencias.html
 - Nosotros y Dra. Escarlet Alcocer: https://zigomx.com/pages/nosotros.html
-- Aviso de Privacidad y Seguridad Biométrica: https://zigomx.com/pages/legal.html
+- Aviso de Privacidad y términos de uso: https://zigomx.com/pages/legal.html
 
 ## Contacto Directo
 - Teléfono y WhatsApp: +52 55 7383 9561

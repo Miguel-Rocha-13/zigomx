@@ -2840,7 +2840,183 @@ body[class*="tema-"] #inline-container iframe {
     text-align: center;
 }
 
+/* ==========================================================================
+   ACTUALIZACIÓN ziGO: TEMA ROSA, OCULTAR SKIP-LINK, AR INTERACTIVO Y QUEJAS
+   ========================================================================== */
 
+/* 1. Ocultar por completo "Saltar al contenido principal" */
+.skip-link,
+.saltar-contenido,
+a[href="#contenido-principal"],
+a[href="#main-content"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* 2. Evitar que los canvas de Realidad Aumentada bloqueen clics en botones */
+#ar-overlay,
+#canvas-ar-individual,
+.ar-canvas-overlay {
+    pointer-events: none !important;
+}
+
+.ar-visor-container {
+    position: relative;
+    overflow: hidden;
+}
+
+/* 3. Tema Rosa Suave en Accesibilidad (body.tema-rosa) */
+body.tema-rosa {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 48%, #fbcfe8 100%) !important;
+    color: #2b1024 !important;
+}
+
+body.tema-rosa #zigo-starfield {
+    opacity: 0.22 !important;
+}
+
+body.tema-rosa header,
+body.tema-rosa .navbar,
+body.tema-rosa .barra-navegacion {
+    background: rgba(255, 241, 248, 0.92) !important;
+    border-bottom: 1px solid rgba(219, 39, 119, 0.28) !important;
+    box-shadow: 0 8px 24px rgba(190, 24, 93, 0.12) !important;
+}
+
+body.tema-rosa nav a,
+body.tema-rosa .menu-links a,
+body.tema-rosa h1,
+body.tema-rosa h2,
+body.tema-rosa h3,
+body.tema-rosa h4,
+body.tema-rosa p,
+body.tema-rosa label,
+body.tema-rosa span,
+body.tema-rosa blockquote {
+    color: #2b1024 !important;
+}
+
+body.tema-rosa nav a.activo,
+body.tema-rosa nav a:hover {
+    color: #be185d !important;
+}
+
+body.tema-rosa .tarjeta,
+body.tema-rosa .armazon-card,
+body.tema-rosa .testimonio-google-card,
+body.tema-rosa .probador-panel,
+body.tema-rosa .bloque-config-cita,
+body.tema-rosa .panel-accesibilidad,
+body.tema-rosa .modal-busqueda-caja,
+body.tema-rosa .banner-seguridad-ia,
+body.tema-rosa .privacidad-aviso {
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1px solid rgba(219, 39, 119, 0.30) !important;
+    color: #2b1024 !important;
+    box-shadow: 0 10px 28px rgba(190, 24, 93, 0.10) !important;
+}
+
+body.tema-rosa .boton-agenda,
+body.tema-rosa .btn-escanear,
+body.tema-rosa button[type="submit"] {
+    background: linear-gradient(135deg, #ec4899 0%, #be185d 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+body.tema-rosa .boton-agenda *,
+body.tema-rosa .btn-escanear *,
+body.tema-rosa button[type="submit"] * {
+    color: #ffffff !important;
+}
+
+body.tema-rosa .btn-detalles,
+body.tema-rosa .btn-filtro {
+    background: rgba(252, 231, 243, 0.95) !important;
+    color: #9d174d !important;
+    border: 1px solid rgba(219, 39, 119, 0.35) !important;
+}
+
+body.tema-rosa .btn-filtro.activo {
+    background: #db2777 !important;
+    color: #ffffff !important;
+}
+
+body.tema-rosa footer {
+    background: rgba(253, 242, 248, 0.95) !important;
+    border-top: 1px solid rgba(219, 39, 119, 0.25) !important;
+    color: #2b1024 !important;
+}
+
+/* 4. Botón de Quejas en menú flotante de mensajes y botón de estadísticas */
+.globo-queja-btn {
+    width: 100%;
+    text-align: left;
+    border: 1px solid rgba(244, 63, 94, 0.45) !important;
+    background: rgba(244, 63, 94, 0.14) !important;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.globo-queja-btn:hover {
+    background: rgba(244, 63, 94, 0.28) !important;
+}
+
+.form-queja-rapida-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.form-queja-rapida-grid input,
+.form-queja-rapida-grid select,
+.form-queja-rapida-grid textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    background: rgba(2, 16, 43, 0.75);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+body.tema-claro .form-queja-rapida-grid input,
+body.tema-claro .form-queja-rapida-grid select,
+body.tema-claro .form-queja-rapida-grid textarea,
+body.tema-rosa .form-queja-rapida-grid input,
+body.tema-rosa .form-queja-rapida-grid select,
+body.tema-rosa .form-queja-rapida-grid textarea {
+    background: #ffffff;
+    color: #1e293b;
+    border-color: rgba(148, 163, 184, 0.6);
+}
+
+.btn-footer-stats-zigo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    background: rgba(0, 229, 255, 0.10);
+    color: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-footer-stats-zigo:hover {
+    transform: translateY(-1px);
+    background: rgba(0, 229, 255, 0.22);
+}
 
 /*============================================================
         MEDIA QUERIES (RESPONSIVO POR PÁGINA Y DISPOSITIVO)

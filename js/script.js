@@ -2200,6 +2200,7 @@ function inicializarCatalogoArmazones() {
             const img = btnProbar.dataset.img || catItem?.archivo || '';
             abrirProbadorVirtual(nombre, img);
         }
+        
     });
 
     // 3. Botones de cierre de modales, captura y agendar cita

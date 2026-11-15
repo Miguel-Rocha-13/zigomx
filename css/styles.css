@@ -1281,8 +1281,8 @@ html[class*="tema-"] .btn-burbuja {
 /*============================================================
     4.6 VISOR DE REALIDAD AUMENTADA
     (lo comparten armazones.html y probador.html)
-    El video nunca se muestra: el lienzo dibuja cada cuadro de la
-    cámara con el armazón encima, así siempre quedan alineados.
+    El lienzo tapa al video y dibuja cada cuadro de la cámara con
+    el armazón encima, así siempre quedan alineados.
 ============================================================*/
 .visor-ar {
     position: relative;
@@ -1294,15 +1294,20 @@ html[class*="tema-"] .btn-burbuja {
     border-radius: 16px;
 }
 
+/* El video queda a tamaño completo debajo del lienzo: los teléfonos dejan de entregar
+   cuadros de un video oculto o diminuto, y entonces no habría nada que analizar */
 .visor-ar video {
     position: absolute;
-    width: 2px;
-    height: 2px;
-    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
     pointer-events: none;
 }
 
 .visor-ar canvas {
+    position: relative;
     display: block;
     width: 100%;
     height: 100%;

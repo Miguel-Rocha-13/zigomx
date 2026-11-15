@@ -1125,8 +1125,11 @@ function pedirPermisoCamara() {
 const MotorAR = (() => {
     // Contorno del rostro en FaceMesh, en orden; sirve para tapar las varillas que pasan por detrás
     const CONTORNO_ROSTRO = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
-    const MALLA_X = 12;
-    const MALLA_Y = 4;
+    // En teléfonos y tabletas se trabaja en modo ligero: detección sin el modelo extra de iris,
+    // malla más gruesa y sin sombra difuminada. La diferencia visual es mínima y el probador va fluido.
+    const ligero = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 700;
+    const MALLA_X = ligero ? 10 : 12;
+    const MALLA_Y = ligero ? 3 : 4;
     const CURVATURA = 0.07;                         // cuánto se curva el frente hacia las sienes (fracción del ancho)
     const INCLINACION = 8 * Math.PI / 180;          // inclinación natural del frente hacia las mejillas
     const ANCHO_REFERENCIA_MM = 138;
@@ -1163,7 +1166,7 @@ const MotorAR = (() => {
             document.head.appendChild(script);
         }).then(async () => {
             const instancia = new FaceMesh({ locateFile: (archivo) => CONFIG_ZIGO.faceMesh.base + archivo });
-            instancia.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+            instancia.setOptions({ maxNumFaces: 1, refineLandmarks: !ligero, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
             instancia.onResults((r) => { marcasDetectadas = (r.multiFaceLandmarks && r.multiFaceLandmarks[0]) || null; });
             await instancia.initialize();
             detector = instancia;
@@ -1371,7 +1374,7 @@ const MotorAR = (() => {
         // El recorte se agranda una fracción de píxel para que no se vean costuras entre triángulos
         const cx = (u0 + u1 + u2) / 3;
         const cy = (v0 + v1 + v2) / 3;
-        const crecer = (u, v) => { const l = Math.hypot(u - cx, v - cy) || 1; return [u + (u - cx) / l * 0.8, v + (v - cy) / l * 0.8]; };
+        const crecer = (u, v) => { const l = Math.hypot(u - cx, v - cy) || 1; return [u + (u - cx) / l * 0.5, v + (v - cy) / l * 0.5]; };
 
         // 'copy' hace que cada triángulo sustituya lo que había en su zona en lugar de sumarse:
         // así las micas semitransparentes no se oscurecen donde dos triángulos se enciman
@@ -1482,12 +1485,18 @@ const MotorAR = (() => {
 
         // 2. Frente: malla de triángulos sobre la capa auxiliar
         const c = capa.getContext('2d');
-        c.setTransform(1, 0, 0, 1, 0, 0);
-        c.clearRect(0, 0, capa.width, capa.height);
         const vertices = [];
         for (let j = 0; j <= MALLA_Y; j++) {
             for (let i = 0; i <= MALLA_X; i++) vertices.push(proyectar(puntoDelFrente(i / MALLA_X, j / MALLA_Y)));
         }
+        // Solo se limpia y se copia el rectángulo que ocupa el armazón, no el lienzo entero
+        const zx = Math.max(0, Math.floor(Math.min(...vertices.map(v => v[0])) - 4));
+        const zy = Math.max(0, Math.floor(Math.min(...vertices.map(v => v[1])) - 4));
+        const zw = Math.min(capa.width, Math.ceil(Math.max(...vertices.map(v => v[0])) + 4)) - zx;
+        const zh = Math.min(capa.height, Math.ceil(Math.max(...vertices.map(v => v[1])) + 4)) - zy;
+        if (zw < 2 || zh < 2) return;
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        c.clearRect(zx, zy, zw, zh);
         const pasoX = armazon.ancho / MALLA_X;
         const pasoY = armazon.alto / MALLA_Y;
         for (let j = 0; j < MALLA_Y; j++) {
@@ -1505,10 +1514,12 @@ const MotorAR = (() => {
 
         // 3. El frente se pasa al lienzo visible con una sombra suave sobre la piel
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-        ctx.shadowBlur = ancho * 0.025;
-        ctx.shadowOffsetY = ancho * 0.012;
-        ctx.drawImage(capa, 0, 0);
+        if (!ligero) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+            ctx.shadowBlur = ancho * 0.025;
+            ctx.shadowOffsetY = ancho * 0.012;
+        }
+        ctx.drawImage(capa, zx, zy, zw, zh, zx, zy, zw, zh);
         ctx.restore();
     }
 
@@ -1530,16 +1541,29 @@ const MotorAR = (() => {
         };
     }
 
-    return { cargar, detectar, suavizar, prepararArmazon, dibujar, medirRostro, get listo() { return Boolean(detector); } };
+    return { cargar, detectar, suavizar, prepararArmazon, dibujar, medirRostro, ligero, get listo() { return Boolean(detector); } };
 })();
 
 /**
  * Visor del probador: muestra la cámara (o una foto) con el armazón encima.
- * El <video> solo alimenta al lienzo; lo que se ve es siempre el lienzo.
+ *
+ * Con la cámara hay dos formas de trabajar:
+ * - Sincronizada (computadoras): cada cuadro se copia, se analiza y se dibuja junto con
+ *   su armazón, así el armazón nunca va detrás del rostro.
+ * - Superpuesta (teléfonos o equipos lentos): el video corre libre debajo del lienzo y
+ *   el lienzo, transparente, solo dibuja el armazón. La imagen nunca se congela aunque
+ *   la detección tarde.
+ * El <video> alimenta al lienzo, que lo tapa: lo que se ve es siempre el lienzo.
  */
 class VisorAR {
     constructor(contenedor) {
         this.video = contenedor.querySelector('video');
+        // En teléfonos el video solo arranca solo si está silenciado y "en línea" (sin pantalla completa),
+        // y esas dos propiedades deben fijarse aquí: como atributos HTML no siempre se respetan
+        this.video.muted = true;
+        this.video.playsInline = true;
+        this.video.setAttribute('playsinline', '');
+        this.video.setAttribute('webkit-playsinline', '');
         this.lienzo = contenedor.querySelector('canvas');
         this.ctx = this.lienzo.getContext('2d');
         this.capa = document.createElement('canvas');
@@ -1552,6 +1576,7 @@ class VisorAR {
         this.armazon = null;
         this.ajustes = { escala: 1, altura: 0, brillo: 100, contraste: 100 };
         this.turno = 0;
+        this.superpuesto = MotorAR.ligero;
         this.alCambiarEstado = () => {};
     }
 
@@ -1572,7 +1597,7 @@ class VisorAR {
     }
 
     ajustarLienzo() {
-        const densidad = Math.min(2, window.devicePixelRatio || 1);
+        const densidad = Math.min(MotorAR.ligero ? 1.5 : 2, window.devicePixelRatio || 1);
         const w = Math.max(2, Math.round(this.lienzo.clientWidth * densidad));
         const h = Math.max(2, Math.round(this.lienzo.clientHeight * densidad));
         if (this.lienzo.width !== w || this.lienzo.height !== h) {
@@ -1582,24 +1607,32 @@ class VisorAR {
     }
 
     pintar() {
-        const fuente = this.modo === 'foto' ? this.foto : this.cuadro;
-        if (this.modo === 'apagado' || !fuente || !fuente.width) return;
+        const espejo = this.modo === 'camara';
+        const soloArmazon = espejo && this.superpuesto;
+        const fuente = this.modo === 'foto' ? this.foto : soloArmazon ? this.video : this.cuadro;
+        const anchoFuente = fuente ? (fuente.videoWidth || fuente.width) : 0;
+        const altoFuente = fuente ? (fuente.videoHeight || fuente.height) : 0;
+        if (this.modo === 'apagado' || !anchoFuente) return;
         this.ajustarLienzo();
         const { ctx } = this;
-        const espejo = this.modo === 'camara';
-        this.mapa = this.crearMapa(fuente.width, fuente.height, espejo, espejo);
+        this.mapa = this.crearMapa(anchoFuente, altoFuente, espejo, espejo);
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, this.lienzo.width, this.lienzo.height);
+        // En modo superpuesto el lienzo queda transparente y deja ver el video que corre debajo
+        if (!soloArmazon) this.dibujarFuente(ctx, fuente);
+
+        if (this.marcas && this.armazon) MotorAR.dibujar(ctx, this.capa, this.marcas, this.mapa, this.armazon, this.ajustes);
+    }
+
+    dibujarFuente(ctx, fuente) {
         ctx.save();
-        if (espejo) {
+        if (this.mapa.espejo) {
             ctx.translate(this.lienzo.width, 0);
             ctx.scale(-1, 1);
         }
         ctx.drawImage(fuente, this.mapa.ox, this.mapa.oy, this.mapa.dw, this.mapa.dh);
         ctx.restore();
-
-        if (this.marcas && this.armazon) MotorAR.dibujar(ctx, this.capa, this.marcas, this.mapa, this.armazon, this.ajustes);
     }
 
     async ponerArmazon(modelo) {
@@ -1609,7 +1642,7 @@ class VisorAR {
 
     ajustar(cambios) {
         Object.assign(this.ajustes, cambios);
-        this.lienzo.style.filter = `brightness(${this.ajustes.brillo}%) contrast(${this.ajustes.contraste}%)`;
+        this.lienzo.style.filter = this.video.style.filter = `brightness(${this.ajustes.brillo}%) contrast(${this.ajustes.contraste}%)`;
         if (this.modo === 'foto') this.pintar();
     }
 
@@ -1617,10 +1650,17 @@ class VisorAR {
         this.detener();
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('sin-camara');
         const turno = this.turno;
-        const flujo = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-            audio: false
-        });
+        let flujo;
+        try {
+            flujo = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: MotorAR.ligero ? 640 : 1280 }, height: { ideal: MotorAR.ligero ? 480 : 720 } },
+                audio: false
+            });
+        } catch (e) {
+            // Algunos teléfonos rechazan la resolución pedida: se reintenta sin exigir tamaño
+            if (e.name === 'NotAllowedError' || e.name === 'SecurityError') throw e;
+            flujo = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        }
         // Si mientras llegaba el permiso se cerró el probador, la cámara se apaga de inmediato
         if (turno !== this.turno) {
             flujo.getTracks().forEach(pista => pista.stop());
@@ -1628,40 +1668,60 @@ class VisorAR {
         }
         this.flujo = flujo;
         this.video.srcObject = flujo;
-        await this.video.play();
+        try { await this.video.play(); } catch (e) {}
         this.modo = 'camara';
         this.bucle(turno);
     }
 
-    /** Ciclo de la cámara: toma un cuadro, busca el rostro en ese mismo cuadro y lo dibuja con el armazón. */
+    /** Ciclo de la cámara: busca el rostro en el cuadro actual y dibuja el armazón en su lugar. */
     async bucle(turno) {
         let perdidos = 0;
+        let fallos = 0;
+        let medidos = 0;
+        let tiempoMedio = 0;
+        this.superpuesto = MotorAR.ligero;
         MotorAR.cargar().catch(() => this.alCambiarEstado('sin-motor'));
         this.alCambiarEstado('cargando');
 
         while (turno === this.turno && this.modo === 'camara') {
             if (this.video.readyState >= 2 && this.video.videoWidth) {
-                // El cuadro se copia (a 960 px de ancho como máximo) para analizar y mostrar exactamente la misma imagen
-                const escala = Math.min(1, 960 / this.video.videoWidth);
-                const w = Math.round(this.video.videoWidth * escala);
-                const h = Math.round(this.video.videoHeight * escala);
-                if (this.cuadro.width !== w || this.cuadro.height !== h) {
-                    this.cuadro.width = w;
-                    this.cuadro.height = h;
+                if (!this.superpuesto) {
+                    // Modo sincronizado: el cuadro se copia (a 960 px de ancho como máximo)
+                    // para analizar y mostrar exactamente la misma imagen
+                    const escala = Math.min(1, 960 / this.video.videoWidth);
+                    const w = Math.round(this.video.videoWidth * escala);
+                    const h = Math.round(this.video.videoHeight * escala);
+                    if (this.cuadro.width !== w || this.cuadro.height !== h) {
+                        this.cuadro.width = w;
+                        this.cuadro.height = h;
+                    }
+                    this.cuadro.getContext('2d').drawImage(this.video, 0, 0, w, h);
                 }
-                this.cuadro.getContext('2d').drawImage(this.video, 0, 0, w, h);
 
                 if (MotorAR.listo) {
+                    const inicio = performance.now();
                     let nuevas = null;
-                    try { nuevas = await MotorAR.detectar(this.cuadro); } catch (e) {}
+                    try {
+                        nuevas = await MotorAR.detectar(this.superpuesto ? this.video : this.cuadro);
+                        fallos = 0;
+                    } catch (e) {
+                        // Hay navegadores que no aceptan un lienzo como entrada: se pasa a analizar el video
+                        this.superpuesto = true;
+                        if (++fallos > 20) this.alCambiarEstado('sin-motor');
+                    }
                     if (turno !== this.turno) return;
+
+                    // Si el equipo no alcanza unos 18 cuadros por segundo, se deja correr el video libre
+                    tiempoMedio += (performance.now() - inicio - tiempoMedio) / Math.min(++medidos, 20);
+                    if (!this.superpuesto && medidos >= 20 && tiempoMedio > 55) this.superpuesto = true;
+
                     if (nuevas) {
                         this.marcas = MotorAR.suavizar(this.marcas, nuevas);
                         perdidos = 0;
-                    } else if (++perdidos > 6) {
+                    } else if (++perdidos > 12) {
                         this.marcas = null;
                     }
-                    this.alCambiarEstado(this.marcas ? 'rostro' : 'sin-rostro');
+                    if (fallos <= 20) this.alCambiarEstado(this.marcas ? 'rostro' : 'sin-rostro');
                 }
                 this.pintar();
             }
@@ -1735,6 +1795,7 @@ class VisorAR {
             copia.height = this.lienzo.height;
             const c = copia.getContext('2d');
             c.filter = this.lienzo.style.filter || 'none';
+            if (this.modo === 'camara' && this.superpuesto) this.dibujarFuente(c, this.video);
             c.drawImage(this.lienzo, 0, 0);
             descargarArchivo(nombreArchivo, copia.toDataURL('image/png'));
             return true;
@@ -1793,7 +1854,7 @@ function crearProbador({ raiz, origen, alElegir = () => {} }) {
         rostro: 'Rostro detectado en vivo',
         'sin-rostro': 'Centra tu rostro frente a la cámara',
         foto: 'Foto lista: elige un armazón',
-        'sin-motor': 'No se pudo cargar el seguimiento facial. Revisa tu conexión.'
+        'sin-motor': 'No se pudo iniciar el seguimiento facial. Revisa tu conexión o usa otro navegador.'
     };
     visor.alCambiarEstado = (clave) => {
         const encendido = clave !== 'apagado';
@@ -1808,6 +1869,8 @@ function crearProbador({ raiz, origen, alElegir = () => {} }) {
     function avisar(texto) {
         alerta.textContent = texto;
         alerta.classList.toggle('oculto', !texto);
+        // En el teléfono el aviso puede quedar fuera de la pantalla: se lleva a la vista
+        if (texto) alerta.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
     async function encenderCamara() {
@@ -1818,9 +1881,16 @@ function crearProbador({ raiz, origen, alElegir = () => {} }) {
             if (modelo) ZigoAnalitica.enviar('prueba_ar', `${modelo.nombre} (${origen})`);
             return true;
         } catch (e) {
-            avisar(e.name === 'NotAllowedError'
-                ? 'El navegador bloqueó la cámara. Actívala en los permisos del sitio o usa “Subir foto de mi rostro”.'
-                : 'No encontramos una cámara disponible. Usa “Subir foto de mi rostro”.');
+            const dentroDeApp = /FBAN|FBAV|Instagram|WhatsApp|Line\/|TikTok|; wv\)/i.test(navigator.userAgent);
+            avisar(dentroDeApp
+                ? 'Este navegador integrado no permite usar la cámara. Abre zigomx.com en Chrome o Safari, o usa “Subir foto de mi rostro”.'
+                : !window.isSecureContext
+                    ? 'La cámara solo funciona en la dirección segura https://zigomx.com. También puedes usar “Subir foto de mi rostro”.'
+                    : e.name === 'NotAllowedError'
+                        ? 'El navegador bloqueó la cámara. Actívala en los permisos del sitio o usa “Subir foto de mi rostro”.'
+                        : e.name === 'NotReadableError'
+                            ? 'Otra aplicación está usando la cámara. Ciérrala e intenta de nuevo, o usa “Subir foto de mi rostro”.'
+                            : 'No encontramos una cámara disponible. Usa “Subir foto de mi rostro”.');
             return false;
         }
     }

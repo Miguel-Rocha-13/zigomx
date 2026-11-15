@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(self), geolocation=(self), microphone=(), payment=(), usb=()">
     <title>ziGO | Óptica, Examen de la Vista y Armazones con IA en CDMX</title>
     <link rel="canonical" href="https://zigomx.com/">
     <link rel="icon" href="./img/mascota_logo2.ico">
     <link rel="apple-touch-icon" href="./img/logo.png">
     <link rel="manifest" href="./site.webmanifest">
     <meta name="theme-color" content="#02102b">
-    <meta name="description" content="ziGO - Soluciones en Movimiento. Exámenes de la vista profesionales con la Dra. Escarlet Alcocer en consultorio o a domicilio, catálogo de armazones, pupilentes y probador virtual con IA en CDMX.">
+    <meta name="description" content="ziGO - Soluciones en Movimiento. Exámenes de la vista profesionales con la Dra. Escarlet Alcocer en consultorio o a domicilio en CDMX, catálogo de armazones, pupilentes y probador virtual con IA.">
     <meta name="keywords" content="ziGO, ziGO óptica, zigomx, examen de la vista CDMX, óptica a domicilio CDMX, lentes oftálmicos, armazones, pupilentes, probador virtual lentes IA, Dra Escarlet Alcocer">
     <meta name="author" content="ziGO - Soluciones en Movimiento">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -47,7 +49,7 @@
           }
         },
         {
-          "@type": "Optician",
+          "@type": ["Optician", "MedicalBusiness"],
           "@id": "https://zigomx.com/#organization",
           "name": "ziGO",
           "legalName": "ziGO - Soluciones en Movimiento",
@@ -63,7 +65,8 @@
           "telephone": "+52-55-7383-9561",
           "email": "skar@zigomx.com",
           "priceRange": "$$",
-          "description": "Óptica móvil y clínica visual en Ciudad de México. Exámenes de la vista en sitio y a domicilio, pupilentes, armazones oftálmicos y probador virtual con Inteligencia Artificial.",
+          "medicalSpecialty": "Optometry",
+          "description": "Óptica móvil y clínica visual en Ciudad de México. Exámenes de la vista en sitio y a domicilio con la Dra. Escarlet Alcocer, pupilentes, armazones oftálmicos y probador virtual con Inteligencia Artificial.",
           "address": {
             "@type": "PostalAddress",
             "addressLocality": "Ciudad de México",
@@ -112,6 +115,27 @@
             "reviewCount": "5",
             "bestRating": "5"
           }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Qué servicios ofrece ziGO Óptica en CDMX?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "ziGO ofrece exámenes de la vista profesionales realizados por la Dra. Escarlet Alcocer en consultorio y a domicilio en CDMX y Área Metropolitana, venta de armazones oftálmicos, lentes graduados, pupilentes y un probador virtual con Inteligencia Artificial."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿El probador virtual de lentes con IA guarda mis fotos o datos biométricos?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. El probador virtual AR y el recomendador facial IA de ziGO procesan la imagen 100% localmente en tu navegador bajo política Zero-Storage, sin almacenar ni transmitir fotografías ni vectores faciales."
+              }
+            }
+          ]
         }
       ]
     }
@@ -119,13 +143,13 @@
 
     <link rel="preload" as="image" href="./img/hero.webp" fetchpriority="high">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="./css/styles.css?v=6.0">
+    <link rel="stylesheet" href="./css/styles.css?v=7.0">
+    <link rel="stylesheet" href="./css/zigo-pro.css?v=7.0">
     <link rel="stylesheet" href="./css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="./js/script.js?v=6.0" defer></script>
+    <script src="./js/script.js?v=7.0" defer></script>
 </head>
 <body>
-    <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
     <canvas id="zigo-starfield" aria-hidden="true"></canvas>
     <div class="cielo-estrellado" aria-hidden="true"></div>
 
@@ -245,66 +269,25 @@
                 </article>
             </div>
         </section>
-        <!-- Widget de Satisfacción del Cliente (1 a 5 caritas) -->
-<section id="zigo-feedback-widget" style="max-width:560px;margin:2rem auto;padding:1.5rem;background:rgba(11,25,44,0.85);border:1px solid #1e3a5f;border-radius:16px;text-align:center;color:#f1f5f9;">
-  <h3 style="margin:0 0 0.4rem;color:#38bdf8;font-size:1.15rem;">¿Cómo está siendo tu experiencia en ziGO?</h3>
-  <p style="margin:0 0 1rem;color:#94a3b8;font-size:0.88rem;">Tu opinión nos ayuda a mejorar nuestro catálogo y probador virtual.</p>
 
-  <div id="zigo-caritas" style="display:flex;justify-content:center;gap:0.75rem;margin-bottom:1rem;">
-    <button type="button" data-score="1" title="Muy mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😡</button>
-    <button type="button" data-score="2" title="Mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😕</button>
-    <button type="button" data-score="3" title="Regular" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😐</button>
-    <button type="button" data-score="4" title="Buena" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🙂</button>
-    <button type="button" data-score="5" title="Excelente" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🤩</button>
-  </div>
-
-  <div id="zigo-feedback-extra" style="display:none;">
-    <input id="zigo-feedback-texto" type="text" maxlength="180" placeholder="¿Algo que quieras comentarnos? (Opcional)" style="width:100%;padding:0.65rem 0.9rem;border-radius:10px;border:1px solid #334155;background:#061121;color:#f8fafc;margin-bottom:0.75rem;">
-    <button type="button" id="zigo-feedback-enviar" style="background:#0ea5e9;color:#04101e;border:none;font-weight:700;padding:0.6rem 1.4rem;border-radius:999px;cursor:pointer;">Enviar valoración</button>
-  </div>
-
-  <p id="zigo-feedback-gracias" style="display:none;color:#34d399;font-weight:600;margin:0.5rem 0 0;">¡Gracias por calificarnos! Seguimos mejorando para ti.</p>
-</section>
-
-<script>
-(() => {
-  let scoreElegido = 0;
-  const botones = document.querySelectorAll('#zigo-caritas button');
-  const extra = document.getElementById('zigo-feedback-extra');
-  const gracias = document.getElementById('zigo-feedback-gracias');
-
-  botones.forEach(btn => {
-    btn.addEventListener('click', () => {
-      scoreElegido = Number(btn.dataset.score);
-      botones.forEach(b => {
-        b.style.borderColor = 'transparent';
-        b.style.transform = 'scale(1)';
-      });
-      btn.style.borderColor = '#38bdf8';
-      btn.style.transform = 'scale(1.15)';
-      extra.style.display = 'block';
-      gracias.style.display = 'none';
-    });
-  });
-
-  document.getElementById('zigo-feedback-enviar').addEventListener('click', () => {
-    if (!scoreElegido) return;
-    const comentario = document.getElementById('zigo-feedback-texto').value.trim();
-    const stats = JSON.parse(localStorage.getItem('zigo_admin_stats') || '{}');
-    stats.calificaciones = stats.calificaciones || [];
-    stats.calificaciones.push({
-      score: scoreElegido,
-      comentario,
-      fecha: new Date().toISOString()
-    });
-    localStorage.setItem('zigo_admin_stats', JSON.stringify(stats));
-
-    extra.style.display = 'none';
-    document.getElementById('zigo-feedback-texto').value = '';
-    gracias.style.display = 'block';
-  });
-})();
-</script>
+        <!-- Widget de Satisfacción del Cliente -->
+        <section id="zigo-feedback-widget" class="zigo-feedback-box" aria-label="Encuesta de satisfacción">
+            <h3>¿Cómo está siendo tu experiencia en ziGO?</h3>
+            <p class="zigo-fb-sub">Tu opinión nos ayuda a mejorar nuestro catálogo, atención y probador virtual.</p>
+            <div id="zigo-caritas" class="zigo-caritas-row">
+                <button type="button" class="zigo-carita-btn" data-score="1" title="Muy mala" aria-label="1 estrella - Muy mala">😡</button>
+                <button type="button" class="zigo-carita-btn" data-score="2" title="Mala" aria-label="2 estrellas - Mala">😕</button>
+                <button type="button" class="zigo-carita-btn" data-score="3" title="Regular" aria-label="3 estrellas - Regular">😐</button>
+                <button type="button" class="zigo-carita-btn" data-score="4" title="Buena" aria-label="4 estrellas - Buena">🙂</button>
+                <button type="button" class="zigo-carita-btn" data-score="5" title="Excelente" aria-label="5 estrellas - Excelente">🤩</button>
+            </div>
+            <div id="zigo-feedback-extra" class="oculto">
+                <input type="text" class="hp-campo-seguridad" id="zigo-fb-hp" tabindex="-1" autocomplete="off">
+                <input id="zigo-feedback-texto" class="zigo-fb-input" type="text" maxlength="240" placeholder="Cuéntanos tu experiencia, sugerencia o felicitación (opcional)...">
+                <button type="button" id="zigo-feedback-enviar" class="zigo-fb-submit">Enviar valoración</button>
+            </div>
+            <p id="zigo-feedback-gracias" class="zigo-fb-ok oculto">¡Gracias por calificarnos! Tu comentario quedó registrado en ziGO.</p>
+        </section>
     </main>
 
     <footer class="footer-zigo">
@@ -331,7 +314,7 @@
             </nav>
             <div class="direccion">
                 <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
-                <p>&copy; 2027 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>

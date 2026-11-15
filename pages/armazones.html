@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Permissions-Policy" content="camera=(self), geolocation=(self), microphone=(), payment=(), usb=()">
     <title>ziGO | Catálogo de Armazones y Probador AR en Vivo en CDMX</title>
     <link rel="canonical" href="https://zigomx.com/pages/armazones.html">
     <link rel="icon" href="../img/mascota_logo2.ico">
@@ -31,34 +33,44 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "Catálogo de Armazones Oftálmicos ziGO",
-      "url": "https://zigomx.com/pages/armazones.html",
-      "numberOfItems": 9,
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "ziGO Focus - Acetato Premium Rectangular" },
-        { "@type": "ListItem", "position": 2, "name": "ziGO Kinetic - Titanio Ligero Geométrico" },
-        { "@type": "ListItem", "position": 3, "name": "ziGO Metro - Acetato Urbano Redondeado" },
-        { "@type": "ListItem", "position": 4, "name": "ziGO Edge - Polímero Resistente Cuadrado" },
-        { "@type": "ListItem", "position": 5, "name": "ziGO Urban - Aleación Metálica Aviador" },
-        { "@type": "ListItem", "position": 6, "name": "ziGO Sport - TR90 Flexible Ovalado" },
-        { "@type": "ListItem", "position": 7, "name": "ziGO Nova - Diseño Minimalista Semi-aire" },
-        { "@type": "ListItem", "position": 8, "name": "ziGO Flex - Bisagra Reforzada Rectangular" },
-        { "@type": "ListItem", "position": 9, "name": "ziGO Bold - Estilo Contemporáneo Cuadrado" }
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://zigomx.com/" },
+            { "@type": "ListItem", "position": 2, "name": "Armazones", "item": "https://zigomx.com/pages/armazones.html" }
+          ]
+        },
+        {
+          "@type": "ItemList",
+          "name": "Catálogo de Armazones Oftálmicos ziGO",
+          "url": "https://zigomx.com/pages/armazones.html",
+          "numberOfItems": 9,
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "ziGO Focus - Acetato Premium Rectangular" },
+            { "@type": "ListItem", "position": 2, "name": "ziGO Kinetic - Titanio Ligero Geométrico" },
+            { "@type": "ListItem", "position": 3, "name": "ziGO Metro - Acetato Urbano Redondeado" },
+            { "@type": "ListItem", "position": 4, "name": "ziGO Edge - Polímero Resistente Cuadrado" },
+            { "@type": "ListItem", "position": 5, "name": "ziGO Urban - Aleación Metálica Aviador" },
+            { "@type": "ListItem", "position": 6, "name": "ziGO Sport - TR90 Flexible Ovalado" },
+            { "@type": "ListItem", "position": 7, "name": "ziGO Nova - Diseño Minimalista Semi-aire" },
+            { "@type": "ListItem", "position": 8, "name": "ziGO Flex - Bisagra Reforzada Rectangular" },
+            { "@type": "ListItem", "position": 9, "name": "ziGO Bold - Estilo Contemporáneo Cuadrado" }
+          ]
+        }
       ]
     }
     </script>
 
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="../css/styles.css?v=6.0">
+    <link rel="stylesheet" href="../css/styles.css?v=7.0">
+    <link rel="stylesheet" href="../css/zigo-pro.css?v=7.0">
     <link rel="stylesheet" href="../css/fonts.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Motor MediaPipe FaceMesh para seguimiento facial 3D en tiempo real -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous" defer></script>
-    <script src="../js/script.js?v=6.0" defer></script>
+    <script src="../js/script.js?v=7.0" defer></script>
 </head>
 <body>
-    <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
     <canvas id="zigo-starfield" aria-hidden="true"></canvas>
     <div class="cielo-estrellado" aria-hidden="true"></div>
 
@@ -110,7 +122,7 @@
                     <h2 class="armazon-nombre">ziGO Focus</h2>
                     <p class="armazon-material">Acetato Premium · Rectangular</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Focus" data-img="../img/armazones/1.jpeg" data-material="Acetato Premium" data-descripcion="Diseño ergonómico rectangular ideal para uso diario y graduaciones versátiles.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Focus" data-img="../img/armazones/1.jpeg" data-material="Acetato Premium · Rectangular" data-medidas="52-18-140 mm" data-rostros="Ovalado, Redondo, Corazón" data-descripcion="Diseño ergonómico rectangular de acetato hipoalergénico, ideal para uso diario y todo tipo de graduaciones.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Focus" data-img="../img/armazones/1.jpeg">
@@ -130,7 +142,7 @@
                     <h2 class="armazon-nombre">ziGO Kinetic</h2>
                     <p class="armazon-material">Titanio Ligero · Geométrico</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Kinetic" data-img="../img/armazones/2.avif" data-material="Titanio Ligero" data-descripcion="Estructura ultrafina y flexible de alta gama que aporta ligereza y elegancia.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Kinetic" data-img="../img/armazones/2.avif" data-material="Titanio Ligero · Geométrico" data-medidas="54-17-142 mm" data-rostros="Redondo, Ovalado, Diamante" data-descripcion="Estructura ultrafina y flexible de titanio con plaquetas suaves que aporta ligereza y elegancia.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Kinetic" data-img="../img/armazones/2.avif">
@@ -150,7 +162,7 @@
                     <h2 class="armazon-nombre">ziGO Metro</h2>
                     <p class="armazon-material">Acetato Urbano · Redondeado</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Metro" data-img="../img/armazones/3.jpeg" data-material="Acetato Urbano" data-descripcion="Estilo moderno con líneas suaves que equilibran facciones angulares.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Metro" data-img="../img/armazones/3.jpeg" data-material="Acetato Urbano · Redondeado" data-medidas="50-19-138 mm" data-rostros="Cuadrado, Alargado, Diamante" data-descripcion="Estilo moderno con líneas suaves redondeadas que armonizan y suavizan facciones angulares.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Metro" data-img="../img/armazones/3.jpeg">
@@ -170,7 +182,7 @@
                     <h2 class="armazon-nombre">ziGO Edge</h2>
                     <p class="armazon-material">Polímero Resistente · Cuadrado</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Edge" data-img="../img/armazones/4.avif" data-material="Polímero Resistente" data-descripcion="Máxima resistencia a impactos, ajuste firme y estructura cuadrada definida.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Edge" data-img="../img/armazones/4.avif" data-material="Polímero Resistente · Cuadrado" data-medidas="53-17-140 mm" data-rostros="Redondo, Ovalado" data-descripcion="Máxima resistencia a impactos, ajuste firme y estructura cuadrada definida para actividad intensa.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Edge" data-img="../img/armazones/4.avif">
@@ -190,7 +202,7 @@
                     <h2 class="armazon-nombre">ziGO Urban</h2>
                     <p class="armazon-material">Aleación Metálica · Aviador</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Urban" data-img="../img/armazones/5.webp" data-material="Aleación Metálica" data-descripcion="Perfil delgado, sofisticado y ligero con puente doble estilizado.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Urban" data-img="../img/armazones/5.webp" data-material="Aleación Metálica · Aviador" data-medidas="55-16-145 mm" data-rostros="Cuadrado, Ovalado, Corazón" data-descripcion="Perfil delgado, sofisticado y ligero en acero inoxidable con puente doble estilizado.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Urban" data-img="../img/armazones/5.webp">
@@ -210,7 +222,7 @@
                     <h2 class="armazon-nombre">ziGO Sport</h2>
                     <p class="armazon-material">TR90 Flexible · Ovalado</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Sport" data-img="../img/armazones/6.webp" data-material="TR90 Flexible" data-descripcion="Diseño aerodinámico y antideslizante para movimiento constante.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Sport" data-img="../img/armazones/6.webp" data-material="TR90 Flexible · Ovalado" data-medidas="52-18-138 mm" data-rostros="Cuadrado, Alargado" data-descripcion="Diseño aerodinámico y antideslizante en TR90 ultraligero para movimiento constante.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Sport" data-img="../img/armazones/6.webp">
@@ -230,7 +242,7 @@
                     <h2 class="armazon-nombre">ziGO Nova</h2>
                     <p class="armazon-material">Diseño Minimalista · Semi-aire</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Nova" data-img="../img/armazones/7.jpeg" data-material="Diseño Minimalista" data-descripcion="Apariencia limpia y ligera que resalta la expresión natural del rostro.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Nova" data-img="../img/armazones/7.jpeg" data-material="Diseño Minimalista · Semi-aire" data-medidas="51-18-140 mm" data-rostros="Corazón, Cuadrado, Ovalado" data-descripcion="Apariencia limpia y ligera semi-al aire que resalta la expresión natural del rostro.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Nova" data-img="../img/armazones/7.jpeg">
@@ -250,7 +262,7 @@
                     <h2 class="armazon-nombre">ziGO Flex</h2>
                     <p class="armazon-material">Bisagra Reforzada · Rectangular</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Flex" data-img="../img/armazones/8.webp" data-material="Bisagra Reforzada" data-descripcion="Sistema de alta durabilidad en varillas con adaptación anatómica.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Flex" data-img="../img/armazones/8.webp" data-material="Bisagra Reforzada · Rectangular" data-medidas="53-18-142 mm" data-rostros="Ovalado, Redondo" data-descripcion="Sistema de bisagra flex de alta durabilidad con adaptación anatómica sin presión en sienes.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Flex" data-img="../img/armazones/8.webp">
@@ -270,7 +282,7 @@
                     <h2 class="armazon-nombre">ziGO Bold</h2>
                     <p class="armazon-material">Estilo Contemporáneo · Cuadrado</p>
                     <div class="acciones-card">
-                        <button type="button" class="btn-detalles" data-modelo="ziGO Bold" data-img="../img/armazones/9.avif" data-material="Estilo Contemporáneo" data-descripcion="Armazón con presencia imponente y equilibrio geométrico.">
+                        <button type="button" class="btn-detalles" data-modelo="ziGO Bold" data-img="../img/armazones/9.avif" data-material="Estilo Contemporáneo · Cuadrado" data-medidas="52-19-140 mm" data-rostros="Redondo, Ovalado" data-descripcion="Armazón con presencia imponente, frente estructurado y equilibrio geométrico moderno.">
                             <i class="fas fa-eye" aria-hidden="true"></i> Detalles
                         </button>
                         <button type="button" class="btn-probar-ar" data-modelo="ziGO Bold" data-img="../img/armazones/9.avif">
@@ -289,6 +301,14 @@
                 <h2 id="modal-titulo"></h2>
                 <p id="modal-material" class="modal-sub"></p>
                 <p id="modal-descripcion" class="modal-desc"></p>
+                <ul class="modal-meta-lista">
+                    <li><strong>Medidas ópticas:</strong> <span id="modal-medidas">52-18-140 mm</span></li>
+                    <li><strong>Rostros ideales:</strong> <span id="modal-rostros">Ovalado, Redondo, Cuadrado</span></li>
+                    <li><strong>Compatibilidad:</strong> Monofocal, Bifocal, Progresivo, Antirreflejante y Fotocromático</li>
+                </ul>
+                <button type="button" id="btn-modal-probar-ar-directo" class="btn-agendar-general w-100">
+                    <i class="fas fa-vr-cardboard" aria-hidden="true"></i> Probar este modelo en AR ahora
+                </button>
             </div>
         </div>
 
@@ -311,8 +331,8 @@
 
                 <div class="ar-controles-ajuste">
                     <label>
-                        Ajuste fino de escala
-                        <input type="range" id="ar-escala" min="0.7" max="1.4" step="0.05" value="1">
+                        Ajuste fino de ancho
+                        <input type="range" id="ar-escala" min="0.75" max="1.35" step="0.02" value="1">
                     </label>
                     <label>
                         Ajuste vertical en puente nasal
@@ -331,69 +351,27 @@
             <p>Armazones seleccionados: <span id="contador-seleccionados">0</span></p>
             <button type="button" id="btn-agendar-seleccionados" class="btn-agendar-general">Agendar Cita con mi Selección</button>
         </div>
-        <!-- Widget de Satisfacción del Cliente (1 a 5 caritas) -->
-<section id="zigo-feedback-widget" style="max-width:560px;margin:2rem auto;padding:1.5rem;background:rgba(11,25,44,0.85);border:1px solid #1e3a5f;border-radius:16px;text-align:center;color:#f1f5f9;">
-  <h3 style="margin:0 0 0.4rem;color:#38bdf8;font-size:1.15rem;">¿Cómo está siendo tu experiencia en ziGO?</h3>
-  <p style="margin:0 0 1rem;color:#94a3b8;font-size:0.88rem;">Tu opinión nos ayuda a mejorar nuestro catálogo y probador virtual.</p>
 
-  <div id="zigo-caritas" style="display:flex;justify-content:center;gap:0.75rem;margin-bottom:1rem;">
-    <button type="button" data-score="1" title="Muy mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😡</button>
-    <button type="button" data-score="2" title="Mala" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😕</button>
-    <button type="button" data-score="3" title="Regular" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">😐</button>
-    <button type="button" data-score="4" title="Buena" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🙂</button>
-    <button type="button" data-score="5" title="Excelente" style="font-size:2rem;background:#0f233c;border:2px solid transparent;border-radius:12px;padding:0.4rem 0.65rem;cursor:pointer;transition:transform .15s;">🤩</button>
-  </div>
-
-  <div id="zigo-feedback-extra" style="display:none;">
-    <input id="zigo-feedback-texto" type="text" maxlength="180" placeholder="¿Algo que quieras comentarnos? (Opcional)" style="width:100%;padding:0.65rem 0.9rem;border-radius:10px;border:1px solid #334155;background:#061121;color:#f8fafc;margin-bottom:0.75rem;">
-    <button type="button" id="zigo-feedback-enviar" style="background:#0ea5e9;color:#04101e;border:none;font-weight:700;padding:0.6rem 1.4rem;border-radius:999px;cursor:pointer;">Enviar valoración</button>
-  </div>
-
-  <p id="zigo-feedback-gracias" style="display:none;color:#34d399;font-weight:600;margin:0.5rem 0 0;">¡Gracias por calificarnos! Seguimos mejorando para ti.</p>
-</section>
-
-<script>
-(() => {
-  let scoreElegido = 0;
-  const botones = document.querySelectorAll('#zigo-caritas button');
-  const extra = document.getElementById('zigo-feedback-extra');
-  const gracias = document.getElementById('zigo-feedback-gracias');
-
-  botones.forEach(btn => {
-    btn.addEventListener('click', () => {
-      scoreElegido = Number(btn.dataset.score);
-      botones.forEach(b => {
-        b.style.borderColor = 'transparent';
-        b.style.transform = 'scale(1)';
-      });
-      btn.style.borderColor = '#38bdf8';
-      btn.style.transform = 'scale(1.15)';
-      extra.style.display = 'block';
-      gracias.style.display = 'none';
-    });
-  });
-
-  document.getElementById('zigo-feedback-enviar').addEventListener('click', () => {
-    if (!scoreElegido) return;
-    const comentario = document.getElementById('zigo-feedback-texto').value.trim();
-    const stats = JSON.parse(localStorage.getItem('zigo_admin_stats') || '{}');
-    stats.calificaciones = stats.calificaciones || [];
-    stats.calificaciones.push({
-      score: scoreElegido,
-      comentario,
-      fecha: new Date().toISOString()
-    });
-    localStorage.setItem('zigo_admin_stats', JSON.stringify(stats));
-
-    extra.style.display = 'none';
-    document.getElementById('zigo-feedback-texto').value = '';
-    gracias.style.display = 'block';
-  });
-})();
-</script>
+        <!-- Widget de Satisfacción del Cliente -->
+        <section id="zigo-feedback-widget" class="zigo-feedback-box" aria-label="Encuesta de satisfacción">
+            <h3>¿Cómo está siendo tu experiencia en ziGO?</h3>
+            <p class="zigo-fb-sub">Tu opinión nos ayuda a mejorar nuestro catálogo, atención y probador virtual.</p>
+            <div id="zigo-caritas" class="zigo-caritas-row">
+                <button type="button" class="zigo-carita-btn" data-score="1" title="Muy mala" aria-label="1 estrella - Muy mala">😡</button>
+                <button type="button" class="zigo-carita-btn" data-score="2" title="Mala" aria-label="2 estrellas - Mala">😕</button>
+                <button type="button" class="zigo-carita-btn" data-score="3" title="Regular" aria-label="3 estrellas - Regular">😐</button>
+                <button type="button" class="zigo-carita-btn" data-score="4" title="Buena" aria-label="4 estrellas - Buena">🙂</button>
+                <button type="button" class="zigo-carita-btn" data-score="5" title="Excelente" aria-label="5 estrellas - Excelente">🤩</button>
+            </div>
+            <div id="zigo-feedback-extra" class="oculto">
+                <input type="text" class="hp-campo-seguridad" id="zigo-fb-hp" tabindex="-1" autocomplete="off">
+                <input id="zigo-feedback-texto" class="zigo-fb-input" type="text" maxlength="240" placeholder="Cuéntanos tu experiencia, sugerencia o felicitación (opcional)...">
+                <button type="button" id="zigo-feedback-enviar" class="zigo-fb-submit">Enviar valoración</button>
+            </div>
+            <p id="zigo-feedback-gracias" class="zigo-fb-ok oculto">¡Gracias por calificarnos! Tu comentario quedó registrado en ziGO.</p>
+        </section>
     </main>
 
-    <!-- Footer Unificado -->
     <footer class="footer-zigo">
         <div class="footer-container">
             <div class="redes-sociales">
@@ -418,7 +396,7 @@
             </nav>
             <div class="direccion">
                 <p>Ciudad de México y Área Metropolitana · Atención Profesional</p>
-                <p>&copy; 2027 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
+                <p>&copy; 2026 ziGO - Soluciones en Movimiento. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>

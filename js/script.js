@@ -1,18 +1,17 @@
 /**
 ***********************************************************************
-    Motor Integral ziGO - Versión Producción v2.1:
-    1. Fondo Estelar Optimizado (con pausa automática en segundo plano)
-    2. Extracción Óptica Sin Fondo (Flood-Fill + soporte local file://)
-    3. Proyección 3D Anatómica Suavizada en Tiempo Real (60fps)
-    4. Buscador Inteligente Tolerante a Errores (Sanitizado contra XSS)
-    5. Accesibilidad Visual (incluye Tema Rosa) + Buzón de Quejas Flotante
-    6. SEO Estructurado (JSON-LD) + Panel de Estadísticas ziGO
+    Motor Integral Unificado ziGO - Versión Producción v3.0
+    - Unificado 100% en un solo archivo (Catálogo, AR, IA, Agenda, Admin)
+    - Sincronización en la nube vía Google Apps Script + respaldo local
+    - Modales Detalles y Probador AR corregidos en armazones.html
+    - Botones flotantes con respuesta inmediata a 1 clic / 1 toque
+    - Autorización por Token de 6 dígitos en Admin (CSV y Reinicio)
 ***********************************************************************
  */
 'use strict';
 
 /*============================================================
-    0. CONFIGURACIÓN DE CONTACTOS, DIRECCIÓN Y CATÁLOGO ziGO
+    0. CONFIGURACIÓN GLOBAL, CATÁLOGO Y GOOGLE APPS SCRIPT
 ============================================================*/
 const CONFIG_ZIGO = {
     nombreNegocio: 'ziGO Óptica & Salud Visual',
@@ -24,22 +23,22 @@ const CONFIG_ZIGO = {
     correoQuejasPrincipal: 'angel.rochab@zigomx.com',
     correoQuejasCopia: 'miguel.rochab@zigomx.com',
     direccionSitioZigo: 'Consultorio ziGO · Ciudad de México (Dirección exacta confirmada al reservar cita)',
-    // Pega aquí tu ID de Google Analytics 4 (ej. 'G-XXXXXXXXXX') cuando publiques en zigomx.com:
+    googleScriptUrl: 'https://script.google.com/macros/s/AKfycbyoobdgG1Nvka_TFuRwsITOcuiWP3VSSHf5lBZ4azulikxjhdABsKCkGW_rj70uKmR9vQ/exec',
     ga4MeasurementId: ''
 };
 
 const RUTA_BASE = window.location.pathname.includes('/pages/') ? '../' : './';
 
 const CATALOGO_ARMAZONES = [
-    { nombre: 'ziGO Focus', archivo: 'img/armazones/1.jpeg', forma: 'Rectangular', material: 'Acetato Premium' },
-    { nombre: 'ziGO Kinetic', archivo: 'img/armazones/2.avif', forma: 'Geométrico', material: 'Titanio Ligero' },
-    { nombre: 'ziGO Metro', archivo: 'img/armazones/3.jpeg', forma: 'Redondeado', material: 'Acetato Urbano' },
-    { nombre: 'ziGO Edge', archivo: 'img/armazones/4.avif', forma: 'Cuadrado', material: 'Polímero Resistente' },
-    { nombre: 'ziGO Urban', archivo: 'img/armazones/5.webp', forma: 'Aviador', material: 'Aleación Metálica' },
-    { nombre: 'ziGO Sport', archivo: 'img/armazones/6.webp', forma: 'Ovalado', material: 'TR90 Flexible' },
-    { nombre: 'ziGO Nova', archivo: 'img/armazones/7.jpeg', forma: 'Minimalista', material: 'Semi-aire' },
-    { nombre: 'ziGO Flex', archivo: 'img/armazones/8.webp', forma: 'Rectangular', material: 'Bisagra Reforzada' },
-    { nombre: 'ziGO Bold', archivo: 'img/armazones/9.avif', forma: 'Cuadrado', material: 'Estilo Contemporáneo' }
+    { id: 'zigo-focus', nombre: 'ziGO Focus', archivo: 'img/armazones/1.jpeg', forma: 'Rectangular', material: 'Acetato Premium', categoria: 'premium', descripcion: 'Diseño ergonómico rectangular ideal para uso diario y graduaciones versátiles.' },
+    { id: 'zigo-kinetic', nombre: 'ziGO Kinetic', archivo: 'img/armazones/2.avif', forma: 'Geométrico', material: 'Titanio Ligero', categoria: 'premium', descripcion: 'Estructura ultrafina y flexible de alta gama que aporta ligereza y elegancia.' },
+    { id: 'zigo-metro', nombre: 'ziGO Metro', archivo: 'img/armazones/3.jpeg', forma: 'Redondeado', material: 'Acetato Urbano', categoria: 'urbano', descripcion: 'Estilo moderno con líneas suaves que equilibran facciones angulares.' },
+    { id: 'zigo-edge', nombre: 'ziGO Edge', archivo: 'img/armazones/4.avif', forma: 'Cuadrado', material: 'Polímero Resistente', categoria: 'deportivo', descripcion: 'Máxima resistencia a impactos, ajuste firme y estructura cuadrada definida.' },
+    { id: 'zigo-urban', nombre: 'ziGO Urban', archivo: 'img/armazones/5.webp', forma: 'Aviador', material: 'Aleación Metálica', categoria: 'urbano', descripcion: 'Perfil delgado, sofisticado y ligero con puente doble estilizado.' },
+    { id: 'zigo-sport', nombre: 'ziGO Sport', archivo: 'img/armazones/6.webp', forma: 'Ovalado', material: 'TR90 Flexible', categoria: 'deportivo', descripcion: 'Diseño aerodinámico y antideslizante para movimiento constante.' },
+    { id: 'zigo-nova', nombre: 'ziGO Nova', archivo: 'img/armazones/7.jpeg', forma: 'Minimalista', material: 'Diseño Minimalista', categoria: 'urbano', descripcion: 'Apariencia limpia y ligera que resalta la expresión natural del rostro.' },
+    { id: 'zigo-flex', nombre: 'ziGO Flex', archivo: 'img/armazones/8.webp', forma: 'Rectangular', material: 'Bisagra Reforzada', categoria: 'deportivo', descripcion: 'Sistema de alta durabilidad en varillas con adaptación anatómica.' },
+    { id: 'zigo-bold', nombre: 'ziGO Bold', archivo: 'img/armazones/9.avif', forma: 'Cuadrado', material: 'Estilo Contemporáneo', categoria: 'urbano', descripcion: 'Armazón con presencia imponente y equilibrio geométrico.' }
 ];
 
 /*============================================================
@@ -60,9 +59,7 @@ function construirUrlWhatsApp(mensaje) {
 
 function construirUrlTelegram(mensaje) {
     const usuario = CONFIG_ZIGO.telegramUsuario.trim();
-    if (usuario.startsWith('+')) {
-        return `https://t.me/${usuario}`;
-    }
+    if (usuario.startsWith('+')) return `https://t.me/${usuario}`;
     const limpio = usuario.replace(/^@/, '');
     return `https://t.me/${limpio}?text=${encodeURIComponent(mensaje)}`;
 }
@@ -75,10 +72,11 @@ function resolverRutaSegura(ruta) {
 }
 
 /*============================================================
-    MÓDULO DE ESTADÍSTICAS Y TELEMETRÍA ziGO (LOCAL + GA4)
+    1. TELEMETRÍA Y BASE DE DATOS EN LA NUBE (APPS SCRIPT + LOCAL)
 ============================================================*/
 const ZigoAnalytics = (function () {
     const STORAGE_KEY = 'zigo_analytics_v1';
+    const ADMIN_KEY = 'zigo_admin_stats';
     const SESSION_KEY = 'zigo_session_activa';
 
     function obtenerEstadoInicial() {
@@ -86,6 +84,7 @@ const ZigoAnalytics = (function () {
             inicioRegistro: new Date().toISOString(),
             sesiones: 0,
             visitasPagina: {},
+            fuentesTrafico: { Google: 0, RedesSociales: 0, Directo: 0 },
             busquedas: [],
             busquedasSinResultado: {},
             armazonesProbadosAR: {},
@@ -98,77 +97,97 @@ const ZigoAnalytics = (function () {
                 buzonQuejas: 0,
                 capturasAR: 0
             },
+            calificaciones: [],
             ultimosEventos: []
         };
     }
 
-// Detección automática de fuentes de tráfico (Google vs Redes Sociales vs Directo)
-function registrarVistaPagina() {
-    const datos = cargarDatos();
-    if (!sessionStorage.getItem(SESSION_KEY)) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        datos.sesiones = (datos.sesiones || 0) + 1;
-
-        // Analizar origen del tráfico (referrer)
-        const ref = document.referrer.toLowerCase();
-        datos.fuentesTráfico = datos.fuentesTráfico || { Google: 0, RedesSociales: 0, Directo: 0 };
-        
-        if (ref.includes('google.') || ref.includes('bing.') || ref.includes('yahoo.')) {
-            datos.fuentesTráfico.Google = (datos.fuentesTráfico.Google || 0) + 1;
-        } else if (ref.includes('facebook.') || ref.includes('instagram.') || ref.includes('tiktok.') || ref.includes('t.co') || ref.includes('whatsapp.')) {
-            datos.fuentesTráfico.RedesSociales = (datos.fuentesTráfico.RedesSociales || 0) + 1;
-        } else {
-            datos.fuentesTráfico.Directo = (datos.fuentesTráfico.Directo || 0) + 1;
-        }
-    }
-    const ruta = window.location.pathname.split('/').pop() || 'index.html';
-    datos.visitasPagina[ruta] = (datos.visitasPagina[ruta] || 0) + 1;
-    guardarDatos(datos);
-}
-
-// Inyección del Botón "Estadísticas ziGO" centrado en la parte inferior de todas las páginas
-document.addEventListener('DOMContentLoaded', () => {
-    const footer = document.querySelector('footer') || document.body;
-    if (footer && !document.getElementById('btn-footer-stats-zigo')) {
-        const contenedorBoton = document.createElement('div');
-        contenedorBoton.style.cssText = 'text-align:center; padding:1.5rem 0; margin-top:2rem; width:100%; display:flex; justify-content:center;';
-        
-        const esPaginaInterna = window.location.pathname.includes('/pages/');
-        const rutaAdmin = esPaginaInterna ? 'admin.html' : 'pages/admin.html';
-
-        contenedorBoton.innerHTML = `
-            <a href="${rutaAdmin}" id="btn-footer-stats-zigo" style="background:#0b192c; color:#38bdf8; border:1px solid #1e3a5f; padding:0.6rem 1.4rem; border-radius:999px; font-weight:700; font-size:0.85rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition:all 0.2s;">
-                <i class="fas fa-chart-bar"></i> Estadísticas ziGO
-            </a>
-        `;
-        footer.appendChild(contenedorBoton);
-    }
-});
-
     function cargarDatos() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return obtenerEstadoInicial();
-            const parsed = JSON.parse(raw);
+            const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            const adminRaw = JSON.parse(localStorage.getItem(ADMIN_KEY) || '{}');
+            const base = obtenerEstadoInicial();
+
+            const armazonesCombinados = {
+                ...(raw.armazonesProbadosAR || {}),
+                ...(adminRaw.modelosVistos || {})
+            };
+
+            const calificacionesCombinadas = Array.isArray(adminRaw.calificaciones) && adminRaw.calificaciones.length
+                ? adminRaw.calificaciones
+                : (raw.calificaciones || []);
+
             return {
-                ...obtenerEstadoInicial(),
-                ...parsed,
+                ...base,
+                ...raw,
+                fuentesTrafico: {
+                    ...base.fuentesTrafico,
+                    ...(raw.fuentesTrafico || raw.fuentesTráfico || {})
+                },
                 conversiones: {
-                    ...obtenerEstadoInicial().conversiones,
-                    ...(parsed.conversiones || {})
-                }
+                    ...base.conversiones,
+                    ...(raw.conversiones || {})
+                },
+                armazonesProbadosAR: armazonesCombinados,
+                calificaciones: calificacionesCombinadas
             };
         } catch (e) {
             return obtenerEstadoInicial();
         }
     }
 
-    function guardarDatos(datos) {
+    function guardarDatosLocales(datos) {
         try {
-            if (datos.ultimosEventos.length > 60) datos.ultimosEventos = datos.ultimosEventos.slice(-60);
+            if (datos.ultimosEventos.length > 80) datos.ultimosEventos = datos.ultimosEventos.slice(-80);
             if (datos.busquedas.length > 100) datos.busquedas = datos.busquedas.slice(-100);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+
+            const adminMirror = {
+                modelosVistos: datos.armazonesProbadosAR,
+                calificaciones: datos.calificaciones,
+                eventos: datos.ultimosEventos
+            };
+            localStorage.setItem(ADMIN_KEY, JSON.stringify(adminMirror));
         } catch (e) {}
+    }
+
+    // Envío asíncrono a Google Apps Script (sin bloquear la navegación ni fallar por CORS)
+    function sincronizarConNube(accion, payload = {}) {
+        const url = (CONFIG_ZIGO.googleScriptUrl || '').trim();
+        if (!url) return;
+
+        const cuerpo = JSON.stringify({
+            action: accion,
+            timestamp: new Date().toISOString(),
+            page: window.location.pathname.split('/').pop() || 'index.html',
+            ...payload
+        });
+
+        try {
+            fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                keepalive: true,
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: cuerpo
+            }).catch(() => {});
+        } catch (e) {}
+    }
+
+    async function obtenerDatosDesdeNube() {
+        const url = (CONFIG_ZIGO.googleScriptUrl || '').trim();
+        if (!url) return null;
+        try {
+            const resp = await fetch(`${url}?action=getStats&t=${Date.now()}`, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+            if (!resp.ok) return null;
+            const json = await resp.json();
+            return json && typeof json === 'object' ? json : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     function enviarAGoogleAnalytics(nombreEvento, params = {}) {
@@ -186,19 +205,40 @@ document.addEventListener('DOMContentLoaded', () => {
             tipo,
             detalle
         });
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
         enviarAGoogleAnalytics(tipo, { detalle, ...meta });
     }
 
     function registrarVistaPagina() {
         const datos = cargarDatos();
+        let fuenteDetectada = '';
+
         if (!sessionStorage.getItem(SESSION_KEY)) {
             sessionStorage.setItem(SESSION_KEY, '1');
             datos.sesiones = (datos.sesiones || 0) + 1;
+
+            const ref = (document.referrer || '').toLowerCase();
+            if (ref.includes('google.') || ref.includes('bing.') || ref.includes('yahoo.') || ref.includes('duckduckgo.')) {
+                datos.fuentesTrafico.Google = (datos.fuentesTrafico.Google || 0) + 1;
+                fuenteDetectada = 'Google';
+            } else if (ref.includes('facebook.') || ref.includes('instagram.') || ref.includes('tiktok.') || ref.includes('t.co') || ref.includes('whatsapp.') || ref.includes('threads.')) {
+                datos.fuentesTrafico.RedesSociales = (datos.fuentesTrafico.RedesSociales || 0) + 1;
+                fuenteDetectada = 'RedesSociales';
+            } else {
+                datos.fuentesTrafico.Directo = (datos.fuentesTrafico.Directo || 0) + 1;
+                fuenteDetectada = 'Directo';
+            }
         }
+
         const ruta = window.location.pathname.split('/').pop() || 'index.html';
         datos.visitasPagina[ruta] = (datos.visitasPagina[ruta] || 0) + 1;
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
+
+        sincronizarConNube('page_view', {
+            ruta,
+            nuevaSesion: Boolean(fuenteDetectada),
+            fuente: fuenteDetectada
+        });
         enviarAGoogleAnalytics('page_view', { page_path: ruta });
     }
 
@@ -206,15 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const limpio = (termino || '').trim().toLowerCase();
         if (!limpio) return;
         const datos = cargarDatos();
-        datos.busquedas.push({
-            termino: limpio,
-            resultados: resultadosCount,
-            fecha: new Date().toISOString()
-        });
+        datos.busquedas.push({ termino: limpio, resultados: resultadosCount, fecha: new Date().toISOString() });
         if (resultadosCount === 0) {
             datos.busquedasSinResultado[limpio] = (datos.busquedasSinResultado[limpio] || 0) + 1;
         }
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
+        sincronizarConNube('search', { termino: limpio, resultados: resultadosCount });
         enviarAGoogleAnalytics('search', { search_term: limpio, results_count: resultadosCount });
     }
 
@@ -222,24 +259,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nombreArmazon) return;
         const datos = cargarDatos();
         datos.armazonesProbadosAR[nombreArmazon] = (datos.armazonesProbadosAR[nombreArmazon] || 0) + 1;
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
         registrarEvento('prueba_ar', `${nombreArmazon} (${origen})`, { armazon: nombreArmazon, origen });
+        sincronizarConNube('prueba_ar', { armazon: nombreArmazon, origen });
     }
 
     function registrarRostroIA(tipoRostro) {
         if (!tipoRostro) return;
         const datos = cargarDatos();
         datos.rostrosDetectadosIA[tipoRostro] = (datos.rostrosDetectadosIA[tipoRostro] || 0) + 1;
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
         registrarEvento('diagnostico_rostro_ia', tipoRostro, { tipo_rostro: tipoRostro });
+        sincronizarConNube('rostro_ia', { tipoRostro });
     }
 
     function registrarModalidadCita(modalidad) {
         if (!modalidad) return;
         const datos = cargarDatos();
         datos.modalidadesCita[modalidad] = (datos.modalidadesCita[modalidad] || 0) + 1;
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
         registrarEvento('seleccion_modalidad_cita', modalidad, { modalidad });
+        sincronizarConNube('modalidad_cita', { modalidad });
     }
 
     function registrarConversion(canal, detalle = '') {
@@ -247,135 +287,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Object.prototype.hasOwnProperty.call(datos.conversiones, canal)) {
             datos.conversiones[canal] += 1;
         }
-        guardarDatos(datos);
+        guardarDatosLocales(datos);
         registrarEvento(`conversion_${canal}`, detalle, { canal });
+        sincronizarConNube('conversion', { canal, detalle });
     }
 
-    function exportarCSV() {
-        const d = cargarDatos();
-        const filas = [
-            ['Categoria', 'Metrica', 'Valor'],
-            ['General', 'Inicio de registro', d.inicioRegistro],
-            ['General', 'Sesiones unicas', d.sesiones],
-            ...Object.entries(d.visitasPagina).map(([k, v]) => ['Visitas por Pagina', k, v]),
-            ...Object.entries(d.armazonesProbadosAR).map(([k, v]) => ['Armazones Probados AR', k, v]),
-            ...Object.entries(d.rostrosDetectadosIA).map(([k, v]) => ['Rostros Detectados IA', k, v]),
-            ...Object.entries(d.modalidadesCita).map(([k, v]) => ['Modalidad Cita', k, v]),
-            ...Object.entries(d.conversiones).map(([k, v]) => ['Conversiones', k, v]),
-            ...Object.entries(d.busquedasSinResultado).map(([k, v]) => ['Busquedas Sin Resultado', k, v])
-        ];
-
-        const csv = filas.map(f => f.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Estadisticas-ziGO-${new Date().toISOString().slice(0, 10)}.csv`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    function registrarCalificacion(registro) {
+        const datos = cargarDatos();
+        const item = {
+            score: Number(registro.score || 5),
+            tipo: registro.tipo || 'Encuesta de Satisfacción',
+            comentario: registro.comentario || '',
+            nombre: registro.nombre || 'Visitante Web',
+            fecha: new Date().toISOString()
+        };
+        datos.calificaciones.push(item);
+        guardarDatosLocales(datos);
+        sincronizarConNube('calificacion', item);
     }
 
-    function mostrarPanelEstadisticas() {
-        const d = cargarDatos();
-        let modal = document.getElementById('modal-estadisticas-zigo');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'modal-estadisticas-zigo';
-            modal.className = 'modal-busqueda-overlay';
-            document.body.appendChild(modal);
-        }
-
-        const renderListaTop = (obj, vacioMsg) => {
-            const entradas = Object.entries(obj || {}).sort((a, b) => b[1] - a[1]);
-            if (entradas.length === 0) return `<p style="font-size:12px;opacity:0.75;">${vacioMsg}</p>`;
-            return entradas.map(([k, v]) => `
-                <div style="display:flex;justify-content:space-between;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.08);margin-bottom:5px;font-size:13px;">
-                    <span>${escaparHTML(k)}</span>
-                    <strong>${v}</strong>
-                </div>
-            `).join('');
-        };
-
-        const totalVisitas = Object.values(d.visitasPagina).reduce((a, b) => a + b, 0);
-        const totalPruebasAR = Object.values(d.armazonesProbadosAR).reduce((a, b) => a + b, 0);
-        const totalConversiones = Object.values(d.conversiones).reduce((a, b) => a + b, 0);
-
-        modal.innerHTML = `
-            <div class="modal-busqueda-caja" role="dialog" aria-modal="true" aria-label="Estadísticas del sitio ziGO" style="max-width:680px;max-height:86vh;overflow-y:auto;">
-                <button type="button" class="modal-cerrar" id="cerrar-stats-modal" aria-label="Cerrar estadísticas">&times;</button>
-                <h3 style="margin:0 0 6px 0;"><i class="fas fa-chart-line" style="color:var(--neon-cyan);"></i> Estadísticas y Métricas ziGO</h3>
-                <p style="font-size:12px;opacity:0.8;margin-bottom:14px;">Registro activo desde: ${new Date(d.inicioRegistro).toLocaleDateString('es-MX')}</p>
-
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;">
-                    <div style="padding:12px;border-radius:12px;background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.3);text-align:center;">
-                        <div style="font-size:22px;font-weight:800;">${d.sesiones}</div>
-                        <div style="font-size:11px;opacity:0.85;">Sesiones</div>
-                    </div>
-                    <div style="padding:12px;border-radius:12px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);text-align:center;">
-                        <div style="font-size:22px;font-weight:800;">${totalVisitas}</div>
-                        <div style="font-size:11px;opacity:0.85;">Páginas Vistas</div>
-                    </div>
-                    <div style="padding:12px;border-radius:12px;background:rgba(217,70,239,0.12);border:1px solid rgba(217,70,239,0.3);text-align:center;">
-                        <div style="font-size:22px;font-weight:800;">${totalPruebasAR}</div>
-                        <div style="font-size:11px;opacity:0.85;">Pruebas AR</div>
-                    </div>
-                    <div style="padding:12px;border-radius:12px;background:rgba(250,204,21,0.12);border:1px solid rgba(250,204,21,0.3);text-align:center;">
-                        <div style="font-size:22px;font-weight:800;">${totalConversiones}</div>
-                        <div style="font-size:11px;opacity:0.85;">Contactos / Leads</div>
-                    </div>
-                </div>
-
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
-                    <div>
-                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-glasses"></i> Armazones más probados en AR</h4>
-                        ${renderListaTop(d.armazonesProbadosAR, 'Aún no hay pruebas AR registradas.')}
-                    </div>
-                    <div>
-                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-bullseye"></i> Conversiones por Canal</h4>
-                        ${renderListaTop(d.conversiones, 'Aún no hay clics de contacto.')}
-                    </div>
-                    <div>
-                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-user-check"></i> Tipos de Rostro (IA)</h4>
-                        ${renderListaTop(d.rostrosDetectadosIA, 'Aún no hay escaneos faciales.')}
-                    </div>
-                    <div>
-                        <h4 style="font-size:13px;margin-bottom:8px;"><i class="fas fa-file-alt"></i> Visitas por Sección</h4>
-                        ${renderListaTop(d.visitasPagina, 'Sin visitas registradas.')}
-                    </div>
-                </div>
-
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;justify-content:flex-end;">
-                    <button type="button" id="btn-exportar-csv-zigo" class="boton-agenda" style="font-size:12px;padding:9px 14px;">
-                        <i class="fas fa-file-csv"></i> Descargar Reporte CSV
-                    </button>
-                    <button type="button" id="btn-limpiar-stats-zigo" class="btn-detalles" style="font-size:12px;padding:9px 14px;">
-                        <i class="fas fa-trash-alt"></i> Reiniciar Contadores
-                    </button>
-                </div>
-            </div>
-        `;
-        modal.style.display = 'flex';
-
-        document.getElementById('cerrar-stats-modal').onclick = () => { modal.style.display = 'none'; };
-        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-        document.getElementById('btn-exportar-csv-zigo').onclick = exportarCSV;
-        document.getElementById('btn-limpiar-stats-zigo').onclick = () => {
-            if (confirm('¿Deseas reiniciar las estadísticas locales acumuladas?')) {
-                localStorage.removeItem(STORAGE_KEY);
-                mostrarPanelEstadisticas();
-            }
-        };
+    function limpiarDatosLocales() {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(ADMIN_KEY);
     }
 
     function inicializarGA4Opcional() {
         const id = (CONFIG_ZIGO.ga4MeasurementId || '').trim();
         if (!id || document.getElementById('script-ga4-zigo')) return;
-
         window.dataLayer = window.dataLayer || [];
         window.gtag = function () { window.dataLayer.push(arguments); };
         window.gtag('js', new Date());
         window.gtag('config', id, { anonymize_ip: true });
-
         const s = document.createElement('script');
         s.id = 'script-ga4-zigo';
         s.async = true;
@@ -384,6 +326,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     return {
+        cargarDatos,
+        obtenerDatosDesdeNube,
+        sincronizarConNube,
+        limpiarDatosLocales,
         inicializarGA4Opcional,
         registrarVistaPagina,
         registrarBusqueda,
@@ -391,15 +337,12 @@ document.addEventListener('DOMContentLoaded', () => {
         registrarRostroIA,
         registrarModalidadCita,
         registrarConversion,
-        mostrarPanelEstadisticas,
-        exportarCSV
+        registrarCalificacion
     };
 })();
 
-window.verEstadisticasZigo = () => ZigoAnalytics.mostrarPanelEstadisticas();
-
 /*============================================================
-    SEO ESTRUCTURADO DINÁMICO (SCHEMA.ORG JSON-LD + ALT TAGS)
+    2. SEO ESTRUCTURADO DINÁMICO (SCHEMA.ORG JSON-LD + ALT TAGS)
 ============================================================*/
 function inicializarSEOEstructurado() {
     document.querySelectorAll('img').forEach((img) => {
@@ -435,35 +378,7 @@ function inicializarSEOEstructurado() {
                     '@type': 'Person',
                     name: 'Dra. Escarlet Alcocer',
                     jobTitle: 'Especialista en Optometría'
-                },
-                aggregateRating: {
-                    '@type': 'AggregateRating',
-                    ratingValue: '5.0',
-                    reviewCount: '5'
                 }
-            },
-            {
-                '@type': 'WebSite',
-                '@id': `${CONFIG_ZIGO.sitioWeb}/#website`,
-                url: CONFIG_ZIGO.sitioWeb,
-                name: CONFIG_ZIGO.nombreNegocio,
-                inLanguage: 'es-MX',
-                publisher: { '@id': `${CONFIG_ZIGO.sitioWeb}/#optica` }
-            },
-            {
-                '@type': 'ItemList',
-                name: 'Catálogo de Armazones Ópticos ziGO',
-                itemListElement: CATALOGO_ARMAZONES.map((arm, index) => ({
-                    '@type': 'ListItem',
-                    position: index + 1,
-                    item: {
-                        '@type': 'Product',
-                        name: arm.nombre,
-                        material: arm.material,
-                        category: `Armazón óptico ${arm.forma}`,
-                        brand: { '@type': 'Brand', name: 'ziGO' }
-                    }
-                }))
             }
         ]
     };
@@ -476,7 +391,7 @@ function inicializarSEOEstructurado() {
 }
 
 /*============================================================
-    1. ESTILO ESTELAR ZIGO (IIFE + AHORRO DE ENERGÍA)
+    3. FONDO ESTELAR ZIGO (OPTIMIZADO CON PAUSA EN 2DO PLANO)
 ============================================================*/
 (function () {
     const canvas = document.getElementById('zigo-starfield');
@@ -503,8 +418,8 @@ function inicializarSEOEstructurado() {
 
     function initStars() {
         const area = canvas.width * canvas.height;
-        const starCount = Math.min(220, Math.floor(area / 7500));
-        const sparkleCount = Math.min(18, Math.floor(area / 95000));
+        const starCount = Math.min(200, Math.floor(area / 8000));
+        const sparkleCount = Math.min(16, Math.floor(area / 100000));
 
         stars = Array.from({ length: starCount }, () => {
             const palette = colors[Math.floor(Math.random() * colors.length)];
@@ -538,7 +453,6 @@ function inicializarSEOEstructurado() {
         ctx.shadowBlur = 10;
         ctx.shadowColor = s.palette.glow;
         ctx.fillStyle = s.palette.core;
-
         ctx.beginPath();
         const outer = s.size;
         const inner = s.size * 0.18;
@@ -557,7 +471,6 @@ function inicializarSEOEstructurado() {
 
     function dibujarFotograma() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         for (const st of stars) {
             if (!prefiereMenosMovimiento) {
                 st.alpha += st.speed;
@@ -573,7 +486,6 @@ function inicializarSEOEstructurado() {
             ctx.fill();
             ctx.restore();
         }
-
         for (const sp of sparkles) {
             if (!prefiereMenosMovimiento) {
                 sp.alpha += sp.speed;
@@ -595,9 +507,7 @@ function inicializarSEOEstructurado() {
     }
 
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && !rafEstelar && !prefiereMenosMovimiento) {
-            animate();
-        }
+        if (!document.hidden && !rafEstelar && !prefiereMenosMovimiento) animate();
     });
 
     window.addEventListener('resize', resize);
@@ -606,7 +516,7 @@ function inicializarSEOEstructurado() {
 })();
 
 /*============================================================
-    2. EXTRACCIÓN ÓPTICA SIN FONDO (FLOOD-FILL + SOPORTE FILE://)
+    4. EXTRACCIÓN ÓPTICA SIN FONDO (FLOOD-FILL + SOPORTE FILE://)
 ============================================================*/
 const cacheArmazonesAR = {};
 
@@ -645,12 +555,9 @@ function procesarArmazonTransparente(imgElement) {
         const esFondo = new Uint8Array(w * h);
         const colaFondo = [];
 
-        for (let x = 0; x < w; x++) {
-            colaFondo.push([x, 0], [x, h - 1]);
-        }
-        for (let y = 0; y < h; y++) {
-            colaFondo.push([0, y], [w - 1, y]);
-        }
+        for (let x = 0; x < w; x++) colaFondo.push([x, 0], [x, h - 1]);
+        for (let y = 0; y < h; y++) colaFondo.push([0, y], [w - 1, y]);
+
         const semillasMicas = [
             [Math.round(w * 0.28), Math.round(h * 0.52)],
             [Math.round(w * 0.72), Math.round(h * 0.52)]
@@ -719,9 +626,7 @@ function procesarArmazonTransparente(imgElement) {
                     }
                 }
 
-                if (grupo.length > mayorComponente.length) {
-                    mayorComponente = grupo;
-                }
+                if (grupo.length > mayorComponente.length) mayorComponente = grupo;
             }
         }
 
@@ -810,7 +715,6 @@ function procesarArmazonTransparente(imgElement) {
             colorPatita
         };
     } catch (e) {
-        // Respaldo limpio para vista local file:// (donde getImageData está restringido por CORS local)
         const corteTop = Math.round(h * 0.25);
         const cropH = Math.max(24, h - corteTop);
         canvas.width = w;
@@ -832,34 +736,29 @@ function obtenerArmazonProcesado(rutaEntrada) {
             resolve(cacheArmazonesAR[rutaFinal]);
             return;
         }
-
         const img = new Image();
         if (window.location.protocol.startsWith('http') && rutaFinal.startsWith('http')) {
             img.crossOrigin = 'anonymous';
         }
-
         img.onload = () => {
             const procesado = procesarArmazonTransparente(img);
             cacheArmazonesAR[rutaFinal] = procesado;
             resolve(procesado);
         };
-
         img.onerror = () => resolve(null);
         img.src = rutaFinal;
     });
 }
 
 /*============================================================
-    3. ADAPTACIÓN DE IMÁGENES DEL INDEX AL TEMA DE COLOR
+    5. ADAPTACIÓN DE IMÁGENES DEL INDEX, DOM Y BOTÓN FOOTER STATS
 ============================================================*/
 function adaptarImagenesIndexATema() {
     const esIndex = !window.location.pathname.includes('/pages/');
     if (!esIndex) return;
 
-    const imagenesIndex = document.querySelectorAll('.hero-imagen img, .contenido-tarjeta img');
-    imagenesIndex.forEach((img) => {
+    document.querySelectorAll('.hero-imagen img, .contenido-tarjeta img').forEach((img) => {
         if (img.dataset.procesadaFondo === '1') return;
-
         const procesar = () => {
             if (!img.naturalWidth) return;
             try {
@@ -873,7 +772,6 @@ function adaptarImagenesIndexATema() {
 
                 const imgData = ctx.getImageData(0, 0, w, h);
                 const data = imgData.data;
-
                 const r0 = data[0], g0 = data[1], b0 = data[2];
                 const visitado = new Uint8Array(w * h);
                 const cola = [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1]];
@@ -884,7 +782,6 @@ function adaptarImagenesIndexATema() {
                     const pos = y * w + x;
                     if (visitado[pos]) continue;
                     visitado[pos] = 1;
-
                     const idx = pos * 4;
                     const diff = (Math.abs(data[idx] - r0) + Math.abs(data[idx + 1] - g0) + Math.abs(data[idx + 2] - b0)) / 3;
                     if (diff <= 42) {
@@ -892,37 +789,21 @@ function adaptarImagenesIndexATema() {
                         cola.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
                     }
                 }
-
                 ctx.putImageData(imgData, 0, 0);
                 img.src = c.toDataURL('image/png');
                 img.dataset.procesadaFondo = '1';
             } catch (e) {}
         };
-
         if (img.complete) procesar();
         else img.addEventListener('load', procesar);
     });
 }
 
-/*============================================================
-    4. RENOMBRADO UX, ELIMINACIÓN DE SKIP-LINK Y SWITCH MODO
-============================================================*/
 function prepararIdentidadEInclusionDOM() {
-    // Eliminar enlaces de "Saltar al contenido principal"
     document.querySelectorAll('.skip-link, .saltar-contenido, a[href="#contenido-principal"], a[href="#main-content"]').forEach(el => {
         if (el.textContent.toLowerCase().includes('saltar') || el.classList.contains('skip-link')) {
             el.remove();
         }
-    });
-
-    document.querySelectorAll('a[href*="probador.html"]').forEach(enlace => {
-        const texto = enlace.textContent.trim();
-        if (texto === 'Asesor IA') enlace.textContent = 'Recomendación IA';
-        else if (texto === 'Asesor Facial IA') enlace.textContent = 'Recomendación Facial IA';
-    });
-
-    document.querySelectorAll('.banner-seguridad-ia p, .privacidad-aviso').forEach(p => {
-        p.innerHTML = p.innerHTML.replace(/(^|\s)(\d+\.)/g, '$1<strong>$2</strong>');
     });
 
     const menuContenedor = document.querySelector('.contenedor-menu');
@@ -957,10 +838,24 @@ function prepararIdentidadEInclusionDOM() {
         `;
         document.body.appendChild(contenedorSvg);
     }
+
+    // Botón de acceso directo al Panel de Estadísticas en el footer
+    const footer = document.querySelector('footer');
+    if (footer && !document.getElementById('btn-footer-stats-zigo')) {
+        const contenedorBoton = document.createElement('div');
+        contenedorBoton.style.cssText = 'text-align:center; padding:1rem 0 0; margin-top:1rem; width:100%; display:flex; justify-content:center;';
+        const rutaAdmin = window.location.pathname.includes('/pages/') ? 'admin.html' : 'pages/admin.html';
+        contenedorBoton.innerHTML = `
+            <a href="${rutaAdmin}" id="btn-footer-stats-zigo" style="background:#0b192c; color:#38bdf8; border:1px solid #1e3a5f; padding:0.55rem 1.3rem; border-radius:999px; font-weight:700; font-size:0.84rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                <i class="fas fa-chart-bar"></i> Estadísticas ziGO
+            </a>
+        `;
+        footer.appendChild(contenedorBoton);
+    }
 }
 
 /*============================================================
-    5. BUSCADOR TOLERANTE A ERRORES (SANITIZADO CONTRA XSS)
+    6. BUSCADOR TOLERANTE A ERRORES
 ============================================================*/
 function normalizarFonetico(txt) {
     return (txt || '')
@@ -998,7 +893,6 @@ function distanciaLevenshtein(a, b) {
 function coincideDifuso(consulta, palabrasClave) {
     const tokensConsulta = normalizarFonetico(consulta).split(' ').filter(Boolean);
     const tokensClave = normalizarFonetico(palabrasClave).split(' ').filter(Boolean);
-
     return tokensConsulta.some(tc => {
         if (tc.length < 3) return tokensClave.includes(tc);
         return tokensClave.some(tk => {
@@ -1022,47 +916,17 @@ function inicializarBuscadorInterno() {
         markar: 'Contactos y llamada', yamar: 'Llamar / Contacto', telefono: 'Teléfono y WhatsApp',
         wasap: 'WhatsApp', telegram: 'Telegram', ubikasion: 'Ubicación / Domicilio',
         direksion: 'Dirección', doktora: 'Dra. Escarlet Alcocer', eskarlet: 'Dra. Escarlet Alcocer',
-        skarlet: 'Dra. Escarlet Alcocer', probador: 'Recomendación Facial IA', rostro: 'Recomendación Facial IA',
+        probador: 'Recomendación Facial IA', rostro: 'Recomendación Facial IA',
         keja: 'Quejas y sugerencias', quejas: 'Quejas y sugerencias'
     };
 
     const indiceSitio = [
-        {
-            titulo: 'Inicio · Ciencia y Arte en tu Mirada',
-            desc: 'Portada principal, examen de la vista, pupilentes y experiencias reales.',
-            url: `${RUTA_BASE}index.html`,
-            tags: 'inicio portada principal bienvenida pupilentes lentes contacto examen vista'
-        },
-        {
-            titulo: 'Catálogo de Armazones y Probador AR',
-            desc: 'Modelos en Acetato, Titanio, Urbano y Deportivo con probador virtual.',
-            url: `${RUTA_BASE}pages/armazones.html`,
-            tags: 'lentes armazones gafas catalogo modelo probar ar virtual acetato titanio'
-        },
-        {
-            titulo: 'Recomendación Facial IA · Tu Lente Ideal',
-            desc: 'Escanea tu rostro en vivo o sube una foto para descubrir qué lente te queda mejor.',
-            url: `${RUTA_BASE}pages/probador.html`,
-            tags: 'recomendacion ia asesor rostro cara ovalada redonda cuadrada foto camara'
-        },
-        {
-            titulo: 'Agendar Examen de la Vista (Sitio o Domicilio)',
-            desc: 'Elige fecha y hora con la Dra. Escarlet Alcocer en consultorio o a domicilio.',
-            url: `${RUTA_BASE}pages/agenda.html`,
-            tags: 'cita agendar examen vista horario domicilio consultorio ubicacion direccion mapa'
-        },
-        {
-            titulo: 'Experiencias en Consulta',
-            desc: 'Conoce paso a paso cómo es la atención clínica con nuestros pacientes.',
-            url: `${RUTA_BASE}pages/experiencias.html`,
-            tags: 'experiencias fotos pacientes consulta proceso testimonio'
-        },
-        {
-            titulo: 'Nosotros · Dra. Escarlet Alcocer y Buzón de Quejas',
-            desc: 'Conoce a nuestra especialista, misión, visión y buzón de quejas y sugerencias.',
-            url: `${RUTA_BASE}pages/nosotros.html`,
-            tags: 'nosotros mision vision valores doctora escarlet alcocer quejas sugerencias reclamo'
-        },
+        { titulo: 'Inicio · Ciencia y Arte en tu Mirada', desc: 'Portada principal, examen de la vista, pupilentes y experiencias reales.', url: `${RUTA_BASE}index.html`, tags: 'inicio portada principal bienvenida pupilentes lentes contacto examen vista' },
+        { titulo: 'Catálogo de Armazones y Probador AR', desc: 'Modelos en Acetato, Titanio, Urbano y Deportivo con probador virtual.', url: `${RUTA_BASE}pages/armazones.html`, tags: 'lentes armazones gafas catalogo modelo probar ar virtual acetato titanio' },
+        { titulo: 'Recomendación Facial IA · Tu Lente Ideal', desc: 'Escanea tu rostro en vivo o sube una foto para descubrir qué lente te queda mejor.', url: `${RUTA_BASE}pages/probador.html`, tags: 'recomendacion ia asesor rostro cara ovalada redonda cuadrada foto camara' },
+        { titulo: 'Agendar Examen de la Vista (Sitio o Domicilio)', desc: 'Elige fecha y hora con la Dra. Escarlet Alcocer en consultorio o a domicilio.', url: `${RUTA_BASE}pages/agenda.html`, tags: 'cita agendar examen vista horario domicilio consultorio ubicacion direccion mapa' },
+        { titulo: 'Experiencias en Consulta', desc: 'Conoce paso a paso cómo es la atención clínica con nuestros pacientes.', url: `${RUTA_BASE}pages/experiencias.html`, tags: 'experiencias fotos pacientes consulta proceso testimonio' },
+        { titulo: 'Nosotros · Dra. Escarlet Alcocer y Buzón de Quejas', desc: 'Conoce a nuestra especialista, misión, visión y buzón de quejas y sugerencias.', url: `${RUTA_BASE}pages/nosotros.html`, tags: 'nosotros mision vision valores doctora escarlet alcocer quejas sugerencias reclamo' },
         ...CATALOGO_ARMAZONES.map(arm => ({
             titulo: `Armazón ${arm.nombre}`,
             desc: `${arm.material} · Estilo ${arm.forma} disponible en catálogo y prueba AR.`,
@@ -1077,7 +941,6 @@ function inicializarBuscadorInterno() {
             inputBuscador.focus();
             return;
         }
-
         const consultaSegura = escaparHTML(consultaOriginal);
 
         let modalBusqueda = document.getElementById('modal-busqueda-global');
@@ -1092,24 +955,12 @@ function inicializarBuscadorInterno() {
         const sugerencias = tokens.map(t => diccionarioCorrecciones[t]).filter(Boolean);
         const sugerenciaUnica = escaparHTML([...new Set(sugerencias)].join(', '));
 
-        const esContactoDirecto = coincideDifuso(
-            consultaOriginal,
-            'marcar llamar telefono celular whatsapp wasap telegram contacto hablar numero mensaje correo'
-        );
-
-        const esConsultaPrecioPromo = coincideDifuso(
-            consultaOriginal,
-            'promo promocion costo precio cuanto cuesta vale descuento oferta cotizacion paquete barato'
-        );
+        const esContactoDirecto = coincideDifuso(consultaOriginal, 'marcar llamar telefono celular whatsapp wasap telegram contacto hablar numero mensaje correo');
+        const esConsultaPrecioPromo = coincideDifuso(consultaOriginal, 'promo promocion costo precio cuanto cuesta vale descuento oferta cotizacion paquete barato');
 
         let bloquesHTML = '';
-
         if (sugerenciaUnica) {
-            bloquesHTML += `
-                <div class="sugerencia-ortografia-box">
-                    <i class="fas fa-magic"></i> ¿Quisiste decir: <strong>${sugerenciaUnica}</strong>? Aquí tienes las opciones relacionadas:
-                </div>
-            `;
+            bloquesHTML += `<div class="sugerencia-ortografia-box"><i class="fas fa-magic"></i> ¿Quisiste decir: <strong>${sugerenciaUnica}</strong>? Aquí tienes las opciones relacionadas:</div>`;
         }
 
         const msgCita = 'Hola Dra. Escarlet, visité la página de ziGO y me gustaría agendar una cita o solicitar información de costos.';
@@ -1120,17 +971,11 @@ function inicializarBuscadorInterno() {
             bloquesHTML += `
                 <div class="alerta-promo-escarlet" style="margin-top:10px;">
                     <strong><i class="fas fa-user-md"></i> Atención Directa · Dra. Escarlet Alcocer</strong>
-                    <p>Para citas, costos personalizados y promociones vigentes comunícate directamente al <strong>${CONFIG_ZIGO.telefonoEscarlet}</strong> o por mensaje:</p>
+                    <p>Para citas, costos personalizados y promociones vigentes comunícate directamente al <strong>${CONFIG_ZIGO.telefonoEscarlet}</strong>:</p>
                     <div class="acciones-promo-escarlet">
-                        <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-escarlet">
-                            <i class="fab fa-whatsapp"></i> WhatsApp (${CONFIG_ZIGO.telefonoEscarlet})
-                        </a>
-                        <a href="${urlTg}" data-canal="telegram" target="_blank" rel="noopener noreferrer" class="boton-agenda" style="font-size:13px;">
-                            <i class="fab fa-telegram"></i> Telegram
-                        </a>
-                        <a href="tel:+${CONFIG_ZIGO.whatsappEscarlet}" data-canal="llamada" class="btn-detalles" style="background:#ffffff;color:#02102b;font-size:12px;">
-                            <i class="fas fa-phone"></i> Llamar ahora
-                        </a>
+                        <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-escarlet"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        <a href="${urlTg}" data-canal="telegram" target="_blank" rel="noopener noreferrer" class="boton-agenda" style="font-size:13px;"><i class="fab fa-telegram"></i> Telegram</a>
+                        <a href="tel:+${CONFIG_ZIGO.whatsappEscarlet}" data-canal="llamada" class="btn-detalles" style="background:#ffffff;color:#02102b;font-size:12px;"><i class="fas fa-phone"></i> Llamar</a>
                     </div>
                 </div>
             `;
@@ -1151,19 +996,10 @@ function inicializarBuscadorInterno() {
             `).join('');
         } else if (!esContactoDirecto && !esConsultaPrecioPromo) {
             bloquesHTML += `
-                <p style="font-size: 14px; margin-bottom: 6px;">No encontramos una coincidencia exacta para "<strong>${consultaSegura}</strong>", pero quizá buscabas alguna de estas opciones:</p>
-                <a href="${RUTA_BASE}pages/armazones.html" class="item-resultado-busqueda">
-                    <div><strong>Catálogo de Armazones y Probador AR</strong><div style="font-size:12px;opacity:0.85;">Ver modelos de lentes y probarlos en cámara</div></div>
-                    <i class="fas fa-glasses"></i>
-                </a>
-                <a href="${RUTA_BASE}pages/agenda.html" class="item-resultado-busqueda">
-                    <div><strong>Agendar Examen de la Vista</strong><div style="font-size:12px;opacity:0.85;">Reservar cita en consultorio o a domicilio</div></div>
-                    <i class="fas fa-calendar-check"></i>
-                </a>
-                <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="item-resultado-busqueda">
-                    <div><strong>Enviar WhatsApp a Escarlet (${CONFIG_ZIGO.telefonoEscarlet})</strong><div style="font-size:12px;opacity:0.85;">Atención directa para citas, llamadas y precios</div></div>
-                    <i class="fab fa-whatsapp" style="color:#25D366;"></i>
-                </a>
+                <p style="font-size: 14px; margin-bottom: 6px;">No encontramos una coincidencia exacta para "<strong>${consultaSegura}</strong>", pero quizá buscabas:</p>
+                <a href="${RUTA_BASE}pages/armazones.html" class="item-resultado-busqueda"><div><strong>Catálogo de Armazones y Probador AR</strong></div><i class="fas fa-glasses"></i></a>
+                <a href="${RUTA_BASE}pages/agenda.html" class="item-resultado-busqueda"><div><strong>Agendar Examen de la Vista</strong></div><i class="fas fa-calendar-check"></i></a>
+                <a href="${urlWa}" data-canal="whatsapp" target="_blank" rel="noopener noreferrer" class="item-resultado-busqueda"><div><strong>WhatsApp Escarlet (${CONFIG_ZIGO.telefonoEscarlet})</strong></div><i class="fab fa-whatsapp" style="color:#25D366;"></i></a>
             `;
         }
 
@@ -1175,13 +1011,8 @@ function inicializarBuscadorInterno() {
             </div>
         `;
         modalBusqueda.style.display = 'flex';
-
-        document.getElementById('cerrar-busqueda-modal').onclick = () => {
-            modalBusqueda.style.display = 'none';
-        };
-        modalBusqueda.onclick = (e) => {
-            if (e.target === modalBusqueda) modalBusqueda.style.display = 'none';
-        };
+        document.getElementById('cerrar-busqueda-modal').onclick = () => { modalBusqueda.style.display = 'none'; };
+        modalBusqueda.onclick = (e) => { if (e.target === modalBusqueda) modalBusqueda.style.display = 'none'; };
     }
 
     inputBuscador.addEventListener('keydown', (e) => {
@@ -1190,14 +1021,11 @@ function inicializarBuscadorInterno() {
             ejecutarBusqueda();
         }
     });
-
-    if (btnLupa) {
-        btnLupa.addEventListener('click', ejecutarBusqueda);
-    }
+    btnLupa?.addEventListener('click', ejecutarBusqueda);
 }
 
 /*============================================================
-    6. MODAL RÁPIDO DE QUEJAS Y SUGERENCIAS (DESDE MENSAJES)
+    7. MODAL RÁPIDO DE QUEJAS + WIDGET DE SATISFACCIÓN (1 A 5 CARITAS)
 ============================================================*/
 function abrirModalQuejasGlobal() {
     let modalQueja = document.getElementById('modal-quejas-rapido-zigo');
@@ -1230,12 +1058,8 @@ function abrirModalQuejasGlobal() {
     `;
     modalQueja.style.display = 'flex';
 
-    document.getElementById('cerrar-modal-queja-rapida').onclick = () => {
-        modalQueja.style.display = 'none';
-    };
-    modalQueja.onclick = (e) => {
-        if (e.target === modalQueja) modalQueja.style.display = 'none';
-    };
+    document.getElementById('cerrar-modal-queja-rapida').onclick = () => { modalQueja.style.display = 'none'; };
+    modalQueja.onclick = (e) => { if (e.target === modalQueja) modalQueja.style.display = 'none'; };
 
     const form = document.getElementById('form-queja-rapida-modal');
     form.onsubmit = async (e) => {
@@ -1249,6 +1073,11 @@ function abrirModalQuejasGlobal() {
         const txtOrig = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando reporte...';
+
+        // Guardar en estadísticas locales + Google Apps Script
+        const scoreEquiv = tipo.toLowerCase().includes('felicitación') ? 5 : (tipo.toLowerCase().includes('queja') ? 1 : 3);
+        ZigoAnalytics.registrarCalificacion({ score: scoreEquiv, tipo, comentario: mensaje, nombre });
+        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
 
         let enviado = false;
         try {
@@ -1270,7 +1099,6 @@ function abrirModalQuejasGlobal() {
 
         btn.disabled = false;
         btn.innerHTML = txtOrig;
-        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
 
         const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
         const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
@@ -1278,14 +1106,57 @@ function abrirModalQuejasGlobal() {
         form.reset();
         const respBox = document.getElementById('qr-respuesta');
         respBox.innerHTML = enviado
-            ? `<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Reporte registrado con Folio ${escaparHTML(folio)}.</strong> Fue enviado al equipo de Calidad ziGO.`
+            ? `<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Reporte registrado con Folio ${escaparHTML(folio)}.</strong> Fue enviado al equipo de Calidad ziGO y guardado en estadísticas.`
             : `<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Folio generado: ${escaparHTML(folio)}.</strong> <a href="${urlMail}" style="text-decoration:underline;font-weight:bold;">Haz clic aquí para enviarlo por correo</a>.`;
         respBox.classList.remove('oculto');
     };
 }
 
+function inicializarWidgetSatisfaccion() {
+    const widget = document.getElementById('zigo-feedback-widget');
+    if (!widget || widget.dataset.inicializado === '1') return;
+    widget.dataset.inicializado = '1';
+
+    let scoreElegido = 0;
+    const botones = widget.querySelectorAll('#zigo-caritas button');
+    const extra = document.getElementById('zigo-feedback-extra');
+    const gracias = document.getElementById('zigo-feedback-gracias');
+    const inputTexto = document.getElementById('zigo-feedback-texto');
+    const btnEnviar = document.getElementById('zigo-feedback-enviar');
+
+    botones.forEach(btn => {
+        btn.onclick = () => {
+            scoreElegido = Number(btn.dataset.score);
+            botones.forEach(b => {
+                b.style.borderColor = 'transparent';
+                b.style.transform = 'scale(1)';
+            });
+            btn.style.borderColor = '#38bdf8';
+            btn.style.transform = 'scale(1.15)';
+            if (extra) extra.style.display = 'block';
+            if (gracias) gracias.style.display = 'none';
+        };
+    });
+
+    if (btnEnviar) {
+        btnEnviar.onclick = () => {
+            if (!scoreElegido) return;
+            const comentario = (inputTexto?.value || '').trim();
+            ZigoAnalytics.registrarCalificacion({
+                score: scoreElegido,
+                tipo: scoreElegido >= 4 ? 'Valoración Positiva' : (scoreElegido <= 2 ? 'Inconformidad en Encuesta' : 'Opinión Neutral'),
+                comentario,
+                nombre: 'Cliente Web'
+            });
+            if (extra) extra.style.display = 'none';
+            if (inputTexto) inputTexto.value = '';
+            if (gracias) gracias.style.display = 'block';
+        };
+    }
+}
+
 /*============================================================
-    7. INCLUSIÓN VISUAL (CON COLOR ROSA) + WIDGET MENSAJES/QUEJAS
+    8. BOTONES FLOTANTES CON RESPUESTA INMEDIATA (1 CLIC / 1 TOQUE)
 ============================================================*/
 function inicializarAccesibilidadYWidgets() {
     const mensajeCitaDirecto = 'Hola Dra. Escarlet, vengo de la página de ziGO y me gustaría agendar una cita.';
@@ -1298,16 +1169,10 @@ function inicializarAccesibilidadYWidgets() {
     widgetAcc.innerHTML = `
         <div id="panel-accesibilidad" class="panel-accesibilidad oculto" role="region" aria-label="Opciones de accesibilidad visual">
             <h3><span><i class="fas fa-universal-access"></i> Inclusión Visual</span></h3>
-
             <div class="fila-modo-base-acc">
-                <button type="button" class="btn-modo-principal btn-modo-oscuro-card" data-tema="oscuro">
-                    <i class="fas fa-moon"></i> Oscuro
-                </button>
-                <button type="button" class="btn-modo-principal btn-modo-claro-card" data-tema="claro">
-                    <i class="fas fa-sun"></i> Claro
-                </button>
+                <button type="button" class="btn-modo-principal btn-modo-oscuro-card" data-tema="oscuro"><i class="fas fa-moon"></i> Oscuro</button>
+                <button type="button" class="btn-modo-principal btn-modo-claro-card" data-tema="claro"><i class="fas fa-sun"></i> Claro</button>
             </div>
-
             <div class="bloque-temas-color">
                 <span><i class="fas fa-palette"></i> Color de fondo personalizado:</span>
                 <div class="paleta-colores-grid">
@@ -1319,7 +1184,6 @@ function inicializarAccesibilidadYWidgets() {
                     <button type="button" class="btn-color-tema" data-tema="rosa" title="Rosa Suave ziGO" style="background:#ec4899;"></button>
                 </div>
             </div>
-
             <div class="fila-fuente-acc">
                 <button type="button" class="btn-acc-opcion" id="acc-texto-mas"><i class="fas fa-plus"></i> Letra A+</button>
                 <button type="button" class="btn-acc-opcion" id="acc-texto-menos"><i class="fas fa-minus"></i> Letra A-</button>
@@ -1328,27 +1192,13 @@ function inicializarAccesibilidadYWidgets() {
                 <button type="button" class="btn-acc-opcion" id="acc-espaciado"><i class="fas fa-text-width"></i> Espaciado</button>
                 <button type="button" class="btn-acc-opcion" id="acc-interlineado"><i class="fas fa-arrows-alt-v"></i> Interlineado</button>
             </div>
-            <button type="button" class="btn-acc-opcion" id="acc-daltonismo">
-                <i class="fas fa-low-vision"></i> Visión de Color (Daltonismo)
-            </button>
-            <button type="button" class="btn-acc-opcion" id="acc-alto-contraste">
-                <i class="fas fa-adjust"></i> Alto Contraste
-            </button>
-            <button type="button" class="btn-acc-opcion" id="acc-guia-lectura">
-                <i class="fas fa-grip-lines"></i> Guía de Lectura
-            </button>
-            <button type="button" class="btn-acc-opcion" id="acc-vista-simple">
-                <i class="fas fa-eye"></i> Vista Simplificada
-            </button>
-            <button type="button" class="btn-acc-opcion" id="acc-leer-pagina">
-                <i class="fas fa-volume-up"></i> Escuchar página
-            </button>
-            <button type="button" class="btn-acc-opcion" id="acc-detener-voz">
-                <i class="fas fa-stop-circle"></i> Detener lectura
-            </button>
-            <button type="button" class="btn-acc-opcion btn-acc-reset" id="acc-restablecer">
-                <i class="fas fa-undo"></i> Restablecer todo
-            </button>
+            <button type="button" class="btn-acc-opcion" id="acc-daltonismo"><i class="fas fa-low-vision"></i> Visión de Color (Daltonismo)</button>
+            <button type="button" class="btn-acc-opcion" id="acc-alto-contraste"><i class="fas fa-adjust"></i> Alto Contraste</button>
+            <button type="button" class="btn-acc-opcion" id="acc-guia-lectura"><i class="fas fa-grip-lines"></i> Guía de Lectura</button>
+            <button type="button" class="btn-acc-opcion" id="acc-vista-simple"><i class="fas fa-eye"></i> Vista Simplificada</button>
+            <button type="button" class="btn-acc-opcion" id="acc-leer-pagina"><i class="fas fa-volume-up"></i> Escuchar página</button>
+            <button type="button" class="btn-acc-opcion" id="acc-detener-voz"><i class="fas fa-stop-circle"></i> Detener lectura</button>
+            <button type="button" class="btn-acc-opcion btn-acc-reset" id="acc-restablecer"><i class="fas fa-undo"></i> Restablecer todo</button>
         </div>
         <button type="button" id="btn-toggle-acc" class="btn-burbuja-maestra" aria-expanded="false" aria-label="Abrir menú de accesibilidad" title="Accesibilidad e Inclusión Visual">
             <i class="fas fa-universal-access"></i>
@@ -1391,55 +1241,63 @@ function inicializarAccesibilidadYWidgets() {
         a.dataset.canal = 'telegram';
     });
 
-    function hacerArrastrable(contenedor, botonDisparador, alHacerClic) {
-        let arrastrando = false, seMovio = false;
-        let inicioX = 0, inicioY = 0, posInicialLeft = 0, posInicialTop = 0;
+    // Control unificado con Pointer Events: 1 clic / 1 toque abre al instante; solo arrastra si mueves >12px
+    function hacerArrastrableInstantaneo(contenedor, botonDisparador, alHacerClic) {
+        let pointerIdActivo = null;
+        let inicioX = 0, inicioY = 0;
+        let posInicialLeft = 0, posInicialTop = 0;
+        let arrastrando = false;
 
-        function iniciarArrastre(clientX, clientY) {
-            arrastrando = true;
-            seMovio = false;
+        botonDisparador.addEventListener('pointerdown', (e) => {
+            if (e.button !== undefined && e.button !== 0) return;
+            pointerIdActivo = e.pointerId;
+            inicioX = e.clientX;
+            inicioY = e.clientY;
+            arrastrando = false;
             const rect = contenedor.getBoundingClientRect();
-            inicioX = clientX;
-            inicioY = clientY;
             posInicialLeft = rect.left;
             posInicialTop = rect.top;
-            contenedor.style.bottom = 'auto';
-            contenedor.style.right = 'auto';
-            contenedor.style.left = `${posInicialLeft}px`;
-            contenedor.style.top = `${posInicialTop}px`;
-        }
+            try { botonDisparador.setPointerCapture(e.pointerId); } catch (err) {}
+        });
 
-        function moverArrastre(clientX, clientY) {
-            if (!arrastrando) return;
-            const deltaX = clientX - inicioX;
-            const deltaY = clientY - inicioY;
-            if (Math.abs(deltaX) > 6 || Math.abs(deltaY) > 6) seMovio = true;
-            const maxLeft = window.innerWidth - contenedor.offsetWidth - 8;
-            const maxTop = window.innerHeight - contenedor.offsetHeight - 8;
-            contenedor.style.left = `${Math.max(8, Math.min(maxLeft, posInicialLeft + deltaX))}px`;
-            contenedor.style.top = `${Math.max(8, Math.min(maxTop, posInicialTop + deltaY))}px`;
-        }
+        botonDisparador.addEventListener('pointermove', (e) => {
+            if (e.pointerId !== pointerIdActivo) return;
+            const deltaX = e.clientX - inicioX;
+            const deltaY = e.clientY - inicioY;
 
-        function finalizarArrastre() {
-            if (!arrastrando) return;
+            // Umbral de 12px para evitar falsos arrastres en pantallas táctiles
+            if (!arrastrando && (Math.abs(deltaX) > 12 || Math.abs(deltaY) > 12)) {
+                arrastrando = true;
+                contenedor.style.bottom = 'auto';
+                contenedor.style.right = 'auto';
+            }
+
+            if (arrastrando) {
+                const maxLeft = window.innerWidth - contenedor.offsetWidth - 8;
+                const maxTop = window.innerHeight - contenedor.offsetHeight - 8;
+                contenedor.style.left = `${Math.max(8, Math.min(maxLeft, posInicialLeft + deltaX))}px`;
+                contenedor.style.top = `${Math.max(8, Math.min(maxTop, posInicialTop + deltaY))}px`;
+            }
+        });
+
+        const terminarInteraccion = (e) => {
+            if (e.pointerId !== pointerIdActivo) return;
+            try { botonDisparador.releasePointerCapture(e.pointerId); } catch (err) {}
+            const fueArrastre = arrastrando;
+            pointerIdActivo = null;
             arrastrando = false;
-            if (!seMovio) alHacerClic();
-        }
 
-        botonDisparador.addEventListener('mousedown', (e) => iniciarArrastre(e.clientX, e.clientY));
-        window.addEventListener('mousemove', (e) => moverArrastre(e.clientX, e.clientY));
-        window.addEventListener('mouseup', finalizarArrastre);
+            if (!fueArrastre) {
+                e.preventDefault();
+                alHacerClic();
+            }
+        };
 
-        botonDisparador.addEventListener('touchstart', (e) => {
-            const t = e.touches[0];
-            iniciarArrastre(t.clientX, t.clientY);
-        }, { passive: true });
-        window.addEventListener('touchmove', (e) => {
-            if (!arrastrando) return;
-            const t = e.touches[0];
-            moverArrastre(t.clientX, t.clientY);
-        }, { passive: true });
-        window.addEventListener('touchend', finalizarArrastre);
+        botonDisparador.addEventListener('pointerup', terminarInteraccion);
+        botonDisparador.addEventListener('pointercancel', () => {
+            pointerIdActivo = null;
+            arrastrando = false;
+        });
     }
 
     const panelAcc = document.getElementById('panel-accesibilidad');
@@ -1447,34 +1305,36 @@ function inicializarAccesibilidadYWidgets() {
     const btnToggleAcc = document.getElementById('btn-toggle-acc');
     const btnToggleRedes = document.getElementById('btn-toggle-redes');
 
-    hacerArrastrable(widgetAcc, btnToggleAcc, () => {
+    hacerArrastrableInstantaneo(widgetAcc, btnToggleAcc, () => {
         const abierto = !panelAcc.classList.toggle('oculto');
         listaRedes.classList.add('oculto');
         btnToggleAcc.setAttribute('aria-expanded', String(abierto));
         btnToggleRedes.setAttribute('aria-expanded', 'false');
     });
 
-    hacerArrastrable(widgetRedes, btnToggleRedes, () => {
+    hacerArrastrableInstantaneo(widgetRedes, btnToggleRedes, () => {
         const abierto = !listaRedes.classList.toggle('oculto');
         panelAcc.classList.add('oculto');
         btnToggleRedes.setAttribute('aria-expanded', String(abierto));
         btnToggleAcc.setAttribute('aria-expanded', 'false');
     });
 
+    // Cerrar menús flotantes al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!widgetAcc.contains(e.target) && !panelAcc.classList.contains('oculto')) {
+            panelAcc.classList.add('oculto');
+            btnToggleAcc.setAttribute('aria-expanded', 'false');
+        }
+        if (!widgetRedes.contains(e.target) && !listaRedes.classList.contains('oculto')) {
+            listaRedes.classList.add('oculto');
+            btnToggleRedes.setAttribute('aria-expanded', 'false');
+        }
+    });
+
     function aplicarTemaColor(nombreTema) {
         const temaFinal = nombreTema || 'oscuro';
-        document.body.classList.remove(
-            'tema-claro',
-            'tema-azul-uveg',
-            'tema-morado',
-            'tema-azul-botones',
-            'tema-menta-uveg',
-            'tema-pizarra-uveg',
-            'tema-rosa'
-        );
-        if (temaFinal !== 'oscuro') {
-            document.body.classList.add(`tema-${temaFinal}`);
-        }
+        document.body.classList.remove('tema-claro', 'tema-azul-uveg', 'tema-morado', 'tema-azul-botones', 'tema-menta-uveg', 'tema-pizarra-uveg', 'tema-rosa');
+        if (temaFinal !== 'oscuro') document.body.classList.add(`tema-${temaFinal}`);
 
         document.querySelectorAll('.btn-color-tema, .btn-modo-principal').forEach(btn => {
             btn.classList.toggle('activo', btn.getAttribute('data-tema') === temaFinal);
@@ -1486,17 +1346,14 @@ function inicializarAccesibilidadYWidgets() {
             btnTopOscuro.classList.toggle('activo', temaFinal === 'oscuro');
             btnTopClaro.classList.toggle('activo', temaFinal !== 'oscuro');
         }
-
         localStorage.setItem('zigo_tema_color', temaFinal);
     }
 
     document.querySelectorAll('.btn-color-tema, .btn-modo-principal').forEach(btn => {
         btn.addEventListener('click', () => aplicarTemaColor(btn.getAttribute('data-tema')));
     });
-
     document.getElementById('btn-top-oscuro')?.addEventListener('click', () => aplicarTemaColor('oscuro'));
     document.getElementById('btn-top-claro')?.addEventListener('click', () => aplicarTemaColor('claro'));
-
     aplicarTemaColor(localStorage.getItem('zigo_tema_color') || 'oscuro');
 
     let escalaActual = parseFloat(localStorage.getItem('zigo_escala_fuente') || '1');
@@ -1505,26 +1362,26 @@ function inicializarAccesibilidadYWidgets() {
     let espaciadoActivo = localStorage.getItem('zigo_espaciado') === '1';
     if (espaciadoActivo) {
         document.documentElement.style.setProperty('--espaciado-letras', '0.07em');
-        document.getElementById('acc-espaciado').classList.add('activo');
+        document.getElementById('acc-espaciado')?.classList.add('activo');
     }
 
     let interlineadoActivo = localStorage.getItem('zigo_interlineado') === '1';
     if (interlineadoActivo) {
         document.documentElement.style.setProperty('--altura-linea', '1.85');
-        document.getElementById('acc-interlineado').classList.add('activo');
+        document.getElementById('acc-interlineado')?.classList.add('activo');
     }
 
     if (localStorage.getItem('zigo_daltonismo') === '1') {
         document.documentElement.classList.add('modo-daltonismo');
-        document.getElementById('acc-daltonismo').classList.add('activo');
+        document.getElementById('acc-daltonismo')?.classList.add('activo');
     }
     if (localStorage.getItem('zigo_alto_contraste') === '1') {
         document.body.classList.add('modo-alto-contraste');
-        document.getElementById('acc-alto-contraste').classList.add('activo');
+        document.getElementById('acc-alto-contraste')?.classList.add('activo');
     }
     if (localStorage.getItem('zigo_vista_simple') === '1') {
         document.body.classList.add('vista-simplificada');
-        document.getElementById('acc-vista-simple').classList.add('activo');
+        document.getElementById('acc-vista-simple')?.classList.add('activo');
     }
 
     let barraGuia = null;
@@ -1539,12 +1396,8 @@ function inicializarAccesibilidadYWidgets() {
             barraGuia = null;
         }
     }
-    window.addEventListener('mousemove', (e) => {
-        if (barraGuia) barraGuia.style.top = `${e.clientY}px`;
-    });
-    window.addEventListener('touchmove', (e) => {
-        if (barraGuia && e.touches[0]) barraGuia.style.top = `${e.touches[0].clientY}px`;
-    }, { passive: true });
+    window.addEventListener('mousemove', (e) => { if (barraGuia) barraGuia.style.top = `${e.clientY}px`; });
+    window.addEventListener('touchmove', (e) => { if (barraGuia && e.touches[0]) barraGuia.style.top = `${e.touches[0].clientY}px`; }, { passive: true });
 
     let lecturaActiva = false;
     let timerRespaldoVoz = null;
@@ -1567,23 +1420,15 @@ function inicializarAccesibilidadYWidgets() {
 
     function detenerLecturaVoz() {
         lecturaActiva = false;
-        if (timerRespaldoVoz) {
-            clearTimeout(timerRespaldoVoz);
-            timerRespaldoVoz = null;
-        }
+        if (timerRespaldoVoz) { clearTimeout(timerRespaldoVoz); timerRespaldoVoz = null; }
         if (audioTTSActual) {
-            try {
-                audioTTSActual.pause();
-                audioTTSActual.src = '';
-            } catch (e) {}
+            try { audioTTSActual.pause(); audioTTSActual.src = ''; } catch (e) {}
             audioTTSActual = null;
         }
         if ('speechSynthesis' in window) {
             try { window.speechSynthesis.cancel(); } catch (e) {}
         }
-        const barra = document.getElementById('barra-lector-voz-zigo');
-        if (barra) barra.remove();
-
+        document.getElementById('barra-lector-voz-zigo')?.remove();
         const btnLeer = document.getElementById('acc-leer-pagina');
         if (btnLeer) {
             btnLeer.classList.remove('activo');
@@ -1597,18 +1442,15 @@ function inicializarAccesibilidadYWidgets() {
         for (const oracion of oraciones) {
             const limpia = oracion.trim();
             if (!limpia) continue;
-            if (limpia.length <= maxLen) {
-                salida.push(limpia);
-            } else {
+            if (limpia.length <= maxLen) salida.push(limpia);
+            else {
                 const palabras = limpia.split(' ');
                 let bloque = '';
                 for (const p of palabras) {
                     if ((bloque + ' ' + p).trim().length > maxLen) {
                         salida.push(bloque.trim());
                         bloque = p;
-                    } else {
-                        bloque = (bloque + ' ' + p).trim();
-                    }
+                    } else bloque = (bloque + ' ' + p).trim();
                 }
                 if (bloque) salida.push(bloque);
             }
@@ -1619,13 +1461,11 @@ function inicializarAccesibilidadYWidgets() {
     function iniciarLecturaPagina() {
         detenerLecturaVoz();
         lecturaActiva = true;
-
         const btnLeer = document.getElementById('acc-leer-pagina');
         if (btnLeer) {
             btnLeer.classList.add('activo');
             btnLeer.innerHTML = '<i class="fas fa-volume-up"></i> Escuchando...';
         }
-
         const contenedor = document.getElementById('contenido-principal') || document.body;
         const textoLimpio = contenedor.innerText.replace(/\s+/g, ' ').trim();
         const fragmentos = dividirTextoEnFragmentos(textoLimpio, 170);
@@ -1636,10 +1476,8 @@ function inicializarAccesibilidadYWidgets() {
                 detenerLecturaVoz();
                 return;
             }
-
             const frase = fragmentos[indice];
             mostrarBarraLector(frase);
-
             const vocesNativas = ('speechSynthesis' in window) ? window.speechSynthesis.getVoices() : [];
             const vozEsNativa = vocesNativas.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
 
@@ -1649,16 +1487,12 @@ function inicializarAccesibilidadYWidgets() {
                     const utter = new SpeechSynthesisUtterance(frase);
                     utter.voice = vozEsNativa;
                     utter.lang = 'es-MX';
-                    utter.onend = () => {
-                        indice++;
-                        reproducirSiguienteFragmento();
-                    };
+                    utter.onend = () => { indice++; reproducirSiguienteFragmento(); };
                     utter.onerror = () => reproducirConAudioWeb(frase);
                     window.speechSynthesis.speak(utter);
                     return;
                 } catch (e) {}
             }
-
             reproducirConAudioWeb(frase);
         }
 
@@ -1667,27 +1501,10 @@ function inicializarAccesibilidadYWidgets() {
             const urlAudio = `https://translate.google.com/translate_tts?ie=UTF-8&tl=es-MX&client=tw-ob&q=${encodeURIComponent(frase)}`;
             const audio = new Audio(urlAudio);
             audioTTSActual = audio;
-
-            audio.onended = () => {
-                indice++;
-                reproducirSiguienteFragmento();
-            };
-
-            audio.onerror = () => {
-                timerRespaldoVoz = setTimeout(() => {
-                    indice++;
-                    reproducirSiguienteFragmento();
-                }, Math.max(2500, frase.length * 55));
-            };
-
-            audio.play().catch(() => {
-                timerRespaldoVoz = setTimeout(() => {
-                    indice++;
-                    reproducirSiguienteFragmento();
-                }, Math.max(2500, frase.length * 55));
-            });
+            audio.onended = () => { indice++; reproducirSiguienteFragmento(); };
+            audio.onerror = () => { timerRespaldoVoz = setTimeout(() => { indice++; reproducirSiguienteFragmento(); }, Math.max(2500, frase.length * 55)); };
+            audio.play().catch(() => { timerRespaldoVoz = setTimeout(() => { indice++; reproducirSiguienteFragmento(); }, Math.max(2500, frase.length * 55)); });
         }
-
         reproducirSiguienteFragmento();
     }
 
@@ -1696,60 +1513,60 @@ function inicializarAccesibilidadYWidgets() {
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     }
 
-    document.getElementById('acc-espaciado').addEventListener('click', function () {
+    document.getElementById('acc-espaciado')?.addEventListener('click', function () {
         espaciadoActivo = !espaciadoActivo;
         this.classList.toggle('activo', espaciadoActivo);
         document.documentElement.style.setProperty('--espaciado-letras', espaciadoActivo ? '0.07em' : 'normal');
         localStorage.setItem('zigo_espaciado', espaciadoActivo ? '1' : '0');
     });
 
-    document.getElementById('acc-interlineado').addEventListener('click', function () {
+    document.getElementById('acc-interlineado')?.addEventListener('click', function () {
         interlineadoActivo = !interlineadoActivo;
         this.classList.toggle('activo', interlineadoActivo);
         document.documentElement.style.setProperty('--altura-linea', interlineadoActivo ? '1.85' : '1.5');
         localStorage.setItem('zigo_interlineado', interlineadoActivo ? '1' : '0');
     });
 
-    document.getElementById('acc-daltonismo').addEventListener('click', function () {
+    document.getElementById('acc-daltonismo')?.addEventListener('click', function () {
         const activo = document.documentElement.classList.toggle('modo-daltonismo');
         this.classList.toggle('activo', activo);
         localStorage.setItem('zigo_daltonismo', activo ? '1' : '0');
     });
 
-    document.getElementById('acc-alto-contraste').addEventListener('click', function () {
+    document.getElementById('acc-alto-contraste')?.addEventListener('click', function () {
         const activo = document.body.classList.toggle('modo-alto-contraste');
         this.classList.toggle('activo', activo);
         localStorage.setItem('zigo_alto_contraste', activo ? '1' : '0');
     });
 
-    document.getElementById('acc-guia-lectura').addEventListener('click', function () {
+    document.getElementById('acc-guia-lectura')?.addEventListener('click', function () {
         const activo = !this.classList.contains('activo');
         this.classList.toggle('activo', activo);
         activarGuiaLectura(activo);
     });
 
-    document.getElementById('acc-vista-simple').addEventListener('click', function () {
+    document.getElementById('acc-vista-simple')?.addEventListener('click', function () {
         const activo = document.body.classList.toggle('vista-simplificada');
         this.classList.toggle('activo', activo);
         localStorage.setItem('zigo_vista_simple', activo ? '1' : '0');
     });
 
-    document.getElementById('acc-texto-mas').addEventListener('click', () => {
+    document.getElementById('acc-texto-mas')?.addEventListener('click', () => {
         escalaActual = Math.min(1.32, +(escalaActual + 0.08).toFixed(2));
         document.documentElement.style.setProperty('--escala-fuente', escalaActual);
         localStorage.setItem('zigo_escala_fuente', escalaActual);
     });
 
-    document.getElementById('acc-texto-menos').addEventListener('click', () => {
+    document.getElementById('acc-texto-menos')?.addEventListener('click', () => {
         escalaActual = Math.max(0.85, +(escalaActual - 0.08).toFixed(2));
         document.documentElement.style.setProperty('--escala-fuente', escalaActual);
         localStorage.setItem('zigo_escala_fuente', escalaActual);
     });
 
-    document.getElementById('acc-leer-pagina').addEventListener('click', iniciarLecturaPagina);
-    document.getElementById('acc-detener-voz').addEventListener('click', detenerLecturaVoz);
+    document.getElementById('acc-leer-pagina')?.addEventListener('click', iniciarLecturaPagina);
+    document.getElementById('acc-detener-voz')?.addEventListener('click', detenerLecturaVoz);
 
-    document.getElementById('acc-restablecer').addEventListener('click', () => {
+    document.getElementById('acc-restablecer')?.addEventListener('click', () => {
         detenerLecturaVoz();
         aplicarTemaColor('oscuro');
         document.body.classList.remove('modo-alto-contraste', 'vista-simplificada');
@@ -1772,7 +1589,7 @@ function inicializarAccesibilidadYWidgets() {
 }
 
 /*============================================================
-    8. PÁGINA INICIO: RESEÑAS VERIFICADAS 5 ESTRELLAS
+    9. PÁGINA INICIO: RESEÑAS VERIFICADAS 5 ESTRELLAS
 ============================================================*/
 function inicializarTestimonios5Estrellas() {
     const grid = document.getElementById('grid-testimonios-dinamicos');
@@ -1786,9 +1603,7 @@ function inicializarTestimonios5Estrellas() {
         { inicial: 'D', nombre: 'Daniel Hernández', estrellas: 5, texto: '"Muy satisfecho con la calidad óptica y la rapidez en la entrega. Se nota la dedicación y el profesionalismo en cada detalle."' }
     ];
 
-    const soloCincoEstrellas = poolResenasGoogle.filter(r => r.estrellas === 5);
-    const mezcladas = [...soloCincoEstrellas].sort(() => Math.random() - 0.5).slice(0, 3);
-
+    const mezcladas = [...poolResenasGoogle].sort(() => Math.random() - 0.5).slice(0, 3);
     grid.innerHTML = mezcladas.map(r => `
         <article class="testimonio-google-card">
             <div class="card-header">
@@ -1808,7 +1623,7 @@ function inicializarTestimonios5Estrellas() {
 }
 
 /*============================================================
-    9. RENDERIZADO 3D ANATÓMICO REALISTA + SUAVIZADO DE MOVIMIENTO
+    10. RENDERIZADO 3D ANATÓMICO REALISTA + VALIDACIÓN FACIAL
 ============================================================*/
 function suavizarLandmarks(anteriores, nuevos, factor = 0.68) {
     if (!anteriores || anteriores.length !== nuevos.length) return nuevos;
@@ -1822,9 +1637,7 @@ function suavizarLandmarks(anteriores, nuevos, factor = 0.68) {
 
 function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra = 1, offsetYExtra = 0, espejado = true) {
     if (!armazonData || !armazonData.canvas) return;
-
     if (ctx.canvas) {
-        // En entorno local file:// (donde transparente=false), multiply vuelve transparente el fondo blanco
         ctx.canvas.style.mixBlendMode = armazonData.transparente ? 'normal' : 'multiply';
     }
 
@@ -1876,17 +1689,14 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
 
     const cosR = Math.cos(anguloRoll);
     const sinR = Math.sin(anguloRoll);
-
     const factorIzq = 1 - yaw * 0.22;
     const factorDer = 1 + yaw * 0.22;
 
     const bisagraIzqX = centroX - (anchoFrente * 0.48) * cosR;
     const bisagraIzqY = centroY - (anchoFrente * 0.48) * sinR - (altoFrente * 0.16 * factorIzq);
-
     const bisagraDerX = centroX + (anchoFrente * 0.48) * cosR;
     const bisagraDerY = centroY + (anchoFrente * 0.48) * sinR - (altoFrente * 0.16 * factorDer);
 
-    // Patitas laterales dinámicas hacia las sienes/orejas
     ctx.save();
     ctx.strokeStyle = armazonData.colorPatita || 'rgba(28, 32, 38, 0.92)';
     ctx.lineCap = 'round';
@@ -1898,7 +1708,6 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
         const destinoOrejaY = orejaIzq.y - (altoFrente * 0.14);
         const ctrlX = (bisagraIzqX + destinoOrejaX) / 2;
         const ctrlY = Math.min(bisagraIzqY, destinoOrejaY) - (altoFrente * 0.06);
-
         ctx.beginPath();
         ctx.moveTo(bisagraIzqX, bisagraIzqY);
         ctx.quadraticCurveTo(ctrlX, ctrlY, destinoOrejaX, destinoOrejaY);
@@ -1911,7 +1720,6 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
         const destinoOrejaY = orejaDer.y - (altoFrente * 0.14);
         const ctrlX = (bisagraDerX + destinoOrejaX) / 2;
         const ctrlY = Math.min(bisagraDerY, destinoOrejaY) - (altoFrente * 0.06);
-
         ctx.beginPath();
         ctx.moveTo(bisagraDerX, bisagraDerY);
         ctx.quadraticCurveTo(ctrlX, ctrlY, destinoOrejaX, destinoOrejaY);
@@ -1919,7 +1727,6 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
     }
     ctx.restore();
 
-    // Proyección trapezoidal 3D en 16 franjas
     ctx.save();
     ctx.translate(centroX, centroY);
     ctx.rotate(anguloRoll);
@@ -1941,28 +1748,20 @@ function dibujarArmazonEnRostro(ctx, w, h, landmarks, armazonData, escalaExtra =
         const t1 = (i + 1) / numFranjas;
         const tMid = (t0 + t1) / 2;
         const ladoNormalizado = (tMid - 0.5) * 2;
-
         const escalaPerspectiva = 1 + (yaw * 0.24 * ladoNormalizado);
         const dstX = -anchoFrente / 2 + t0 * anchoFrente;
         const dstW = (anchoFrente / numFranjas) + 0.6;
         const dstH = altoFrente * escalaPerspectiva;
         const dstY = -dstH / 2 + (pitch * altoFrente * 0.12 * Math.abs(ladoNormalizado));
 
-        ctx.drawImage(
-            imgCanvas,
-            t0 * srcW, 0, srcW / numFranjas, srcH,
-            dstX, dstY, dstW, dstH
-        );
+        ctx.drawImage(imgCanvas, t0 * srcW, 0, srcW / numFranjas, srcH, dstX, dstY, dstW, dstH);
     }
-
     ctx.restore();
 }
 
 function dibujarArmazonCentradoFallback(ctx, w, h, armazonData, escalaExtra = 1, offsetYExtra = 0) {
     if (!armazonData || !armazonData.canvas) return;
-    if (ctx.canvas) {
-        ctx.canvas.style.mixBlendMode = armazonData.transparente ? 'normal' : 'multiply';
-    }
+    if (ctx.canvas) ctx.canvas.style.mixBlendMode = armazonData.transparente ? 'normal' : 'multiply';
     const imgCanvas = armazonData.canvas;
     const ancho = w * 0.46 * escalaExtra;
     const alto = ancho * ((imgCanvas.height || 150) / (imgCanvas.width || 300));
@@ -1973,29 +1772,24 @@ function dibujarArmazonCentradoFallback(ctx, w, h, armazonData, escalaExtra = 1,
 
 async function validarFotoRostroBiometrica(archivo) {
     if (!archivo) return { valido: false, motivo: 'No se seleccionó ningún archivo.' };
-
     const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
     if (!tiposPermitidos.includes(archivo.type)) {
         return { valido: false, motivo: 'Formato no válido. Sube únicamente una imagen JPG, PNG o WEBP de tu rostro.' };
     }
-
     if (archivo.size > 12 * 1024 * 1024) {
         return { valido: false, motivo: 'La imagen es demasiado pesada (máximo 12 MB).' };
     }
-
     if (typeof FaceMesh === 'undefined') {
         return { valido: false, motivo: 'El motor de validación facial aún está cargando. Intenta de nuevo en 2 segundos.' };
     }
 
     const urlTemporal = URL.createObjectURL(archivo);
     const img = new Image();
-
     const cargada = await new Promise((res) => {
         img.onload = () => res(true);
         img.onerror = () => res(false);
         img.src = urlTemporal;
     });
-
     URL.revokeObjectURL(urlTemporal);
 
     if (!cargada || !img.naturalWidth) {
@@ -2006,18 +1800,10 @@ async function validarFotoRostroBiometrica(archivo) {
         const detector = new FaceMesh({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
         });
-        detector.setOptions({
-            maxNumFaces: 2,
-            refineLandmarks: true,
-            minDetectionConfidence: 0.65,
-            minTrackingConfidence: 0.65
-        });
+        detector.setOptions({ maxNumFaces: 2, refineLandmarks: true, minDetectionConfidence: 0.65, minTrackingConfidence: 0.65 });
 
         let respondido = false;
-        const liberarDetector = () => {
-            try { detector.close(); } catch (e) {}
-        };
-
+        const liberarDetector = () => { try { detector.close(); } catch (e) {} };
         const timeoutId = setTimeout(() => {
             if (!respondido) {
                 respondido = true;
@@ -2048,22 +1834,11 @@ async function validarFotoRostroBiometrica(archivo) {
             const altoRostro = Math.hypot(lm[152].x - lm[10].x, lm[152].y - lm[10].y);
             const nariz = lm[1];
 
-            const rostroValido = (
-                distOjos >= 0.10 &&
-                distOjos <= 0.72 &&
-                altoRostro >= 0.22 &&
-                nariz.x > 0.15 && nariz.x < 0.85 &&
-                nariz.y > 0.15 && nariz.y < 0.85
-            );
-
+            const rostroValido = distOjos >= 0.10 && distOjos <= 0.72 && altoRostro >= 0.22 && nariz.x > 0.15 && nariz.x < 0.85 && nariz.y > 0.15 && nariz.y < 0.85;
             if (!rostroValido) {
-                resolve({
-                    valido: false,
-                    motivo: 'Imagen rechazada: El rostro está muy lejos o recortado. Sube un retrato frontal centrado.'
-                });
+                resolve({ valido: false, motivo: 'Imagen rechazada: El rostro está muy lejos o recortado. Sube un retrato frontal centrado.' });
                 return;
             }
-
             resolve({ valido: true, img, landmarks: lm });
         });
 
@@ -2079,7 +1854,7 @@ async function validarFotoRostroBiometrica(archivo) {
 }
 
 /*============================================================
-    10. PÁGINA ARMÁZONES: LIMPIEZA DE FONDOS Y PROBADOR AR
+    11. PÁGINA ARMÁZONES: DETALLES, PROBADOR AR Y SELECCIÓN (CORREGIDO)
 ============================================================*/
 async function limpiarFondosCatalogoTarjetas() {
     const imagenesCatalogo = document.querySelectorAll('.armazon-img');
@@ -2088,31 +1863,38 @@ async function limpiarFondosCatalogoTarjetas() {
         if (!srcOriginal) continue;
         const limpio = await obtenerArmazonProcesado(srcOriginal);
         if (limpio && limpio.canvasCatalogo && limpio.canvasCatalogo.toDataURL) {
-            try {
-                imgEl.src = limpio.canvasCatalogo.toDataURL('image/png');
-            } catch (e) {}
+            try { imgEl.src = limpio.canvasCatalogo.toDataURL('image/png'); } catch (e) {}
         }
     }
 }
 
-async function abrirModal(nombre, imagen, material, descripcion) {
+async function abrirModalDetallesArmazon(nombre, imagen, material, descripcion) {
+    const modal = document.getElementById('modal-detalles');
+    if (!modal) return;
+
     document.getElementById('modal-titulo').innerText = nombre;
     const modalImg = document.getElementById('modal-img');
-    modalImg.src = imagen;
+    modalImg.src = resolverRutaSegura(imagen);
+
     const limpio = await obtenerArmazonProcesado(imagen);
     if (limpio && limpio.canvasCatalogo && limpio.canvasCatalogo.toDataURL) {
-        try {
-            modalImg.src = limpio.canvasCatalogo.toDataURL('image/png');
-        } catch (e) {}
+        try { modalImg.src = limpio.canvasCatalogo.toDataURL('image/png'); } catch (e) {}
     }
+
     document.getElementById('modal-material').innerText = `Material: ${material}`;
     document.getElementById('modal-descripcion').innerText = descripcion;
-    document.getElementById('modal-detalles').style.display = 'flex';
+
+    // Quitar .oculto (que tiene display:none !important) y mostrar flex
+    modal.classList.remove('oculto');
+    modal.style.display = 'flex';
 }
 
-function cerrarModal() {
+function cerrarModalDetallesArmazon() {
     const modal = document.getElementById('modal-detalles');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.classList.add('oculto');
+        modal.style.display = 'none';
+    }
 }
 
 let streamARIndividual = null;
@@ -2134,6 +1916,7 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
     const badge = document.getElementById('badge-tracking-individual');
     if (!modal || !video || !canvas) return;
 
+    canvas.style.pointerEvents = 'none';
     armazonNombreModalActual = nombre;
     armazonRutaModalActual = imagenRuta;
     ZigoAnalytics.registrarPruebaAR(nombre, 'catalogo');
@@ -2209,10 +1992,12 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
     procesandoFrameIndividual = false;
     video.style.display = 'block';
     document.getElementById('btn-volver-camara-modal')?.classList.add('oculto');
+
+    // Quitar .oculto y mostrar flex
+    modal.classList.remove('oculto');
     modal.style.display = 'flex';
 
     armazonModalActual = await obtenerArmazonProcesado(imagenRuta);
-
     const ctx = canvas.getContext('2d');
     if (animacionARIndividualId) cancelAnimationFrame(animacionARIndividualId);
 
@@ -2239,7 +2024,16 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
             return;
         }
 
-        if (!streamARIndividual) return;
+        if (!streamARIndividual) {
+            if (armazonModalActual) {
+                canvas.width = 640;
+                canvas.height = 480;
+                ctx.clearRect(0, 0, 640, 480);
+                dibujarArmazonCentradoFallback(ctx, 640, 480, armazonModalActual, escalaUsuario, offsetYUsuario);
+            }
+            return;
+        }
+
         const vw = video.videoWidth || 640;
         const vh = video.videoHeight || 480;
         if (canvas.width !== vw) canvas.width = vw;
@@ -2265,6 +2059,7 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (badge) badge.innerHTML = '<span class="punto-estado"></span> Usa "Subir foto de mi rostro"';
         bucleRenderAR();
         return;
     }
@@ -2281,12 +2076,7 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
             faceMeshIndividual = new FaceMesh({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
             });
-            faceMeshIndividual.setOptions({
-                maxNumFaces: 1,
-                refineLandmarks: true,
-                minDetectionConfidence: 0.55,
-                minTrackingConfidence: 0.55
-            });
+            faceMeshIndividual.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.55, minTrackingConfidence: 0.55 });
             faceMeshIndividual.onResults((results) => {
                 const detectado = results.multiFaceLandmarks && results.multiFaceLandmarks[0];
                 if (detectado) {
@@ -2294,13 +2084,10 @@ async function abrirProbadorVirtual(nombre, imagenRuta) {
                     framesPerdidosIndividual = 0;
                 } else {
                     framesPerdidosIndividual++;
-                    if (framesPerdidosIndividual > 12) {
-                        ultimosLandmarksIndividual = null;
-                    }
+                    if (framesPerdidosIndividual > 12) ultimosLandmarksIndividual = null;
                 }
             });
         }
-
         bucleRenderAR();
     } catch (err) {
         if (badge) badge.innerHTML = '<span class="punto-estado"></span> Cámara no disponible · Usa "Subir foto"';
@@ -2323,7 +2110,10 @@ function cerrarProbadorVirtual() {
     const video = document.getElementById('webcam-ar');
     if (video) video.srcObject = null;
     const modal = document.getElementById('modal-probador-ar');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.classList.add('oculto');
+        modal.style.display = 'none';
+    }
 }
 
 function tomarCapturaProbadorAR() {
@@ -2348,15 +2138,15 @@ function tomarCapturaProbadorAR() {
     }
 
     ctx.drawImage(canvasOverlay, 0, 0, canvasFinal.width, canvasFinal.height);
-
     ZigoAnalytics.registrarConversion('capturasAR', armazonNombreModalActual);
+
     const enlace = document.createElement('a');
     enlace.href = canvasFinal.toDataURL('image/png');
-    enlace.download = 'ziGO-Prueba-AR.png';
+    enlace.download = `ziGO-Prueba-AR-${(armazonNombreModalActual || 'Lente').replace(/\s+/g, '-')}.png`;
     enlace.click();
 }
 
-function actualizarContador() {
+function actualizarContadorArmazones() {
     const seleccionados = document.querySelectorAll('.seleccionar-armazon:checked');
     const contadorSpan = document.getElementById('contador-seleccionados');
     const panelFlotante = document.querySelector('.panel-agendar-flotante');
@@ -2367,120 +2157,102 @@ function actualizarContador() {
     }
 }
 
-function inicializarFiltros() {
+function inicializarCatalogoArmazones() {
+    const grid = document.querySelector('.armazon-grid');
+    if (!grid) return;
+
+    // 1. Filtros de categoría
     const botonesFiltro = document.querySelectorAll('.btn-filtro');
     const tarjetas = document.querySelectorAll('.armazon-card');
-    if (botonesFiltro.length === 0) return;
-
     botonesFiltro.forEach(boton => {
         boton.addEventListener('click', () => {
             botonesFiltro.forEach(b => b.classList.remove('activo'));
             boton.classList.add('activo');
             const filtro = boton.getAttribute('data-filtro');
-
             tarjetas.forEach(tarjeta => {
                 const cat = tarjeta.getAttribute('data-categoria');
-                const visible = filtro === 'todos' || cat === filtro;
-                tarjeta.style.display = visible ? 'flex' : 'none';
+                tarjeta.style.display = (filtro === 'todos' || cat === filtro) ? 'flex' : 'none';
             });
         });
     });
-}
 
-function irAColocarCita() {
-    const seleccionados = Array.from(document.querySelectorAll('.seleccionar-armazon:checked')).map(cb => cb.value);
-    if (seleccionados.length === 0) return;
-    window.location.href = `agenda.html?armazones=${encodeURIComponent(seleccionados.join(', '))}`;
+    // 2. Enlace directo a TODOS los botones Detalles, Probar AR, Modales y Agendar
+    grid.addEventListener('click', (e) => {
+        const btnDetalles = e.target.closest('.btn-detalles');
+        if (btnDetalles) {
+            e.preventDefault();
+            const card = btnDetalles.closest('.armazon-card');
+            const nombre = btnDetalles.dataset.modelo || card?.dataset.modelo || 'Armazón ziGO';
+            const catItem = CATALOGO_ARMAZONES.find(c => c.nombre.toLowerCase() === nombre.toLowerCase());
+            const img = btnDetalles.dataset.img || catItem?.archivo || '';
+            const material = btnDetalles.dataset.material || catItem?.material || 'Acetato / Aleación ligera';
+            const descripcion = btnDetalles.dataset.descripcion || catItem?.descripcion || 'Diseño ergonómico ziGO adaptado a tu estilo.';
+            abrirModalDetallesArmazon(nombre, img, material, descripcion);
+            return;
+        }
+
+        const btnProbar = e.target.closest('.btn-probar-ar');
+        if (btnProbar) {
+            e.preventDefault();
+            const card = btnProbar.closest('.armazon-card');
+            const nombre = btnProbar.dataset.modelo || card?.dataset.modelo || 'Armazón ziGO';
+            const catItem = CATALOGO_ARMAZONES.find(c => c.nombre.toLowerCase() === nombre.toLowerCase());
+            const img = btnProbar.dataset.img || catItem?.archivo || '';
+            abrirProbadorVirtual(nombre, img);
+        }
+    });
+
+    // 3. Botones de cierre de modales, captura y agendar cita
+    document.getElementById('btn-cerrar-modal-detalles')?.addEventListener('click', cerrarModalDetallesArmazon);
+    document.getElementById('modal-detalles')?.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-detalles') cerrarModalDetallesArmazon();
+    });
+
+    document.getElementById('btn-cerrar-probador-ar')?.addEventListener('click', cerrarProbadorVirtual);
+    document.getElementById('modal-probador-ar')?.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-probador-ar') cerrarProbadorVirtual();
+    });
+
+    document.getElementById('btn-captura-probador-ar')?.addEventListener('click', tomarCapturaProbadorAR);
+
+    document.getElementById('btn-agendar-seleccionados')?.addEventListener('click', () => {
+        const seleccionados = Array.from(document.querySelectorAll('.seleccionar-armazon:checked')).map(cb => cb.value);
+        if (seleccionados.length === 0) return;
+        window.location.href = `agenda.html?armazones=${encodeURIComponent(seleccionados.join(', '))}`;
+    });
+
+    document.querySelectorAll('.seleccionar-armazon').forEach(box => {
+        box.addEventListener('change', actualizarContadorArmazones);
+    });
+    actualizarContadorArmazones();
 }
 
 /*============================================================
-    11. PÁGINA RECOMENDACIÓN FACIAL IA (PROBADOR.HTML)
+    12. PÁGINA RECOMENDACIÓN FACIAL IA (PROBADOR.HTML)
 ============================================================*/
 function inicializarAsistenteIA() {
     const video = document.getElementById('webcam-feed');
     const canvasOverlay = document.getElementById('ar-overlay');
     if (!video || !canvasOverlay) return;
 
-    // Asegurar que el canvas nunca bloquee clics sobre botones
     canvasOverlay.style.pointerEvents = 'none';
 
-    const buscarBotonPorTexto = (regex) =>
-        Array.from(document.querySelectorAll('button')).find(b => regex.test((b.textContent || '').trim()));
-
-    const btnActivarCamara = document.getElementById('btn-activar-camara') || buscarBotonPorTexto(/encender c[aá]mara|activar c[aá]mara/i);
-    const btnCaptura = document.getElementById('btn-captura') || document.querySelector('.btn-captura-ar') || buscarBotonPorTexto(/capturar|tomar foto/i);
-    const btnEscanear = document.getElementById('btn-escanear-ia') || buscarBotonPorTexto(/analizar mi rostro|volver a analizar/i);
+    const btnActivarCamara = document.getElementById('btn-activar-camara');
+    const btnCaptura = document.getElementById('btn-captura');
+    const btnEscanear = document.getElementById('btn-escanear-ia');
     const alertaIA = document.getElementById('alerta-ia-rostro');
     const panelResultado = document.getElementById('resultado-ia');
     const statusTexto = document.getElementById('ar-status-texto');
     const statusDot = document.getElementById('ar-status-dot');
-    const selectCatalogo = document.getElementById('select-armazon-ia') || document.querySelector('select');
+    const selectCatalogo = document.getElementById('select-armazon-ia');
+    const inputSubirFoto = document.getElementById('input-subir-foto-ia');
+    const btnVolverCamara = document.getElementById('btn-volver-camara-ia');
+    const sliderBrillo = document.getElementById('ia-brillo');
+    const sliderContraste = document.getElementById('ia-contraste');
+    const sliderEscala = document.getElementById('ia-ar-escala');
+    const sliderOffset = document.getElementById('ia-ar-posicion-y');
 
     if (!btnEscanear) return;
-
-    // Detectar o crear controles de foto y sliders sin duplicarlos
-    let btnSubirFoto = document.getElementById('btn-subir-foto') || document.getElementById('btn-subir-foto-ia') || buscarBotonPorTexto(/subir foto/i);
-    let inputSubirFoto = document.getElementById('input-foto-rostro') || document.getElementById('input-subir-foto') || document.getElementById('input-subir-foto-ia') || document.querySelector('input[type="file"]');
-    let btnVolverCamara = document.getElementById('btn-usar-camara') || document.getElementById('btn-volver-camara-ia') || buscarBotonPorTexto(/volver a c[aá]mara|usar c[aá]mara/i);
-
-    const visorContainer = video.closest('.ar-visor-container') || video.parentElement;
-
-    if (!btnSubirFoto && visorContainer) {
-        visorContainer.insertAdjacentHTML('afterend', `
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
-                <input type="file" id="input-subir-foto-ia" accept="image/jpeg,image/png,image/webp" style="display:none;">
-                <button type="button" id="btn-subir-foto-ia" class="btn-detalles">
-                    <i class="fas fa-image"></i> Subir foto de mi rostro
-                </button>
-                <button type="button" id="btn-volver-camara-ia" class="btn-detalles oculto">
-                    <i class="fas fa-video"></i> Volver a cámara en vivo
-                </button>
-            </div>
-        `);
-        btnSubirFoto = document.getElementById('btn-subir-foto-ia');
-        inputSubirFoto = document.getElementById('input-subir-foto-ia');
-        btnVolverCamara = document.getElementById('btn-volver-camara-ia');
-    } else if (btnSubirFoto && !inputSubirFoto) {
-        const nuevoInput = document.createElement('input');
-        nuevoInput.type = 'file';
-        nuevoInput.id = 'input-subir-foto-ia';
-        nuevoInput.accept = 'image/jpeg,image/png,image/webp';
-        nuevoInput.style.display = 'none';
-        btnSubirFoto.parentElement.appendChild(nuevoInput);
-        inputSubirFoto = nuevoInput;
-    }
-
-    // Detectar sliders nativos por ID o etiqueta
-    let sliderBrillo = document.getElementById('slider-brillo') || document.getElementById('ia-brillo');
-    let sliderContraste = document.getElementById('slider-contraste') || document.getElementById('ia-contraste');
-    let sliderEscala = document.getElementById('slider-escala-ia') || document.getElementById('ia-escala-lente');
-    let sliderOffset = document.getElementById('slider-offset-ia') || document.getElementById('ia-offset-y');
-
-    document.querySelectorAll('input[type="range"]').forEach(rng => {
-        const textoContenedor = (rng.closest('label')?.textContent || rng.parentElement?.textContent || '').toLowerCase();
-        if (!sliderBrillo && textoContenedor.includes('brillo')) sliderBrillo = rng;
-        if (!sliderContraste && textoContenedor.includes('contraste')) sliderContraste = rng;
-        if (!sliderEscala && (textoContenedor.includes('tamaño') || textoContenedor.includes('escala'))) sliderEscala = rng;
-        if (!sliderOffset && (textoContenedor.includes('altura') || textoContenedor.includes('posición') || textoContenedor.includes('nariz'))) sliderOffset = rng;
-    });
-
-    // Asegurar que existan controles de Tamaño y Altura del lente
-    if (!sliderEscala || !sliderOffset) {
-        const contenedorSliders = (sliderBrillo && sliderBrillo.closest('.ar-controles-ajuste')) || visorContainer;
-        if (contenedorSliders && !document.getElementById('ia-escala-lente')) {
-            const bloqueExtra = `
-                <label>Tamaño del armazón <input type="range" id="ia-escala-lente" min="0.7" max="1.4" step="0.05" value="1"></label>
-                <label>Altura en nariz <input type="range" id="ia-offset-y" min="-35" max="35" step="1" value="0"></label>
-            `;
-            if (contenedorSliders.classList.contains('ar-controles-ajuste')) {
-                contenedorSliders.insertAdjacentHTML('beforeend', bloqueExtra);
-            } else {
-                contenedorSliders.insertAdjacentHTML('afterend', `<div class="ar-controles-ajuste" style="margin-top:10px;">${bloqueExtra}</div>`);
-            }
-            sliderEscala = document.getElementById('ia-escala-lente');
-            sliderOffset = document.getElementById('ia-offset-y');
-        }
-    }
 
     let streamIA = null;
     let faceMeshIA = null;
@@ -2493,10 +2265,7 @@ function inicializarAsistenteIA() {
     let landmarksFotoSubidaIA = null;
 
     function mostrarAlertaIA(msg) {
-        if (!alertaIA) {
-            alert(msg);
-            return;
-        }
+        if (!alertaIA) { alert(msg); return; }
         alertaIA.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${escaparHTML(msg)}`;
         alertaIA.classList.remove('oculto');
     }
@@ -2504,8 +2273,8 @@ function inicializarAsistenteIA() {
     function aplicarFiltrosLuzIA() {
         const brillo = sliderBrillo?.value || '100';
         const contraste = sliderContraste?.value || '100';
-        const spanBrillo = document.getElementById('val-brillo');
-        const spanContraste = document.getElementById('val-contraste');
+        const spanBrillo = document.getElementById('val-brillo-ia');
+        const spanContraste = document.getElementById('val-contraste-ia');
         if (spanBrillo) spanBrillo.innerText = `${brillo}%`;
         if (spanContraste) spanContraste.innerText = `${contraste}%`;
         video.style.filter = `brightness(${brillo}%) contrast(${contraste}%)`;
@@ -2520,9 +2289,11 @@ function inicializarAsistenteIA() {
         document.querySelectorAll('.btn-modelo-lente').forEach(btn => {
             btn.classList.toggle('activo', btn.getAttribute('data-nombre') === nombre);
         });
-        if (!rafIA && (streamIA || fotoSubidaIA)) {
-            iniciarBucleRenderIA();
+        const btnAgendarIA = document.getElementById('btn-agendar-desde-ia');
+        if (btnAgendarIA) {
+            btnAgendarIA.href = `./agenda.html?armazones=${encodeURIComponent(nombre)}`;
         }
+        if (!rafIA && (streamIA || fotoSubidaIA)) iniciarBucleRenderIA();
     }
 
     function iniciarBucleRenderIA() {
@@ -2555,20 +2326,15 @@ function inicializarAsistenteIA() {
             }
 
             if (!streamIA) return;
-
             const vw = video.videoWidth || 640;
             const vh = video.videoHeight || 480;
             if (canvasOverlay.width !== vw) canvasOverlay.width = vw;
             if (canvasOverlay.height !== vh) canvasOverlay.height = vh;
-
             ctx.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
 
-            // Envío no bloqueante a MediaPipe para que el renderizado corra fluido a 60fps
             if (faceMeshIA && !procesandoFrameIA && video.readyState >= 2) {
                 procesandoFrameIA = true;
-                faceMeshIA.send({ image: video }).catch(() => {}).finally(() => {
-                    procesandoFrameIA = false;
-                });
+                faceMeshIA.send({ image: video }).catch(() => {}).finally(() => { procesandoFrameIA = false; });
             }
 
             if (ultimosLandmarksIA && armazonActivoIA) {
@@ -2576,7 +2342,6 @@ function inicializarAsistenteIA() {
             } else if (armazonActivoIA) {
                 dibujarArmazonCentradoFallback(ctx, canvasOverlay.width, canvasOverlay.height, armazonActivoIA, escala, offsetY);
             }
-
             rafIA = requestAnimationFrame(bucleIA);
         }
         bucleIA();
@@ -2596,7 +2361,7 @@ function inicializarAsistenteIA() {
             return true;
         }
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            mostrarAlertaIA('Tu navegador no permite acceso directo a cámara. Usa el botón "Subir foto de mi rostro".');
+            mostrarAlertaIA('Tu navegador no permite acceso directo a cámara. Usa "Subir foto de mi rostro".');
             return false;
         }
         try {
@@ -2610,18 +2375,13 @@ function inicializarAsistenteIA() {
             if (statusTexto) statusTexto.innerText = 'Cámara activa';
             if (statusDot) statusDot.classList.add('activo');
             if (btnActivarCamara) btnActivarCamara.style.display = 'none';
-            if (alertaIA) alertaIA.classList.add('oculto');
+            alertaIA?.classList.add('oculto');
 
             if (typeof FaceMesh !== 'undefined' && !faceMeshIA) {
                 faceMeshIA = new FaceMesh({
                     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
                 });
-                faceMeshIA.setOptions({
-                    maxNumFaces: 1,
-                    refineLandmarks: true,
-                    minDetectionConfidence: 0.55,
-                    minTrackingConfidence: 0.55
-                });
+                faceMeshIA.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.55, minTrackingConfidence: 0.55 });
                 faceMeshIA.onResults((res) => {
                     const detectado = res.multiFaceLandmarks && res.multiFaceLandmarks[0];
                     if (detectado) {
@@ -2629,13 +2389,10 @@ function inicializarAsistenteIA() {
                         framesPerdidosIA = 0;
                     } else {
                         framesPerdidosIA++;
-                        if (framesPerdidosIA > 12) {
-                            ultimosLandmarksIA = null;
-                        }
+                        if (framesPerdidosIA > 12) ultimosLandmarksIA = null;
                     }
                 });
             }
-
             iniciarBucleRenderIA();
             return true;
         } catch (err) {
@@ -2644,63 +2401,42 @@ function inicializarAsistenteIA() {
         }
     }
 
-    if (btnSubirFoto && inputSubirFoto) {
-        btnSubirFoto.addEventListener('click', (e) => {
-            e.preventDefault();
-            inputSubirFoto.click();
-        });
+    inputSubirFoto?.addEventListener('change', async (e) => {
+        const archivo = e.target.files[0];
+        if (!archivo) return;
+        const labelSubir = document.querySelector('label[for="input-subir-foto-ia"]');
+        const txtOrig = labelSubir ? labelSubir.innerHTML : '';
+        if (labelSubir) labelSubir.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando rostro...';
 
-        inputSubirFoto.addEventListener('change', async (e) => {
-            const archivo = e.target.files[0];
-            if (!archivo) return;
+        const validacion = await validarFotoRostroBiometrica(archivo);
+        if (labelSubir) labelSubir.innerHTML = txtOrig;
 
-            const textoOriginal = btnSubirFoto.innerHTML;
-            btnSubirFoto.disabled = true;
-            btnSubirFoto.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando rostro...';
-
-            const validacion = await validarFotoRostroBiometrica(archivo);
-            btnSubirFoto.disabled = false;
-            btnSubirFoto.innerHTML = textoOriginal;
-
-            if (!validacion.valido) {
-                mostrarAlertaIA(validacion.motivo);
-                inputSubirFoto.value = '';
-                return;
-            }
-
-            if (streamIA) {
-                streamIA.getTracks().forEach(t => t.stop());
-                streamIA = null;
-            }
-
-            video.style.display = 'none';
-            fotoSubidaIA = validacion.img;
-            landmarksFotoSubidaIA = validacion.landmarks;
-            if (alertaIA) alertaIA.classList.add('oculto');
-            if (statusTexto) statusTexto.innerText = 'Foto verificada con IA';
-            if (statusDot) statusDot.classList.add('activo');
-            btnVolverCamara?.classList.remove('oculto');
-
-            iniciarBucleRenderIA();
-        });
-    }
-
-    btnVolverCamara?.addEventListener('click', (e) => {
-        e.preventDefault();
-        encenderCamaraIA();
+        if (!validacion.valido) {
+            mostrarAlertaIA(validacion.motivo);
+            inputSubirFoto.value = '';
+            return;
+        }
+        if (streamIA) {
+            streamIA.getTracks().forEach(t => t.stop());
+            streamIA = null;
+        }
+        video.style.display = 'none';
+        fotoSubidaIA = validacion.img;
+        landmarksFotoSubidaIA = validacion.landmarks;
+        alertaIA?.classList.add('oculto');
+        if (statusTexto) statusTexto.innerText = 'Foto verificada con IA';
+        if (statusDot) statusDot.classList.add('activo');
+        btnVolverCamara?.classList.remove('oculto');
+        iniciarBucleRenderIA();
     });
 
-    btnActivarCamara?.addEventListener('click', (e) => {
-        e.preventDefault();
-        encenderCamaraIA();
-    });
+    btnVolverCamara?.addEventListener('click', (e) => { e.preventDefault(); encenderCamaraIA(); });
+    btnActivarCamara?.addEventListener('click', (e) => { e.preventDefault(); encenderCamaraIA(); });
 
     selectCatalogo?.addEventListener('change', async () => {
         if (!selectCatalogo.value) return;
         const [nombre, ruta] = selectCatalogo.value.split('|');
-        if (!fotoSubidaIA && !streamIA) {
-            await encenderCamaraIA();
-        }
+        if (!fotoSubidaIA && !streamIA) await encenderCamaraIA();
         await seleccionarArmazonEnVivoIA(nombre, ruta);
     });
 
@@ -2754,17 +2490,12 @@ function inicializarAsistenteIA() {
         }));
 
         contenedorBotones.innerHTML = tarjetasMini.join('');
-
         contenedorBotones.querySelectorAll('.btn-modelo-lente').forEach(btn => {
-            btn.addEventListener('click', () => {
-                seleccionarArmazonEnVivoIA(btn.getAttribute('data-nombre'), btn.getAttribute('data-ruta'));
-            });
+            btn.addEventListener('click', () => seleccionarArmazonEnVivoIA(btn.getAttribute('data-nombre'), btn.getAttribute('data-ruta')));
         });
 
         panelResultado.classList.remove('oculto');
-        if (listaObjetosRec[0]) {
-            seleccionarArmazonEnVivoIA(listaObjetosRec[0].nombre, listaObjetosRec[0].archivo);
-        }
+        if (listaObjetosRec[0]) seleccionarArmazonEnVivoIA(listaObjetosRec[0].nombre, listaObjetosRec[0].archivo);
     }
 
     function extraerMetricasLandmarks(lm) {
@@ -2785,19 +2516,16 @@ function inicializarAsistenteIA() {
             await calcularYMostrarDiagnostico([extraerMetricasLandmarks(landmarksFotoSubidaIA)]);
             return;
         }
-
         const camaraLista = await encenderCamaraIA();
         if (!camaraLista) return;
 
         btnEscanear.disabled = true;
         btnEscanear.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Midiendo proporciones faciales...';
-        if (alertaIA) alertaIA.classList.add('oculto');
+        alertaIA?.classList.add('oculto');
 
         const muestras = [];
         const recolector = setInterval(() => {
-            if (ultimosLandmarksIA) {
-                muestras.push(extraerMetricasLandmarks(ultimosLandmarksIA));
-            }
+            if (ultimosLandmarksIA) muestras.push(extraerMetricasLandmarks(ultimosLandmarksIA));
         }, 120);
 
         setTimeout(async () => {
@@ -2810,7 +2538,6 @@ function inicializarAsistenteIA() {
                 mostrarAlertaIA('No se detectó un rostro claro frente a la cámara. Asegúrate de tener buena iluminación o sube una foto frontal.');
                 return;
             }
-
             await calcularYMostrarDiagnostico(muestras);
         }, 1800);
     });
@@ -2836,10 +2563,9 @@ function inicializarAsistenteIA() {
             ctx.drawImage(video, 0, 0, c.width, c.height);
             ctx.restore();
         }
-
         ctx.drawImage(canvasOverlay, 0, 0, c.width, c.height);
-
         ZigoAnalytics.registrarConversion('capturasAR', 'Recomendacion_IA');
+
         const a = document.createElement('a');
         a.href = c.toDataURL('image/png');
         a.download = 'ziGO-Recomendacion-IA.png';
@@ -2855,7 +2581,7 @@ function inicializarAsistenteIA() {
 }
 
 /*============================================================
-    12. PÁGINA AGENDA: MASCOTA ziGO + SITIO VS DOMICILIO CONDICIONAL
+    13. PÁGINA AGENDA: MASCOTA ziGO + SITIO VS DOMICILIO
 ============================================================*/
 function inicializarAgenda() {
     const inlineContainer = document.getElementById('inline-container');
@@ -2863,13 +2589,11 @@ function inicializarAgenda() {
 
     const avatarOptica = document.querySelector('.avatar-optica');
     if (avatarOptica) {
-        const iconoHead = document.querySelector('link[rel*="icon"]')?.getAttribute('href') || '../img/favicon.png';
+        const iconoHead = document.querySelector('link[rel*="icon"]')?.getAttribute('href') || '../img/mascota_logo2.ico';
         avatarOptica.innerHTML = `<img src="${iconoHead}" alt="Mascota ziGO">`;
     }
 
-    document.querySelectorAll('.accesos-previos-agenda a').forEach(btn => {
-        btn.classList.add('btn-acceso-agenda-unificado');
-    });
+    document.querySelectorAll('.accesos-previos-agenda a').forEach(btn => btn.classList.add('btn-acceso-agenda-unificado'));
 
     const parametrosURL = new URLSearchParams(window.location.search);
     const armazonesURL = parametrosURL.get('armazones') ? decodeURIComponent(parametrosURL.get('armazones')) : '';
@@ -2880,13 +2604,6 @@ function inicializarAgenda() {
     let mapaInstancia = null;
 
     const resumenDiv = document.getElementById('resumen-datos-cita');
-    const btnCopiar = document.getElementById('btn-copiar-armazones');
-    const notasAyuda = document.querySelector('.notas-ayuda');
-
-    if (notasAyuda) {
-        notasAyuda.innerHTML = 'Al seleccionar fecha, hora y pulsar <strong>Siguiente</strong>, toda tu ubicación y armazones aparecerán cargados automáticamente.';
-    }
-
     const controlesDomicilio = document.querySelector('.controles-mapa-agenda');
     const mapaBox = document.getElementById('mapa-ubicacion-agenda');
     const textoCoords = document.getElementById('texto-coordenadas-elegidas');
@@ -2918,12 +2635,10 @@ function inicializarAgenda() {
                 ? '<i class="fas fa-map-marker-alt"></i> 2. Tu Ubicación para Visita a Domicilio'
                 : '<i class="fas fa-clinic-medical"></i> 2. Ubicación de Atención en Sitio';
         }
-        if (tarjetaSitio) tarjetaSitio.classList.toggle('oculto', esDomicilio);
+        tarjetaSitio?.classList.toggle('oculto', esDomicilio);
         if (controlesDomicilio) {
             controlesDomicilio.classList.toggle('oculto', !esDomicilio);
-            if (esDomicilio && mapaInstancia) {
-                setTimeout(() => mapaInstancia.invalidateSize(), 200);
-            }
+            if (esDomicilio && mapaInstancia) setTimeout(() => mapaInstancia.invalidateSize(), 200);
         }
     }
 
@@ -2945,15 +2660,10 @@ function inicializarAgenda() {
         const resumen = construirTextoResumen();
         const encResumen = encodeURIComponent(resumen);
         const encArmazones = encodeURIComponent(armazonesURL || 'Por definir en consulta');
-
         const zohoUrl = `https://zigo1.zohobookings.com/portal-embed#/5013970000000035045?Notas%20o%20armazones%20de%20inter%C3%A9s=${encResumen}&Notas=${encResumen}&armazones=${encArmazones}`;
 
         inlineContainer.innerHTML = '';
-        Bookings.inlineEmbed({
-            url: zohoUrl,
-            parent: '#inline-container',
-            height: '780px'
-        });
+        Bookings.inlineEmbed({ url: zohoUrl, parent: '#inline-container', height: '780px' });
         setTimeout(ajustarCalendarioMovilEstrecho, 700);
     }
 
@@ -2961,25 +2671,16 @@ function inicializarAgenda() {
         const esDomicilio = modalidadSeleccionada.toLowerCase().includes('domicilio');
         if (resumenDiv) {
             let html = `<div><strong>Modalidad:</strong> ${escaparHTML(modalidadSeleccionada)}</div>`;
-            if (armazonesURL) {
-                html += `<div><strong>Armazones:</strong> ${escaparHTML(armazonesURL)}</div>`;
-            }
+            if (armazonesURL) html += `<div><strong>Armazones:</strong> ${escaparHTML(armazonesURL)}</div>`;
             if (esDomicilio) {
-                if (direccionDetectada) {
-                    html += `<div><strong>Dirección Domicilio:</strong> ${escaparHTML(direccionDetectada)}</div>`;
-                }
-                if (enlaceGoogleMaps) {
-                    html += `<div><strong>Google Maps:</strong> <a href="${enlaceGoogleMaps}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:bold;">Abrir pin exacto</a></div>`;
-                }
+                if (direccionDetectada) html += `<div><strong>Dirección Domicilio:</strong> ${escaparHTML(direccionDetectada)}</div>`;
+                if (enlaceGoogleMaps) html += `<div><strong>Google Maps:</strong> <a href="${enlaceGoogleMaps}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:bold;">Abrir pin exacto</a></div>`;
             } else {
                 html += `<div><strong>Punto de atención:</strong> ${escaparHTML(CONFIG_ZIGO.direccionSitioZigo)}</div>`;
             }
             resumenDiv.innerHTML = html;
         }
-
-        if (recargarCalendario) {
-            cargarZohoConDatosPrellenados();
-        }
+        if (recargarCalendario) cargarZohoConDatosPrellenados();
     }
 
     document.querySelectorAll('input[name="modalidad-cita"]').forEach(radio => {
@@ -2992,8 +2693,7 @@ function inicializarAgenda() {
     });
 
     if (mapaBox && typeof L !== 'undefined') {
-        const cdmxCentro = [19.4326, -99.1332];
-        const mapa = L.map('mapa-ubicacion-agenda').setView(cdmxCentro, 12);
+        const mapa = L.map('mapa-ubicacion-agenda').setView([19.4326, -99.1332], 12);
         mapaInstancia = mapa;
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -3002,16 +2702,13 @@ function inicializarAgenda() {
         }).addTo(mapa);
 
         let marcador = null;
-
         async function fijarPuntoMapa(lat, lng, etiqueta = '', precisionMetros = null) {
             if (marcador) mapa.removeLayer(marcador);
-
             marcador = L.marker([lat, lng], { draggable: true }).addTo(mapa);
             marcador.on('dragend', () => {
                 const pos = marcador.getLatLng();
                 fijarPuntoMapa(pos.lat, pos.lng, '(Pin ajustado)');
             });
-
             mapa.setView([lat, lng], 16);
             enlaceGoogleMaps = `https://www.google.com/maps?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
 
@@ -3029,58 +2726,48 @@ function inicializarAgenda() {
 
             if (textoCoords) {
                 const notaAjuste = (precisionMetros && precisionMetros > 300)
-                    ? ' <span style="color:#38bdf8;">(Arrastra el pin azul o escribe tu calle y número exactos arriba si deseas afinarlo)</span>'
+                    ? ' <span style="color:#38bdf8;">(Arrastra el pin azul o escribe tu calle y número arriba si deseas afinarlo)</span>'
                     : '';
                 textoCoords.innerHTML = `<i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> Ubicación lista ${escaparHTML(etiqueta)}: <strong>${escaparHTML(direccionDetectada || `${lat.toFixed(5)}, ${lng.toFixed(5)}`)}</strong>${notaAjuste}`;
             }
-
             actualizarResumenVisual(true);
         }
 
-        mapa.on('click', (e) => {
-            fijarPuntoMapa(e.latlng.lat, e.latlng.lng, '(Pin en mapa)');
-        });
+        mapa.on('click', (e) => fijarPuntoMapa(e.latlng.lat, e.latlng.lng, '(Pin en mapa)'));
 
         const btnMiUbicacion = document.getElementById('btn-mi-ubicacion');
-        if (btnMiUbicacion) {
-            btnMiUbicacion.addEventListener('click', () => {
-                if (!navigator.geolocation) {
-                    alert('Tu dispositivo no soporta geolocalización GPS.');
-                    return;
-                }
-                const textoOriginal = btnMiUbicacion.innerHTML;
-                btnMiUbicacion.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calibrando GPS...';
+        btnMiUbicacion?.addEventListener('click', () => {
+            if (!navigator.geolocation) { alert('Tu dispositivo no soporta geolocalización GPS.'); return; }
+            const textoOriginal = btnMiUbicacion.innerHTML;
+            btnMiUbicacion.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calibrando GPS...';
 
-                let mejorLectura = null;
-                const watchId = navigator.geolocation.watchPosition(
-                    (pos) => {
-                        if (!mejorLectura || pos.coords.accuracy < mejorLectura.coords.accuracy) {
-                            mejorLectura = pos;
-                        }
-                        if (pos.coords.accuracy <= 60) {
-                            navigator.geolocation.clearWatch(watchId);
-                            btnMiUbicacion.innerHTML = textoOriginal;
-                            fijarPuntoMapa(pos.coords.latitude, pos.coords.longitude, `(GPS ±${Math.round(pos.coords.accuracy)}m)`, pos.coords.accuracy);
-                        }
-                    },
-                    () => {
+            let mejorLectura = null;
+            const watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    if (!mejorLectura || pos.coords.accuracy < mejorLectura.coords.accuracy) mejorLectura = pos;
+                    if (pos.coords.accuracy <= 60) {
                         navigator.geolocation.clearWatch(watchId);
                         btnMiUbicacion.innerHTML = textoOriginal;
-                        alert('No se pudo obtener el GPS automático. Escribe tu calle y número en el cuadro de arriba o toca tu casa en el mapa.');
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-
-                setTimeout(() => {
-                    navigator.geolocation.clearWatch(watchId);
-                    if (mejorLectura) {
-                        btnMiUbicacion.innerHTML = textoOriginal;
-                        const { latitude, longitude, accuracy } = mejorLectura.coords;
-                        fijarPuntoMapa(latitude, longitude, `(GPS ±${Math.round(accuracy)}m)`, accuracy);
+                        fijarPuntoMapa(pos.coords.latitude, pos.coords.longitude, `(GPS ±${Math.round(pos.coords.accuracy)}m)`, pos.coords.accuracy);
                     }
-                }, 3500);
-            });
-        }
+                },
+                () => {
+                    navigator.geolocation.clearWatch(watchId);
+                    btnMiUbicacion.innerHTML = textoOriginal;
+                    alert('No se pudo obtener el GPS automático. Escribe tu calle y número arriba o toca tu casa en el mapa.');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+
+            setTimeout(() => {
+                navigator.geolocation.clearWatch(watchId);
+                if (mejorLectura) {
+                    btnMiUbicacion.innerHTML = textoOriginal;
+                    const { latitude, longitude, accuracy } = mejorLectura.coords;
+                    fijarPuntoMapa(latitude, longitude, `(GPS ±${Math.round(accuracy)}m)`, accuracy);
+                }
+            }, 3500);
+        });
 
         const btnBuscarDir = document.getElementById('btn-buscar-direccion');
         const inputDir = document.getElementById('input-buscar-direccion');
@@ -3091,119 +2778,25 @@ function inicializarAgenda() {
                 try {
                     const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ', Ciudad de México')}&limit=1`);
                     const datos = await resp.json();
-                    if (datos && datos[0]) {
-                        fijarPuntoMapa(parseFloat(datos[0].lat), parseFloat(datos[0].lon), '(Dirección ingresada)');
-                    } else {
-                        alert('No encontramos esa calle exacta. Escribe tu colonia o haz clic directo en tu calle en el mapa.');
-                    }
+                    if (datos && datos[0]) fijarPuntoMapa(parseFloat(datos[0].lat), parseFloat(datos[0].lon), '(Dirección ingresada)');
+                    else alert('No encontramos esa calle exacta. Escribe tu colonia o haz clic directo en tu calle en el mapa.');
                 } catch (e) {}
             };
             btnBuscarDir.addEventListener('click', buscarEnMapa);
-            inputDir.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    buscarEnMapa();
-                }
-            });
+            inputDir.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); buscarEnMapa(); } });
         }
-    }
-
-    if (btnCopiar) {
-        btnCopiar.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar datos en calendario';
-        btnCopiar.addEventListener('click', () => {
-            actualizarResumenVisual(true);
-            const orig = btnCopiar.innerHTML;
-            btnCopiar.innerHTML = '<i class="fas fa-check"></i> ¡Datos listos para Siguiente!';
-            setTimeout(() => { btnCopiar.innerHTML = orig; }, 2200);
-        });
     }
 
     actualizarVistaModalidad();
     actualizarResumenVisual(true);
 }
 
-/*============================================================
-    13. PÁGINA NOSOTROS: BUZÓN DE QUEJAS DIRECTO A ÁNGEL Y MIGUEL
-============================================================*/
-function inicializarBuzonQuejas() {
-    const formQuejas = document.getElementById('form-quejas-zigo');
-    const respuesta = document.getElementById('respuesta-queja');
-    if (!formQuejas) return;
-
-    formQuejas.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btnSubmit = formQuejas.querySelector('button[type="submit"]');
-        const nombre = (document.getElementById('queja-nombre')?.value || '').trim() || 'Paciente Anónimo';
-        const tipo = document.getElementById('queja-tipo')?.value || 'Comentario / Queja';
-        const mensaje = (document.getElementById('queja-mensaje')?.value || '').trim();
-        const folio = `ZIGO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-        const textoOriginalBtn = btnSubmit ? btnSubmit.innerHTML : '';
-        if (btnSubmit) {
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando reporte por correo...';
-        }
-
-        let enviadoPorCorreo = false;
-        try {
-            const resp = await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasPrincipal}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    _subject: `[${folio}] ${tipo} - Buzón de Calidad ziGO`,
-                    _cc: CONFIG_ZIGO.correoQuejasCopia,
-                    _template: 'table',
-                    Folio: folio,
-                    Tipo: tipo,
-                    Paciente: nombre,
-                    Mensaje: mensaje
-                })
-            });
-            enviadoPorCorreo = resp.ok;
-        } catch (err) {}
-
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = textoOriginalBtn;
-        }
-
-        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
-
-        const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
-        const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
-
-        formQuejas.reset();
-
-        if (respuesta) {
-            respuesta.innerHTML = enviadoPorCorreo
-                ? `<div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Reporte enviado correctamente (Folio ${escaparHTML(folio)}).</strong> Tu mensaje fue canalizado al área de Calidad y Atención ziGO para darle seguimiento oportuno.</div>`
-                : `<div style="display:flex; flex-direction:column; gap:10px;">
-                    <div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Folio generado: ${escaparHTML(folio)}.</strong> Haz clic abajo para completar el envío directo desde tu correo:</div>
-                    <div>
-                        <a href="${urlMail}" class="boton-agenda" style="font-size:12px; padding:9px 16px; display:inline-flex; align-items:center; gap:6px;">
-                            <i class="fas fa-envelope"></i> Enviar reporte por Correo
-                        </a>
-                    </div>
-                   </div>`;
-            respuesta.classList.remove('oculto');
-        }
-    });
-}
-
-/*============================================================
-    14. ADAPTACIÓN RESPONSIVA CALENDARIO ZOHO (< 400PX)
-============================================================*/
 function ajustarCalendarioMovilEstrecho() {
     const contenedor = document.getElementById('inline-container');
     if (!contenedor) return;
-
-    const anchoPantalla = window.innerWidth;
     const iframe = contenedor.querySelector('iframe');
     if (!iframe) return;
-
+    const anchoPantalla = window.innerWidth;
     if (anchoPantalla < 400) {
         const anchoMinimoZoho = 390;
         const factorEscala = Math.max(0.76, (anchoPantalla - 20) / anchoMinimoZoho);
@@ -3217,93 +2810,7 @@ function ajustarCalendarioMovilEstrecho() {
 }
 
 /*============================================================
-    15. SEGUIMIENTO DE CONVERSIONES Y ACCESO DIRECTO A ESTADÍSTICAS
-============================================================*/
-function inicializarSeguimientoConversiones() {
-    document.addEventListener('click', (e) => {
-        const enlace = e.target.closest('a');
-        if (!enlace) return;
-        const href = enlace.getAttribute('href') || '';
-        const canal = enlace.dataset.canal || '';
-
-        if (canal === 'whatsapp' || href.includes('wa.me')) {
-            ZigoAnalytics.registrarConversion('whatsapp', href);
-        } else if (canal === 'telegram' || href.includes('t.me')) {
-            ZigoAnalytics.registrarConversion('telegram', href);
-        } else if (canal === 'llamada' || href.startsWith('tel:')) {
-            ZigoAnalytics.registrarConversion('llamada', href);
-        }
-    });
-
-    // Atajo de teclado Ctrl + Shift + E
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
-            e.preventDefault();
-            ZigoAnalytics.mostrarPanelEstadisticas();
-        }
-    });
-
-    // Botón discreto en el footer + triple clic para abrir estadísticas en móvil o PC
-    const footer = document.querySelector('footer');
-    if (footer) {
-        if (!document.getElementById('btn-footer-stats-zigo')) {
-            const btnStats = document.createElement('button');
-            btnStats.type = 'button';
-            btnStats.id = 'btn-footer-stats-zigo';
-            btnStats.className = 'btn-footer-stats-zigo';
-            btnStats.innerHTML = '<i class="fas fa-chart-bar"></i> Estadísticas ziGO';
-            btnStats.addEventListener('click', () => ZigoAnalytics.mostrarPanelEstadisticas());
-            footer.appendChild(btnStats);
-        }
-
-        footer.addEventListener('click', (e) => {
-            if (e.detail === 3) {
-                ZigoAnalytics.mostrarPanelEstadisticas();
-            }
-        });
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('stats') === 'zigo' || window.location.hash === '#estadisticas') {
-        setTimeout(() => ZigoAnalytics.mostrarPanelEstadisticas(), 400);
-    }
-}
-
-/*============================================================
-    INICIALIZACIÓN GLOBAL DEL SISTEMA
-============================================================*/
-document.addEventListener('DOMContentLoaded', () => {
-    ZigoAnalytics.inicializarGA4Opcional();
-    ZigoAnalytics.registrarVistaPagina();
-    inicializarSEOEstructurado();
-
-    prepararIdentidadEInclusionDOM();
-    inicializarBuscadorInterno();
-    inicializarAccesibilidadYWidgets();
-    inicializarTestimonios5Estrellas();
-    adaptarImagenesIndexATema();
-    limpiarFondosCatalogoTarjetas();
-    inicializarSeguimientoConversiones();
-
-    document.querySelectorAll('.seleccionar-armazon').forEach(box => {
-        box.addEventListener('change', actualizarContador);
-    });
-    actualizarContador();
-    inicializarFiltros();
-    inicializarAsistenteIA();
-    inicializarBuzonQuejas();
-});
-
-window.addEventListener('load', () => {
-    inicializarAgenda();
-    setTimeout(ajustarCalendarioMovilEstrecho, 800);
-});
-
-window.addEventListener('resize', ajustarCalendarioMovilEstrecho);
-window.addEventListener('pageshow', actualizarContador);
-
-/*============================================================
-    13. PÁGINA NOSOTROS: BUZÓN DE QUEJAS DIRECTO Y REGISTRO LOCAL
+    14. PÁGINA NOSOTROS: BUZÓN DE QUEJAS + NUBE + CORREO
 ============================================================*/
 function inicializarBuzonQuejas() {
     const formQuejas = document.getElementById('form-quejas-zigo');
@@ -3318,17 +2825,9 @@ function inicializarBuzonQuejas() {
         const mensaje = (document.getElementById('queja-mensaje')?.value || '').trim();
         const folio = `ZIGO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        // Guardar automáticamente en localStorage para que se vea en el panel admin
-        const stats = JSON.parse(localStorage.getItem('zigo_admin_stats') || '{}');
-        stats.calificaciones = stats.calificaciones || [];
-        stats.calificaciones.push({
-            score: tipo.toLowerCase().includes('felicitación') ? 5 : (tipo.toLowerCase().includes('queja') ? 1 : 3),
-            tipo: tipo,
-            comentario: mensaje,
-            nombre: nombre,
-            fecha: new Date().toISOString()
-        });
-        localStorage.setItem('zigo_admin_stats', JSON.stringify(stats));
+        const scoreEquiv = tipo.toLowerCase().includes('felicitación') ? 5 : (tipo.toLowerCase().includes('queja') ? 1 : 3);
+        ZigoAnalytics.registrarCalificacion({ score: scoreEquiv, tipo, comentario: mensaje, nombre });
+        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
 
         const textoOriginalBtn = btnSubmit ? btnSubmit.innerHTML : '';
         if (btnSubmit) {
@@ -3336,14 +2835,10 @@ function inicializarBuzonQuejas() {
             btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando y enviando...';
         }
 
-        let enviadoPorCorreo = false;
         try {
-            const resp = await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasPrincipal}`, {
+            await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasPrincipal}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
                     _subject: `[${folio}] ${tipo} - Buzón de Calidad ziGO`,
                     _cc: CONFIG_ZIGO.correoQuejasCopia,
@@ -3354,7 +2849,6 @@ function inicializarBuzonQuejas() {
                     Mensaje: mensaje
                 })
             });
-            enviadoPorCorreo = resp.ok;
         } catch (err) {}
 
         if (btnSubmit) {
@@ -3362,13 +2856,7 @@ function inicializarBuzonQuejas() {
             btnSubmit.innerHTML = textoOriginalBtn;
         }
 
-        ZigoAnalytics.registrarConversion('buzonQuejas', `${folio} - ${tipo}`);
-
-        const textoFormateado = `Folio: ${folio}\nTipo: ${tipo}\nPaciente: ${nombre}\nMensaje: ${mensaje}`;
-        const urlMail = `mailto:${CONFIG_ZIGO.correoQuejasPrincipal}?cc=${CONFIG_ZIGO.correoQuejasCopia}&subject=${encodeURIComponent(`[${folio}] ${tipo} - ziGO`)}&body=${encodeURIComponent(textoFormateado)}`;
-
         formQuejas.reset();
-
         if (respuesta) {
             respuesta.innerHTML = `<div><i class="fas fa-check-circle" style="color:var(--neon-cyan);"></i> <strong>Reporte registrado y guardado (Folio ${escaparHTML(folio)}).</strong> Ya es visible en tus estadísticas de administración.</div>`;
             respuesta.classList.remove('oculto');
@@ -3376,3 +2864,263 @@ function inicializarBuzonQuejas() {
     });
 }
 
+/*============================================================
+    15. PANEL DE ADMINISTRACIÓN (pages/admin.html) CON TOKEN Y NUBE
+============================================================*/
+function inicializarPanelAdmin() {
+    if (!document.getElementById('kpi-rating')) return;
+
+    let datosActualesPanel = ZigoAnalytics.cargarDatos();
+
+    function dibujarGraficaMontana(datos) {
+        const pathLine = document.getElementById('chart-line');
+        const pathArea = document.getElementById('chart-area');
+        if (!pathLine || !datos.length) return;
+
+        const max = Math.max(...datos, 1);
+        const width = 600;
+        const height = 100;
+        const step = width / (datos.length - 1 || 1);
+
+        const points = datos.map((val, i) => {
+            const x = i * step;
+            const y = height - (val / max) * 75 - 15;
+            return `${x},${y}`;
+        });
+
+        pathLine.setAttribute('d', `M ${points.join(' L ')}`);
+        pathArea.setAttribute('d', `M 0,120 L ${points.join(' L ')} L ${width},120 Z`);
+    }
+
+    function renderDashboard(datosNube = null) {
+        const local = ZigoAnalytics.cargarDatos();
+        const d = datosNube ? {
+            ...local,
+            ...datosNube,
+            fuentesTrafico: { ...local.fuentesTrafico, ...(datosNube.fuentesTrafico || {}) },
+            armazonesProbadosAR: { ...local.armazonesProbadosAR, ...(datosNube.armazonesProbadosAR || {}) },
+            calificaciones: Array.isArray(datosNube.calificaciones) && datosNube.calificaciones.length
+                ? datosNube.calificaciones
+                : local.calificaciones
+        } : local;
+
+        datosActualesPanel = d;
+
+        const calificaciones = d.calificaciones || [];
+        const modelosVistos = d.armazonesProbadosAR || {};
+        const fuentes = d.fuentesTrafico || { Google: 0, RedesSociales: 0, Directo: 0 };
+
+        const promedio = calificaciones.length
+            ? (calificaciones.reduce((acc, c) => acc + Number(c.score || c.rating || 0), 0) / calificaciones.length).toFixed(1)
+            : '0.0';
+
+        document.getElementById('kpi-rating').textContent = `${promedio} / 5 ⭐`;
+        document.getElementById('kpi-rating-count').textContent = `${calificaciones.length} valoraciones registradas`;
+        document.getElementById('kpi-ar').textContent = Object.values(modelosVistos).reduce((a, b) => a + Number(b || 0), 0);
+        document.getElementById('kpi-google').textContent = fuentes.Google || 0;
+        document.getElementById('kpi-social').textContent = fuentes.RedesSociales || 0;
+
+        const emojis = { 5: '🤩 Excelente (5)', 4: '🙂 Buena (4)', 3: '😐 Regular (3)', 2: '😕 Mala (2)', 1: '😡 Muy mala (1)' };
+        const totalCal = calificaciones.length || 1;
+        document.getElementById('chart-caritas').innerHTML = [5, 4, 3, 2, 1].map(n => {
+            const count = calificaciones.filter(c => Number(c.score || c.rating) === n).length;
+            const pct = Math.round((count / totalCal) * 100);
+            return `
+                <div style="margin-bottom:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.88rem;">
+                        <span>${emojis[n]}</span><span>${count} (${pct}%)</span>
+                    </div>
+                    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                </div>
+            `;
+        }).join('');
+
+        const totalFuentes = Object.values(fuentes).reduce((a, b) => a + Number(b || 0), 0) || 1;
+        document.getElementById('chart-fuentes').innerHTML = Object.entries(fuentes).map(([canal, total]) => {
+            const pct = Math.round((Number(total || 0) / totalFuentes) * 100);
+            return `
+                <div style="margin-bottom:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.88rem;">
+                        <span><strong>${escaparHTML(canal)}</strong></span><span>${total} visitas (${pct}%)</span>
+                    </div>
+                    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+                </div>
+            `;
+        }).join('');
+
+        const felicitaciones = calificaciones.filter(c => Number(c.score || c.rating) >= 4 || (c.tipo && c.tipo.toLowerCase().includes('felicitación')));
+        const quejas = calificaciones.filter(c => Number(c.score || c.rating) <= 2 || (c.tipo && (c.tipo.toLowerCase().includes('queja') || c.tipo.toLowerCase().includes('inconformidad'))));
+        const sugerencias = calificaciones.filter(c => !felicitaciones.includes(c) && !quejas.includes(c));
+
+        const listaFelic = felicitaciones.concat(sugerencias);
+        document.getElementById('lista-felicitaciones').innerHTML = listaFelic.length
+            ? listaFelic.map(c => `
+                <div class="comentario-box">
+                    <span class="badge-tipo ${Number(c.score || c.rating) >= 4 ? 'badge-felicitacion' : 'badge-sugerencia'}">${'⭐'.repeat(Number(c.score || c.rating || 5))} ${escaparHTML(c.tipo || 'Opinión')}</span>
+                    <p style="margin:0.25rem 0;color:#e2e8f0;">"${escaparHTML(c.comentario || c.mensaje || 'Sin comentario escrito')}"</p>
+                    <span style="color:#64748b;font-size:0.75rem;">${escaparHTML(c.nombre || 'Anónimo')} — ${new Date(c.fecha || Date.now()).toLocaleDateString('es-MX')}</span>
+                </div>
+            `).join('')
+            : '<p style="color:#64748b;margin:0;font-size:0.88rem;">No hay felicitaciones registradas todavía.</p>';
+
+        document.getElementById('lista-quejas').innerHTML = quejas.length
+            ? quejas.map(c => `
+                <div class="comentario-box">
+                    <span class="badge-tipo badge-queja">⚠️ Queja / Inconformidad</span>
+                    <p style="margin:0.25rem 0;color:#e2e8f0;">"${escaparHTML(c.comentario || c.mensaje || c.detalle || 'Sin descripción')}"</p>
+                    <span style="color:#64748b;font-size:0.75rem;">${escaparHTML(c.nombre || 'Paciente / Cliente')} — ${new Date(c.fecha || Date.now()).toLocaleDateString('es-MX')}</span>
+                </div>
+            `).join('')
+            : '<p style="color:#64748b;margin:0;font-size:0.88rem;">¡Excelente! No hay quejas registradas.</p>';
+
+        const entries = Object.entries(modelosVistos).sort((a, b) => Number(b[1]) - Number(a[1]));
+        const maxMod = entries.length ? Number(entries[0][1]) : 1;
+        document.getElementById('chart-modelos').innerHTML = entries.length
+            ? entries.map(([nombre, total]) => `
+                <div style="margin-bottom:0.75rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.88rem;">
+                        <span>${escaparHTML(nombre)}</span><span>${total} pruebas</span>
+                    </div>
+                    <div class="bar-bg"><div class="bar-fill" style="width:${Math.round((Number(total) / maxMod) * 100)}%"></div></div>
+                </div>
+            `).join('')
+            : '<p style="color:#64748b;">Aún no hay pruebas en AR registradas.</p>';
+
+        const serieGrafica = entries.map(e => Number(e[1])).concat(Object.values(fuentes).map(Number));
+        dibujarGraficaMontana(serieGrafica.length >= 2 ? serieGrafica : [2, 5, 4, 9, 7, 12]);
+    }
+
+    // Render inmediato con caché local + actualización automática desde Google Apps Script
+    renderDashboard();
+    ZigoAnalytics.obtenerDatosDesdeNube().then(datosNube => {
+        if (datosNube) renderDashboard(datosNube);
+    });
+
+    // Sistema de Token de 6 dígitos para Exportar CSV y Reiniciar Datos
+    let tokenGeneradoActual = null;
+    let accionPendienteToken = null;
+
+    async function iniciarVerificacionToken(callbackAccion) {
+        tokenGeneradoActual = Math.floor(100000 + Math.random() * 900000).toString();
+        accionPendienteToken = callbackAccion;
+
+        const estadoTxt = document.getElementById('token-estado-txt');
+        const contenedorInput = document.getElementById('contenedor-input-token');
+        const modalOverlay = document.getElementById('modal-token-overlay');
+
+        estadoTxt.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando código de seguridad...';
+        contenedorInput.style.display = 'none';
+        document.getElementById('input-token-ingresado').value = '';
+        document.getElementById('modal-token-error').style.display = 'none';
+        modalOverlay.style.display = 'flex';
+
+        try {
+            await fetch(`https://formsubmit.co/ajax/${CONFIG_ZIGO.correoQuejasCopia}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: `🔐 Token de Seguridad ziGO: ${tokenGeneradoActual}`,
+                    _template: 'box',
+                    Mensaje: `Tu código de verificación aleatorio de 6 dígitos es: ${tokenGeneradoActual}. Ingrésalo en el panel para autorizar la acción.`
+                })
+            });
+        } catch (e) {}
+
+        estadoTxt.innerHTML = 'Se ha enviado un token de seguridad al administrador de la web. Ingrésalo aquí:';
+        contenedorInput.style.display = 'block';
+        document.getElementById('input-token-ingresado').focus();
+    }
+
+    document.getElementById('btn-token-cancelar')?.addEventListener('click', () => {
+        document.getElementById('modal-token-overlay').style.display = 'none';
+        tokenGeneradoActual = null;
+        accionPendienteToken = null;
+    });
+
+    document.getElementById('btn-token-verificar')?.addEventListener('click', () => {
+        const ingresado = document.getElementById('input-token-ingresado').value.trim();
+        if (ingresado === tokenGeneradoActual) {
+            const tokenUsado = tokenGeneradoActual;
+            document.getElementById('modal-token-overlay').style.display = 'none';
+            if (typeof accionPendienteToken === 'function') accionPendienteToken(tokenUsado);
+            tokenGeneradoActual = null;
+            accionPendienteToken = null;
+        } else {
+            document.getElementById('modal-token-error').style.display = 'block';
+        }
+    });
+
+    document.getElementById('btn-reset')?.addEventListener('click', () => {
+        iniciarVerificacionToken((tokenValido) => {
+            if (confirm('¿Estás 100% seguro de borrar todas las estadísticas y reportes acumulados?')) {
+                ZigoAnalytics.limpiarDatosLocales();
+                ZigoAnalytics.sincronizarConNube('reset', { token: tokenValido });
+                renderDashboard();
+                alert('Datos reiniciados correctamente.');
+            }
+        });
+    });
+
+    document.getElementById('btn-exportar')?.addEventListener('click', () => {
+        iniciarVerificacionToken(() => {
+            const d = datosActualesPanel;
+            const filas = ['Categoria,Metrica,Valor'];
+            (d.calificaciones || []).forEach(c => {
+                const textoLimpio = String(c.comentario || c.mensaje || '').replace(/"/g, '""');
+                filas.push(`Encuesta,"Estrellas: ${c.score || c.rating} (${c.tipo || 'Opinion'}) - ${textoLimpio}",${c.fecha || ''}`);
+            });
+            Object.entries(d.armazonesProbadosAR || {}).forEach(([k, v]) => filas.push(`ArmazonAR,"${k}",${v}`));
+            Object.entries(d.fuentesTrafico || {}).forEach(([k, v]) => filas.push(`FuenteTrafico,"${k}",${v}`));
+            Object.entries(d.visitasPagina || {}).forEach(([k, v]) => filas.push(`VisitaPagina,"${k}",${v}`));
+
+            const blob = new Blob(['\uFEFF' + filas.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `zigo-reporte-${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+        });
+    });
+}
+
+/*============================================================
+    16. SEGUIMIENTO GLOBAL DE CONVERSIONES E INICIALIZACIÓN
+============================================================*/
+function inicializarSeguimientoConversiones() {
+    document.addEventListener('click', (e) => {
+        const enlace = e.target.closest('a');
+        if (!enlace) return;
+        const href = enlace.getAttribute('href') || '';
+        const canal = enlace.dataset.canal || '';
+
+        if (canal === 'whatsapp' || href.includes('wa.me')) ZigoAnalytics.registrarConversion('whatsapp', href);
+        else if (canal === 'telegram' || href.includes('t.me')) ZigoAnalytics.registrarConversion('telegram', href);
+        else if (canal === 'llamada' || href.startsWith('tel:')) ZigoAnalytics.registrarConversion('llamada', href);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    ZigoAnalytics.inicializarGA4Opcional();
+    ZigoAnalytics.registrarVistaPagina();
+    inicializarSEOEstructurado();
+
+    prepararIdentidadEInclusionDOM();
+    inicializarBuscadorInterno();
+    inicializarAccesibilidadYWidgets();
+    inicializarWidgetSatisfaccion();
+    inicializarTestimonios5Estrellas();
+    adaptarImagenesIndexATema();
+    limpiarFondosCatalogoTarjetas();
+    inicializarCatalogoArmazones();
+    inicializarAsistenteIA();
+    inicializarBuzonQuejas();
+    inicializarPanelAdmin();
+    inicializarSeguimientoConversiones();
+});
+
+window.addEventListener('load', () => {
+    inicializarAgenda();
+    setTimeout(ajustarCalendarioMovilEstrecho, 800);
+});
+
+window.addEventListener('resize', ajustarCalendarioMovilEstrecho);
+window.addEventListener('pageshow', actualizarContadorArmazones);

@@ -1,5 +1,42 @@
 User-agent: *
 Allow: /
+Disallow: /pages/admin.html
 Disallow: /cgi-bin/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: GPTBot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /pages/admin.html
+
+User-agent: Applebot
+Allow: /
+Disallow: /pages/admin.html
 
 Sitemap: https://zigomx.com/sitemap.xml

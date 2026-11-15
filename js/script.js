@@ -1326,7 +1326,10 @@ const MotorAR = (() => {
      * en el puente de la nariz y las medidas que fijan el tamaño del armazón.
      */
     function calcularPostura(marcas, mapa) {
-        const P = (i) => [mapa.x(marcas[i].x), mapa.y(marcas[i].y), marcas[i].z * mapa.escala];
+        // La profundidad (z) es el dato menos estable de FaceMesh, sobre todo en teléfonos:
+        // se acota a un rango razonable respecto al ancho del rostro en pantalla
+        const ancho2D = Math.hypot(mapa.x(marcas[454].x) - mapa.x(marcas[234].x), mapa.y(marcas[454].y) - mapa.y(marcas[234].y)) || 1;
+        const P = (i) => [mapa.x(marcas[i].x), mapa.y(marcas[i].y), acotar(marcas[i].z * mapa.escala, -ancho2D, ancho2D)];
 
         // El iris da la posición exacta de cada pupila; su profundidad se toma de las comisuras del ojo
         const ojo = (iris, a, b) => {
@@ -1349,8 +1352,9 @@ const MotorAR = (() => {
         if (vec.punto(abajo, frenteAMenton) < 0) abajo = vec.por(abajo, -1);
 
         const centroOjos = vec.medio(ojoA, ojoB);
-        const distanciaPupilar = vec.largo(vec.resta(ojoB, ojoA));
-        const anchoCara = vec.largo(vec.resta(P(454), P(234)));
+        const distanciaPupilar = Math.min(vec.largo(vec.resta(ojoB, ojoA)), Math.hypot(ojoB[0] - ojoA[0], ojoB[1] - ojoA[1]) * 1.4);
+        // El ancho real nunca puede superar por mucho al que se ve en pantalla (límite: giro de unos 45°)
+        const anchoCara = Math.min(vec.largo(vec.resta(P(454), P(234))), ancho2D * 1.4);
 
         return {
             P, derecha, abajo, frente, centroOjos, distanciaPupilar, anchoCara,
@@ -1421,7 +1425,7 @@ const MotorAR = (() => {
 
         // Perspectiva: lo que queda más lejos de la cámara se ve más chico y más cerca del centro de la imagen
         const proyectar = (p) => {
-            const k = mapa.focal / (mapa.focal + (p[2] - ancla[2]));
+            const k = acotar(mapa.focal / (mapa.focal + (p[2] - ancla[2])), 0.6, 1.5);
             return [mapa.cx + (p[0] - mapa.cx) * k, mapa.cy + (p[1] - mapa.cy) * k];
         };
         const puntoDelFrente = (u, v) => vec.suma(
@@ -1557,6 +1561,7 @@ const MotorAR = (() => {
  */
 class VisorAR {
     constructor(contenedor) {
+        this.caja = contenedor;
         this.video = contenedor.querySelector('video');
         // En teléfonos el video solo arranca solo si está silenciado y "en línea" (sin pantalla completa),
         // y esas dos propiedades deben fijarse aquí: como atributos HTML no siempre se respetan
@@ -1598,8 +1603,10 @@ class VisorAR {
 
     ajustarLienzo() {
         const densidad = Math.min(MotorAR.ligero ? 1.5 : 2, window.devicePixelRatio || 1);
-        const w = Math.max(2, Math.round(this.lienzo.clientWidth * densidad));
-        const h = Math.max(2, Math.round(this.lienzo.clientHeight * densidad));
+        // Se mide la caja del visor y no el lienzo: en algunos navegadores móviles el alto del
+        // lienzo depende de su propia resolución, y medirlo a él lo haría crecer sin control
+        const w = Math.max(2, Math.round(this.caja.clientWidth * densidad));
+        const h = Math.max(2, Math.round(this.caja.clientHeight * densidad));
         if (this.lienzo.width !== w || this.lienzo.height !== h) {
             this.lienzo.width = this.capa.width = w;
             this.lienzo.height = this.capa.height = h;
@@ -1863,7 +1870,9 @@ function crearProbador({ raiz, origen, alElegir = () => {} }) {
         botonCaptura.classList.toggle('oculto', !encendido);
         botonVolver.classList.toggle('oculto', clave !== 'foto');
         estado.firstElementChild.classList.toggle('activo', clave === 'rostro' || clave === 'foto');
-        estado.lastElementChild.textContent = TEXTOS_ESTADO[clave] || '';
+        estado.lastElementChild.textContent = (TEXTOS_ESTADO[clave] || '') + (window.location.hash === '#diag'
+            ? ` · video ${visor.video.videoWidth}x${visor.video.videoHeight} · lienzo ${visor.lienzo.width}x${visor.lienzo.height} · caja ${cajaVisor.clientWidth}x${cajaVisor.clientHeight} · ${visor.superpuesto ? 'superpuesto' : 'sincronizado'} · dpr ${window.devicePixelRatio}`
+            : '');
     };
 
     function avisar(texto) {

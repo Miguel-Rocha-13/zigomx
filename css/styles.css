@@ -17,6 +17,17 @@
     8. Adaptación a pantallas chicas
 ***********************************************************************
 */
+.contenedor-advertencia{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+.advertencia{
+    width: 1200px;
+    height: auto;
+}
 
 /*============================================================
     1. FUENTES (Roboto variable, alojada en el propio sitio)

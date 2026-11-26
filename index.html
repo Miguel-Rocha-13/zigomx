@@ -62,7 +62,7 @@
             "zigomx"
           ],
           "url": "https://zigomx.com/",
-          "hasMap": "https://www.google.com/maps/place/ziGO/@19.3906594,-99.3084214,11z/data=!4m8!3m7!1s0x6fdd5e8b5323c885:0x856914309a0b6189!8m2!3d19.3907336!4d-99.1436127!9m1!1b1!16s%2Fg%2F11_1scv2zl",
+          "hasMap": "https://www.google.com/maps/place/ziGO/@19.3906594,-99.3084215,11z/data=!4m16!1m7!3m6!1s0x6fdd5e8b5323c885:0x856914309a0b6189!2sziGO!8m2!3d19.3907336!4d-99.1436127!16s%2Fg%2F11_1scv2zl!3m7!1s0x6fdd5e8b5323c885:0x856914309a0b6189!8m2!3d19.3907336!4d-99.1436127!9m1!1b1!16s%2Fg%2F11_1scv2zl",
           "logo": {
             "@type": "ImageObject",
             "url": "https://zigomx.com/img/logo.png",
@@ -175,6 +175,7 @@
     <link rel="stylesheet" href="./css/styles.css?v=8.3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <script src="./js/script.js?v=8.3" defer></script>
+    <script src="./js/resenas-google.js?v=1.1" defer></script>
 </head>
 <body>
     <canvas id="zigo-starfield" aria-hidden="true"></canvas>
@@ -246,43 +247,54 @@
 
         <section class="testimonios-section" aria-label="Opiniones de pacientes">
             <h2 class="seccion-titulo">Lo que dicen nuestros pacientes</h2>
-            <p class="subtitulo-seccion">Experiencias de quienes ya nos visitaron</p>
-            <div class="testimonios-grid">
+            <p class="subtitulo-seccion" id="resumen-google-resenas">Basado en las reseñas verificadas en Google</p>
+            <div class="testimonios-grid" id="grid-resenas-google">
                 <article class="testimonio-card">
                     <div class="testimonio-cabecera">
-                        <div class="testimonio-avatar" aria-hidden="true">M</div>
+                        <div class="testimonio-avatar" style="background: #ffffff; padding: 6px; overflow: hidden;" aria-hidden="true">
+                            <img src="./img/google-logo.webp" alt="Google" width="24" height="24" style="width: 24px; height: 24px; max-width: none; object-fit: contain; display: block;">
+                        </div>
                         <div>
-                            <p class="testimonio-nombre">Miguel Rocha</p>
-                            <p class="testimonio-origen">Paciente ziGO</p>
+                            <p class="testimonio-nombre">Miguel Leonorio Rocha Badillo</p>
+                            <p class="testimonio-origen">Reseña verificada en Google</p>
                         </div>
                     </div>
                     <div class="testimonio-estrellas" role="img" aria-label="5 de 5 estrellas">★★★★★</div>
-                    <blockquote class="testimonio-texto">"Excelente atención profesional. Me encantó la variedad de armazones y el cuidado en cada medición. Mis lentes quedaron perfectos."</blockquote>
+                    <blockquote class="testimonio-texto">"He ido a muchas ópticas donde sientes que solo te quieren vender a la fuerza y llega a ser incómodo, pero con ziGO la experiencia cambió por completo. Desde el principio se adaptan a tus horarios, te explican todo con muchísima claridad."</blockquote>
                 </article>
                 <article class="testimonio-card">
                     <div class="testimonio-cabecera">
-                        <div class="testimonio-avatar" aria-hidden="true">J</div>
+                        <div class="testimonio-avatar" style="background: #ffffff; padding: 6px; overflow: hidden;" aria-hidden="true">
+                            <img src="./img/google-logo.webp" alt="Google" width="24" height="24" style="width: 24px; height: 24px; max-width: none; object-fit: contain; display: block;">
+                        </div>
                         <div>
-                            <p class="testimonio-nombre">Julio César B.</p>
-                            <p class="testimonio-origen">Paciente ziGO</p>
+                            <p class="testimonio-nombre">Maria Solis</p>
+                            <p class="testimonio-origen">Reseña verificada en Google</p>
                         </div>
                     </div>
                     <div class="testimonio-estrellas" role="img" aria-label="5 de 5 estrellas">★★★★★</div>
-                    <blockquote class="testimonio-texto">"¡La atención al paciente es increíble! Todo el proceso fue muy cómodo, claro y con un trato humano excepcional. ¡Súper recomendado!"</blockquote>
+                    <blockquote class="testimonio-texto">"Excelente servicio y trato. Todo el proceso fue muy cómodo, claro y con una atención muy profesional."</blockquote>
                 </article>
                 <article class="testimonio-card">
                     <div class="testimonio-cabecera">
-                        <div class="testimonio-avatar" aria-hidden="true">A</div>
+                        <div class="testimonio-avatar" style="background: #ffffff; padding: 6px; overflow: hidden;" aria-hidden="true">
+                            <img src="./img/google-logo.webp" alt="Google" width="24" height="24" style="width: 24px; height: 24px; max-width: none; object-fit: contain; display: block;">
+                        </div>
                         <div>
                             <p class="testimonio-nombre">Arantza L.</p>
-                            <p class="testimonio-origen">Paciente ziGO</p>
+                            <p class="testimonio-origen">Reseña verificada en Google</p>
                         </div>
                     </div>
                     <div class="testimonio-estrellas" role="img" aria-label="5 de 5 estrellas">★★★★★</div>
                     <blockquote class="testimonio-texto">"La doctora Escarlet es una excelente especialista. Me explicó cada detalle de mi diagnóstico y el proceso de selección fue muy profesional."</blockquote>
                 </article>
             </div>
+            <div class="grupo-botones-hero" style="justify-content: center; margin-top: 2rem;">
+                <a href="https://www.google.com/maps/place/ziGO/@19.3906594,-99.3084215,11z/data=!4m16!1m7!3m6!1s0x6fdd5e8b5323c885:0x856914309a0b6189!2sziGO!8m2!3d19.3907336!4d-99.1436127!16s%2Fg%2F11_1scv2zl!3m7!1s0x6fdd5e8b5323c885:0x856914309a0b6189!8m2!3d19.3907336!4d-99.1436127!9m1!1b1!16s%2Fg%2F11_1scv2zl?hl=es-419&entry=ttu&g_ep=EgoyMDI2MTEyMy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="ver-catalogo">Ver todas las reseñas en Google</a>
+                <a href="https://g.page/r/CYlhC5owFGmFECE/review" target="_blank" rel="noopener noreferrer" class="agendar-examen">Dejar mi reseña ★★★★★</a>
+            </div>
         </section>
+
     </main>
 
     <footer class="footer-zigo">

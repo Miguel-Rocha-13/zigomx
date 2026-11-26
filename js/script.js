@@ -2809,3 +2809,168 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // El calendario de Zoho y el mapa dependen de scripts externos: se arman cuando todo terminó de cargar
 window.addEventListener('load', inicializarAgenda);
+
+
+/*============================================================
+    RESEÑAS DE GOOGLE
+============================================================*/
+document.addEventListener("DOMContentLoaded", () => {
+    // Pega aquí tu URL de Apps Script terminada en /exec?accion=resenas
+    const URL_APPS_SCRIPT = "PEGA_AQUI_LA_URL_DE_TU_APP_WEB";
+    const grid = document.getElementById("grid-resenas-google");
+    const resumen = document.getElementById("resumen-google-resenas");
+
+    if (!grid) return;
+
+    // Reseñas reales de 5 estrellas de ziGO (puedes agregar aquí más de tus 22 reseñas de Google)
+    const resenasGuardadas = [
+        {
+            autor: "Miguel Leonorio Rocha Badillo",
+            comentario: "He ido a muchas ópticas donde sientes que solo te quieren vender a la fuerza y llega a ser incómodo, pero con ziGO la experiencia cambió por completo. Desde el principio se adaptan a tus horarios, te explican todo con muchísima claridad.",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Yomara Rodriguez",
+            comentario: "Excelente atención, trabajaba en 2 lugares lo cual absorbia todo mi tiempo al dañarse mis lentes ( que es algo super necesario para mis actividades ) me urgia la entrega evidentemente necesite de una atención inmediata y comoda , en este lugar encontré la mejor opción fueron a mi domicilio , se portaron super amables , con excelente recomendaciones ,variedad de armazones y lo mejor de todo me entregaron*** el mismo dia !****super puntuales y de igual manera hasta la puerta de mi casa 🙌",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Fernanda Onofre",
+            comentario: "La atención es excelente, te asesoran super bien en armazones, son súper pacientes haciendo el examen de la vista, además si no entiendes algo te explican, definitivamente regresaré por otro par, bien amables y atentos 1000/10",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Rubi Santiago Hidalgo ",
+            comentario: "Excelente servicio , lo recomiendo 100% la explicación y atención 10/10 , los precios accesibles de acuerdo a la necesidad de cada integrante, te hacen sentir como en casa , los horarios de atención muy buenos .",
+            fecha: "Reseña verificada en Google"
+        }
+    ];
+
+    // Elimina duplicados por nombre de autor para que nunca se repita la misma tarjeta
+    function deduplicarPorAutor(lista) {
+        const vistos = new Set();
+        return lista.filter(item => {
+            if (!item || !item.autor || !item.comentario) return false;
+            const clave = item.autor.trim().toLowerCase();
+            if (vistos.has(clave)) return false;
+            vistos.add(clave);
+            return true;
+        });
+    }
+
+    // Mezcla aleatoria evitando repetir exactamente el mismo trío de la carga anterior
+    function seleccionarTresDistintas(lista) {
+        const unicas = deduplicarPorAutor(lista);
+        if (unicas.length <= 3) return unicas;
+
+        const ultimaFirma = sessionStorage.getItem("zigo_ultimas_resenas") || "";
+        let seleccion = [];
+
+        for (let intento = 0; intento < 8; intento++) {
+            const copia = [...unicas];
+            for (let i = copia.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copia[i], copia[j]] = [copia[j], copia[i]];
+            }
+            seleccion = copia.slice(0, 3);
+            const firmaActual = seleccion.map(r => r.autor.trim().toLowerCase()).join("|");
+            if (firmaActual !== ultimaFirma) {
+                sessionStorage.setItem("zigo_ultimas_resenas", firmaActual);
+                break;
+            }
+        }
+        return seleccion;
+    }
+
+    function crearAvatarGoogle() {
+        const avatar = document.createElement("div");
+        avatar.className = "testimonio-avatar";
+        avatar.style.background = "#ffffff";
+        avatar.style.padding = "6px";
+        avatar.style.overflow = "hidden";
+        avatar.setAttribute("aria-hidden", "true");
+
+        const img = document.createElement("img");
+        img.src = "./img/google-logo.webp";
+        img.alt = "Google";
+        img.width = 24;
+        img.height = 24;
+        img.style.width = "24px";
+        img.style.height = "24px";
+        img.style.maxWidth = "none";
+        img.style.objectFit = "contain";
+        img.style.display = "block";
+
+        avatar.appendChild(img);
+        return avatar;
+    }
+
+    function renderizarTarjetas(lista) {
+        const tresElegidas = seleccionarTresDistintas(lista);
+        grid.innerHTML = "";
+
+        tresElegidas.forEach(item => {
+            const card = document.createElement("article");
+            card.className = "testimonio-card";
+
+            const cabecera = document.createElement("div");
+            cabecera.className = "testimonio-cabecera";
+
+            const info = document.createElement("div");
+
+            const nombre = document.createElement("p");
+            nombre.className = "testimonio-nombre";
+            nombre.textContent = item.autor;
+
+            const origen = document.createElement("p");
+            origen.className = "testimonio-origen";
+            origen.textContent = item.fecha && item.fecha.includes("Google")
+                ? item.fecha
+                : `Google · ${item.fecha || "Reseña verificada"}`;
+
+            info.appendChild(nombre);
+            info.appendChild(origen);
+            cabecera.appendChild(crearAvatarGoogle());
+            cabecera.appendChild(info);
+
+            const estrellas = document.createElement("div");
+            estrellas.className = "testimonio-estrellas";
+            estrellas.setAttribute("role", "img");
+            estrellas.setAttribute("aria-label", "5 de 5 estrellas");
+            estrellas.textContent = "★★★★★";
+
+            const texto = document.createElement("blockquote");
+            texto.className = "testimonio-texto";
+            texto.textContent = `"${item.comentario}"`;
+
+            card.appendChild(cabecera);
+            card.appendChild(estrellas);
+            card.appendChild(texto);
+            grid.appendChild(card);
+        });
+    }
+
+    // 1. Pinta 3 reseñas distintas al instante con el logo de Google en el círculo
+    renderizarTarjetas(resenasGuardadas);
+
+    // 2. Consulta en vivo las reseñas de 5 estrellas desde Google Apps Script y las mezcla con las guardadas
+    if (!URL_APPS_SCRIPT.startsWith("https://")) return;
+
+    fetch(URL_APPS_SCRIPT)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.ok || !Array.isArray(data.resenas) || data.resenas.length === 0) return;
+
+            if (resumen && data.total) {
+                const nota = Number(data.calificacion || 5).toFixed(1);
+                resumen.textContent = `Calificación ${nota} ★★★★★ · Basado en ${data.total} reseñas verificadas en Google`;
+            }
+
+            // Combina primero las en vivo de Google + las guardadas sin duplicar autores
+            const combinadas = deduplicarPorAutor([...data.resenas, ...resenasGuardadas]);
+            renderizarTarjetas(combinadas);
+        })
+        .catch(() => {
+            // Si falla la red, mantiene las tarjetas renderizadas
+        });
+});

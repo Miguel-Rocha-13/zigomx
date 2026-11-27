@@ -2822,7 +2822,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!grid) return;
 
-    // Reseñas reales de 5 estrellas de ziGO (puedes agregar aquí más de tus 22 reseñas de Google)
+    // Reseñas reales de 5 estrellas de ziGO (Aqui se almacenan las reseñas de Google)
     const resenasGuardadas = [
         {
             autor: "Miguel Leonorio Rocha Badillo",
@@ -2840,10 +2840,39 @@ document.addEventListener("DOMContentLoaded", () => {
             fecha: "Reseña verificada en Google"
         },
         {
-            autor: "Rubi Santiago Hidalgo ",
+            autor: "Rubi Santiago Hidalgo",
             comentario: "Excelente servicio , lo recomiendo 100% la explicación y atención 10/10 , los precios accesibles de acuerdo a la necesidad de cada integrante, te hacen sentir como en casa , los horarios de atención muy buenos .",
             fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Capriica Solar",
+            comentario: "¡Me encanta! La verdad es que el servicio es increíble y me sentí muy respaldado.Gracias por brindar calidad y excelencia en el producto. 🙏🏻💛…",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Misshel Alcocer",
+            comentario: "Muy buen servicio de atención personalizada, los armazones son de buena calidad y muy cordiales al atenderé",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Escorpion mike (Escorpion13)",
+            comentario: "Excelente atención por parte de la Dra. Escarlet. Me sentí muy cómodo durante el examen; explica todo a detalle, resuelve cada duda con paciencia y los precios son muy accesibles. ¡Totalmente recomendada!",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Mike Turner",
+            comentario: "La verdad, quedé muy contento con el servicio y el trabajo. La Doctora Scarlett es súper atenta, profesional y muy amable. Todo estuvo muy bien y sin duda volvería a acudir con ella. ¡Recomiendo mucho la óptica!",
+            fecha: "Reseña verificada en Google"
+        },
+        {
+            autor: "Xare Ny",
+            comentario: "Muy complacidos con el servicio que nos dieron, muchas gracias.",
+            fecha: "Reseña verificada en Google"
         }
+
+        /*        
+
+            */
     ];
 
     // Elimina duplicados por nombre de autor para que nunca se repita la misma tarjeta
